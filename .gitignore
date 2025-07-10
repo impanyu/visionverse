@@ -42,3 +42,11 @@ next-env.d.ts
 
 # user uploaded files
 ./data/
+
+# ChromaDB files - these are large binary files that shouldn't be in git
+chroma/
+*.bin
+*.sqlite3
+
+# Local database files
+/data/
