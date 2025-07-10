@@ -1,5 +1,9 @@
-import { Assistant } from "./assistant";
+import AssistantPage from "./assistant";
 
 export default function Home() {
-  return <Assistant />;
+  console.log("🏠 HOME PAGE LOADED - Server-side log test");
+  
+  return (
+    <AssistantPage />
+  );
 }

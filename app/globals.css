@@ -118,5 +118,21 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent font flashing and ensure consistent rendering */
+    font-display: swap;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+  
+  /* Ensure consistent font weights for VisionVerse branding */
+  .brand-title {
+    font-weight: 700 !important;
+    font-family: var(--font-geist-sans) !important;
+  }
+}
+
+/* Prevent layout shift during font loading */
+@font-face {
+  font-family: 'Geist';
+  font-display: swap;
 }
