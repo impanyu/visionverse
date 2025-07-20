@@ -1331,8 +1331,6 @@ function ShowProductToolUIComponent({ args, result, status }: { args: ShowProduc
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 mr-4">
-                      <p className="text-sm text-blue-700 mb-2">Click to visit the original product page:</p>
-                      <p className="text-xs text-gray-600 break-all">{product.url}</p>
                       {ui.visionId && (
                         <p className="text-xs text-green-600 mt-2">
                           ✓ Click tracking enabled (from vision {ui.visionId.slice(-8)})
@@ -1637,36 +1635,41 @@ function ExpandableProductCard({ product, isNewlyCreated = false }: ExpandablePr
               <div className="space-y-1 text-sm text-gray-600">
                 <p><strong>Product ID:</strong> {product.id}</p>
                 {product.url && product.url.trim() && (
-                  <p><strong>URL:</strong> <a 
-                    href={product.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-blue-600 hover:underline"
-                    onClick={async (e) => {
-                      // Check if we have vision tracking parameters in the current URL
-                      const urlParams = new URLSearchParams(window.location.search);
-                      const visionId = urlParams.get('visionId');
-                      const productId = urlParams.get('productId');
-                      
-                      // Only track if we have vision context
-                      if (visionId && productId === product.id) {
-                        try {
-                          await fetch('/api/track-click', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              visionId: visionId,
-                              productId: product.id
-                            })
-                          });
-                        } catch (error) {
-                          console.error('Failed to track click:', error);
+                  <p><strong>URL:</strong> 
+                    <a 
+                      href={product.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="ml-2 inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg"
+                      onClick={async (e) => {
+                        // Check if we have vision tracking parameters in the current URL
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const visionId = urlParams.get('visionId');
+                        const productId = urlParams.get('productId');
+                        
+                        // Only track if we have vision context
+                        if (visionId && productId === product.id) {
+                          try {
+                            await fetch('/api/track-click', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                visionId: visionId,
+                                productId: product.id
+                              })
+                            });
+                          } catch (error) {
+                            console.error('Failed to track click:', error);
+                          }
                         }
-                      }
-                    }}
-                  >{product.url}</a></p>
+                      }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Visit Product
+                    </a>
+                  </p>
                 )}
                 <p><strong>Created:</strong> {new Date(product.createdAt).toLocaleString()}</p>
                 <p><strong>Updated:</strong> {new Date(product.updatedAt).toLocaleString()}</p>

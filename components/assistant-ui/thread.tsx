@@ -117,6 +117,18 @@ const PersistentSuggestions: FC = () => {
           prompt="search for vision about:"
           method="replace"
           autoSend={false}
+          onClick={() => {
+            // Focus the input after the text is inserted
+            setTimeout(() => {
+              const input = document.querySelector('textarea[placeholder="Write a message..."]') as HTMLTextAreaElement;
+              if (input) {
+                input.focus();
+                // Position cursor at the end of the text
+                const length = input.value.length;
+                input.setSelectionRange(length, length);
+              }
+            }, 100);
+          }}
         >
           <span className="line-clamp-2 text-ellipsis text-xs font-medium text-teal-700">
             Search for visions

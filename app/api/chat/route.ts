@@ -127,8 +127,8 @@ For all other interactions (non-tool related), respond normally with helpful tex
                 
                 console.log(`Most similar vision found: ${mostSimilarId}, similarity: ${similarityScore.toFixed(3)}`);
                 
-                // If similarity is > 0.5, consider it a duplicate
-                if (similarityScore > 0.5) {
+                // If similarity is > 0.6, consider it a duplicate
+                if (similarityScore > 0.6) {
                   // Get the full vision document from MongoDB
                   const existingVision = await collection.findOne({ 
                     _id: new ObjectId(mostSimilarId),
@@ -614,23 +614,28 @@ For all other interactions (non-tool related), respond normally with helpful tex
             // Map results with similarity scores and filter for good matches
             const resultsWithScores = vectorResults.ids[0].map((id, index) => {
               const vision = visions.find(v => v._id?.toString() === id);
-              const score = vectorResults.distances?.[0]?.[index];
+              const distance = vectorResults.distances?.[0]?.[index];
               const document = vectorResults.documents?.[0]?.[index];
               
-              if (vision && score !== undefined) {
+              if (vision && distance !== undefined) {
+                // Convert ChromaDB's squared L2 distance to cosine similarity
+                // For normalized embeddings: squared_L2 = 2 * (1 - cosine_similarity)
+                // So: cosine_similarity = 1 - (squared_L2 / 2)
+                const cosineSimilarity = 1 - (distance / 2);
+                
                 return {
                   vision: {
                     id: vision._id?.toString(),
                     ...vision,
                     _id: undefined,
                   },
-                  similarityScore: score,
+                  similarityScore: cosineSimilarity,
                   matchedText: document,
                 };
               }
               return null;
             }).filter((result): result is NonNullable<typeof result> => result !== null)
-              .filter(result => result.similarityScore < 1) // Only results with score > 0 (1 - distance > 0)
+              .filter(result => result.similarityScore > 0.5) // Only results with >50% similarity
               .slice(0, 10); // Limit to top 10 results
 
             return {
@@ -711,23 +716,28 @@ For all other interactions (non-tool related), respond normally with helpful tex
             // Map results with similarity scores and filter for good matches
             const resultsWithScores = vectorResults.ids[0].map((id, index) => {
               const vision = visions.find(v => v._id?.toString() === id);
-              const score = vectorResults.distances?.[0]?.[index];
+              const distance = vectorResults.distances?.[0]?.[index];
               const document = vectorResults.documents?.[0]?.[index];
               
-              if (vision && score !== undefined) {
+              if (vision && distance !== undefined) {
+                // Convert ChromaDB's squared L2 distance to cosine similarity
+                // For normalized embeddings: squared_L2 = 2 * (1 - cosine_similarity)
+                // So: cosine_similarity = 1 - (squared_L2 / 2)
+                const cosineSimilarity = 1 - (distance / 2);
+                
                 return {
                   vision: {
                     id: vision._id?.toString(),
                     ...vision,
                     _id: undefined,
                   },
-                  similarityScore: score,
+                  similarityScore: cosineSimilarity,
                   matchedText: document,
                 };
               }
               return null;
             }).filter((result): result is NonNullable<typeof result> => result !== null)
-              .filter(result => result.similarityScore < 1) // Only results with score > 0 (1 - distance > 0)
+              .filter(result => result.similarityScore > 0.5) // Only results with >50% similarity
               .slice(0, 10); // Limit to top 10 results
 
             return {

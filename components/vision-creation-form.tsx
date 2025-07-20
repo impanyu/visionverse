@@ -75,7 +75,7 @@ export function VisionCreationForm({ onSubmit, onCancel, isLoading = false }: Vi
           Create Your Vision
         </CardTitle>
         <CardDescription>
-          Describe your vision and optionally upload an image to help bring it to life. You can also specify a price if you want to sell or trade your vision.
+          Describe your vision and optionally upload an image to help bring it to life.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -95,7 +95,8 @@ export function VisionCreationForm({ onSubmit, onCancel, isLoading = false }: Vi
             />
           </div>
 
-          {/* Price Input */}
+          {/* Price Input - HIDDEN but keeping the state for backend compatibility */}
+          {/* 
           <div className="space-y-2">
             <label htmlFor="price" className="text-sm font-medium">
               Price (Optional)
@@ -116,6 +117,7 @@ export function VisionCreationForm({ onSubmit, onCancel, isLoading = false }: Vi
             </div>
             <p className="text-xs text-gray-500">Set a price if you want to sell or trade this vision</p>
           </div>
+          */}
 
           {/* Image Upload */}
           <div className="space-y-2">

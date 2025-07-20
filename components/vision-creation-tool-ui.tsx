@@ -240,11 +240,14 @@ export const VisionCreationToolUI = makeAssistantToolUI<
                       <div className="flex items-center gap-4 text-sm text-yellow-600">
                         <span>Created: {new Date(submitResult.vision.createdAt).toLocaleDateString()}</span>
                         <span>ID: {submitResult.vision.id.slice(-8)}</span>
+                        {/* Price display hidden */}
+                        {/*
                         {submitResult.vision.onSale && submitResult.vision.price && (
                           <span className="font-medium text-green-600">
                             ${((submitResult.vision.price || 0) / 100).toFixed(2)}
                           </span>
                         )}
+                        */}
                       </div>
                     </div>
                   </div>
@@ -349,12 +352,14 @@ export const VisionCreationToolUI = makeAssistantToolUI<
                     </div>
                   )}
                   
-                  {/* Price Display */}
+                  {/* Price Display - HIDDEN */}
+                  {/*
                   {submitResult.vision.onSale && submitResult.vision.price && (
                     <div className="mt-3 text-sm text-gray-600">
                       <span className="font-medium">Price:</span> ${(submitResult.vision.price / 100).toFixed(2)}
                     </div>
                   )}
+                  */}
                 </div>
 
                 {/* Vision List Display */}
@@ -413,7 +418,7 @@ export const VisionCreationToolUI = makeAssistantToolUI<
           <CardHeader>
             <CardTitle>{result.ui_components.title}</CardTitle>
             <CardDescription>
-              Share your vision, idea, complaint, or dream about a product or service. You can also attach supporting files like images or documents. You can also specify a price if you want to sell or trade your vision.
+              Share your vision, idea, complaint, or dream about a product or service. You can also attach supporting files like images or documents.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -433,6 +438,7 @@ export const VisionCreationToolUI = makeAssistantToolUI<
                 />
               </div>
 
+              {/* Price Input - HIDDEN but keeping the state for backend compatibility
               <div className="space-y-2">
                 <label htmlFor="price" className="text-sm font-medium">
                   Price (Optional)
@@ -452,6 +458,7 @@ export const VisionCreationToolUI = makeAssistantToolUI<
                 </div>
                 <p className="text-xs text-gray-500">Set a price if you want to sell or trade this vision</p>
               </div>
+              */}
 
               <div className="space-y-2">
                 <label htmlFor="imageFile" className="text-sm font-medium">
@@ -1278,11 +1285,14 @@ export const VisionDuplicateFoundToolUI = makeAssistantToolUI<
                     <div className="flex items-center gap-4 text-sm text-yellow-600">
                       <span>Created: {new Date(duplicateVision.createdAt).toLocaleDateString()}</span>
                       <span>ID: {duplicateVision.id.slice(-8)}</span>
+                      {/* Price display hidden */}
+                      {/*
                       {duplicateVision.onSale && duplicateVision.price && (
                         <span className="font-medium text-green-600">
                           ${((duplicateVision.price || 0) / 100).toFixed(2)}
                         </span>
                       )}
+                      */}
                     </div>
                   </div>
                 </div>
@@ -1505,7 +1515,7 @@ function ExpandableVisionCard({
                 </span>
                 {similarityScore && (
                   <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    Similarity Score: {(1 - similarityScore).toFixed(3)}
+                    {(similarityScore * 100).toFixed(1)}% match
                   </span>
                 )}
               </div>
@@ -1537,12 +1547,14 @@ function ExpandableVisionCard({
                     Has attachment
                   </span>
                 )}
-                {/* Only show price if vision is on sale */}
+                {/* Only show price if vision is on sale - HIDDEN */}
+                {/*
                 {vision.onSale && (
                   <span className="flex items-center gap-1 text-green-600 font-medium">
                     ${((vision.price || 0) / 100).toFixed(2)}
                   </span>
                 )}
+                */}
                 <ThreadPrimitive.Suggestion
                   prompt={`show vision ${vision.id}`}
                   method="replace"
@@ -1625,7 +1637,7 @@ function ExpandableVisionCard({
               </span>
               {similarityScore && (
                 <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                  Similarity Score: {(1 - similarityScore).toFixed(3)}
+                  {(similarityScore * 100).toFixed(1)}% match
                 </span>
               )}
               <SupportButton
@@ -1701,14 +1713,14 @@ function ExpandableVisionCard({
 
             {/* Vision Metadata */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* On Sale Toggle and Price Section */}
+              {/* On Sale Toggle and Price Section - HIDDEN */}
+              {/* 
               <div className="space-y-2">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                   <Hash className="h-4 w-4" />
                   Sale Settings
                 </h4>
                 <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-                  {/* On Sale Toggle */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">On Sale</span>
                     <button
@@ -1726,7 +1738,6 @@ function ExpandableVisionCard({
                     </button>
                   </div>
                   
-                  {/* Price Input (only shown when on sale) */}
                   {localOnSale && (
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">Price</label>
@@ -1745,7 +1756,6 @@ function ExpandableVisionCard({
                     </div>
                   )}
                   
-                  {/* Save Button and Message */}
                   {currentUser === vision.userId && (
                     <div className="space-y-2">
                       <button
@@ -1764,6 +1774,7 @@ function ExpandableVisionCard({
                   )}
                 </div>
               </div>
+              */}
 
               <div className="space-y-2">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
@@ -2085,9 +2096,6 @@ function ExpandableVisionCard({
                                             >
                                               Open Product Page →
                                             </a>
-                                            <p className="text-white/80 text-xs mt-2 break-all">
-                                              {product.url}
-                                            </p>
                                           </div>
                                         )}
                                       </div>
@@ -2429,14 +2437,14 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                 </div>
               </div>
 
-              {/* Sale Settings Section */}
+              {/* Sale Settings Section - HIDDEN */}
+              {/*
               <div>
                 <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-3">
                   <Hash className="h-4 w-4" />
                   Sale Settings
                 </h4>
                 <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-                  {/* On Sale Toggle */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">On Sale</span>
                     <button
@@ -2454,7 +2462,6 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                     </button>
                   </div>
                   
-                  {/* Price Input (only shown when on sale) */}
                   {localOnSale && (
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">Price</label>
@@ -2473,7 +2480,6 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                     </div>
                   )}
                   
-                  {/* Save Button - Only show if user owns the vision */}
                   {currentUser === vision.userId && (
                     <button
                       onClick={handleSave}
@@ -2484,7 +2490,6 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                     </button>
                   )}
                   
-                  {/* Save Message */}
                   {saveMessage && (
                     <div className={`text-sm p-2 rounded ${
                       saveMessage.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -2494,8 +2499,10 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                   )}
                 </div>
               </div>
+              */}
 
-              {/* Price Display - Only show if vision is on sale */}
+              {/* Price Display - Only show if vision is on sale - HIDDEN */}
+              {/*
               {localOnSale && (
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">Current Price</h4>
@@ -2506,6 +2513,7 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                   </div>
                 </div>
               )}
+              */}
 
               <div>
                 <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-3">
@@ -2791,9 +2799,6 @@ function ShowVisionToolUIComponent({ args, result, status }: { args: ShowVisionA
                                           >
                                             Open Product Page →
                                           </a>
-                                          <p className="text-white/80 text-xs mt-2 break-all">
-                                            {product.url}
-                                          </p>
                                         </div>
                                       )}
                                     </div>

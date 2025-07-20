@@ -132,8 +132,8 @@ export async function POST(req: Request) {
         
         console.log(`Most similar vision found: ${mostSimilarId}, similarity: ${similarityScore.toFixed(3)}`);
         
-        // If similarity is > 0.5, consider it a duplicate
-        if (similarityScore > 0.5) {
+        // If similarity is > 0.6, consider it a duplicate
+        if (similarityScore > 0.6) {
           // Get the full vision document from MongoDB
           const existingVision = await collection.findOne({ 
             _id: new ObjectId(mostSimilarId),
