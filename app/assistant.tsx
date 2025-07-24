@@ -18,7 +18,6 @@ import { useThread } from "@assistant-ui/react";
 import { VisionCreationToolUI, VisionCreationDirectToolUI, ListMyVisionsToolUI, SearchMyVisionsToolUI, SearchAllVisionsToolUI, DeleteVisionWithListToolUI, VisionCreatedWithListToolUI, VisionDuplicateFoundToolUI, ShowVisionToolUI } from "@/components/vision-creation-tool-ui";
 import { 
   ProductFormToolUI, 
-  ProductCreationToolUI, 
   ProductCreatedWithListToolUI, 
   ProductsListToolUI, 
   ProductDeletedWithListToolUI,
@@ -110,7 +109,7 @@ export default function AssistantPage() {
       <VisionCreatedWithListToolUI />
       <VisionDuplicateFoundToolUI />
       <ShowVisionToolUI />
-      <ProductCreationToolUI />
+      <ProductFormToolUI />
       <ProductCreatedWithListToolUI />
       <ProductsListToolUI />
       <ProductDeletedWithListToolUI />

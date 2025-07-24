@@ -51,11 +51,42 @@ export const ProductFormToolUI = makeAssistantToolUI<
     const [error, setError] = useState<string | null>(null);
     const [hasSubmitted, setHasSubmitted] = useState(false);
 
+    // Preserve file state across re-renders caused by prop changes
+    useEffect(() => {
+      console.log('🔄 COMPONENT RE-RENDER: args changed, preserving file state');
+      setFormData(prev => {
+        console.log('📁 PRESERVING FILE:', {
+          hadFile: !!prev.imageFile,
+          fileName: prev.imageFile?.name || 'NO FILE'
+        });
+        return {
+          ...prev,
+          productDescription: prev.productDescription || "",
+          url: prev.url || ""
+          // Keep imageFile as-is to preserve selected file
+        };
+      });
+    }, [args]);
+
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
+      console.log('🚀 HANDLESUBMIT CALLED');
+      console.log('📋 CURRENT FORM STATE AT SUBMIT:', {
+        productDescription: formData.productDescription,
+        url: formData.url,
+        imageFile: {
+          exists: !!formData.imageFile,
+          fileName: formData.imageFile?.name || 'NO FILE',
+          fileSize: formData.imageFile?.size || 'NO SIZE',
+          fileType: formData.imageFile?.type || 'NO TYPE',
+          isFileInstance: formData.imageFile instanceof File
+        }
+      });
+      
       // Prevent double submission
       if (isSubmitting || hasSubmitted) {
+        console.log('⚠️ PREVENTING DOUBLE SUBMISSION');
         return;
       }
       
@@ -84,8 +115,29 @@ export const ProductFormToolUI = makeAssistantToolUI<
         formDataToSend.append("productDescription", formData.productDescription);
         formDataToSend.append("url", formData.url.trim());
         
+        console.log('🔍 FRONTEND SUBMIT: Current formData.imageFile:', {
+          exists: !!formData.imageFile,
+          fileName: formData.imageFile?.name || 'NO FILE',
+          fileSize: formData.imageFile?.size || 'NO SIZE',
+          fileType: formData.imageFile?.type || 'NO TYPE',
+          fileInstance: formData.imageFile instanceof File
+        });
+        
         if (formData.imageFile) {
           formDataToSend.append("imageFile", formData.imageFile);
+          console.log('✅ FRONTEND SUBMIT: File appended to FormData');
+        } else {
+          console.log('❌ FRONTEND SUBMIT: No file to append');
+        }
+        
+        // Debug: Log all FormData entries
+        console.log('📋 FRONTEND SUBMIT: FormData entries:');
+        for (const [key, value] of formDataToSend.entries()) {
+          if (value instanceof File) {
+            console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+          } else {
+            console.log(`  ${key}: ${value}`);
+          }
         }
 
         const response = await fetch("/api/create_product", {
@@ -305,19 +357,44 @@ export const ProductFormToolUI = makeAssistantToolUI<
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="imageFile" className="text-sm font-medium">
+                <label htmlFor="imageFile1" className="text-sm font-medium">
                   Product Image (Optional)
                 </label>
                 <div className="flex items-center space-x-2">
                   <input
-                    id="imageFile"
+                    id="imageFile1"
                     type="file"
-                    onChange={(e) => setFormData(prev => ({ ...prev, imageFile: e.target.files?.[0] || null }))}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      console.log('🔍 FRONTEND: File selected:', {
+                        fileName: file?.name || 'NO FILE',
+                        fileSize: file?.size || 'NO SIZE',
+                        fileType: file?.type || 'NO TYPE',
+                        fileInstance: file instanceof File
+                      });
+                      
+                      console.log('📝 STORING FILE IN STATE...');
+                      setFormData(prev => {
+                        console.log('📝 PREV STATE BEFORE FILE UPDATE:', {
+                          hadFile: !!prev.imageFile,
+                          fileName: prev.imageFile?.name || 'NO FILE'
+                        });
+                        
+                        const newState = { ...prev, imageFile: file };
+                        
+                        console.log('📝 NEW STATE AFTER FILE UPDATE:', {
+                          hadFile: !!newState.imageFile,
+                          fileName: newState.imageFile?.name || 'NO FILE'
+                        });
+                        
+                        return newState;
+                      });
+                    }}
                     accept="image/*"
                     className="hidden"
                   />
                   <label
-                    htmlFor="imageFile"
+                    htmlFor="imageFile1"
                     className="flex items-center gap-2 px-3 py-2 border border-dashed rounded-md cursor-pointer hover:bg-gray-50"
                   >
                     <Upload className="h-4 w-4" />
@@ -346,6 +423,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
                 type="submit"
                 disabled={isSubmitting || !formData.productDescription.trim() || !formData.url.trim()}
                 className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                onClick={() => console.log('🎯 SUBMIT BUTTON CLICKED!')}
               >
                 {isSubmitting ? (
                   <>
@@ -373,289 +451,6 @@ type CreateProductFormArgs = {
   price?: number;
 };
 
-type CreateProductFormResult = {
-  type: "product_creation_ui";
-  message: string;
-};
-
-function ProductCreationToolUIComponent({ args }: { args: CreateProductFormArgs }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [submitResult, setSubmitResult] = useState<CreateProductResponse | null>(null);
-
-  const [formData, setFormData] = useState({
-    productDescription: args.productDescription || '',
-    url: '', // URL is now required
-    imageFile: null as File | null,
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.productDescription.trim()) {
-      setError("Product description is required");
-      return;
-    }
-
-    if (!formData.url.trim()) {
-      setError("Product URL is required");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setError("");
-
-      // Create FormData for file upload
-      const formDataToSend = new FormData();
-      formDataToSend.append("productDescription", formData.productDescription);
-      formDataToSend.append("url", formData.url.trim());
-      
-      if (formData.imageFile) {
-        formDataToSend.append("imageFile", formData.imageFile);
-      }
-
-      const response = await fetch('/api/create_product', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
-      const result: CreateProductResponse = await response.json();
-      setSubmitResult(result);
-      
-      // Fetch updated product list
-      const listResponse = await fetch('/api/create_product?limit=20');
-      if (listResponse.ok) {
-        const listResult = await listResponse.json();
-        setSubmitResult(prev => prev ? {...prev, products: listResult.products} : null);
-      }
-      
-    } catch (err) {
-      console.error('Error creating product:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-      setIsSubmitting(false);
-      setHasSubmitted(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData(prev => ({ ...prev, imageFile: file }));
-  };
-
-  // Helper functions
-  const isImageFile = (filePath: string) => {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    const ext = filePath.toLowerCase().split('.').pop();
-    return ext && imageExtensions.includes(`.${ext}`);
-  };
-
-  const getFileUrl = (filePath: string) => {
-    if (!filePath || filePath === "/no-file" || filePath.trim() === "") return null;
-    const relativePath = filePath.replace('/data/', '');
-    return `/api/files/${relativePath}`;
-  };
-
-  if (submitResult) {
-    const fileUrl = getFileUrl(submitResult.product.filePath);
-    const isImage = submitResult.product.filePath !== "/no-file" && isImageFile(submitResult.product.filePath);
-
-    const products = (submitResult as any).products || [];
-
-    return (
-      <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-3 h-3 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full shadow-sm"></div>
-            <h2 className="text-xl font-bold text-gray-800">Product Created Successfully!</h2>
-          </div>
-          
-          {/* Created Product Display */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <h3 className="font-semibold text-green-800 mb-2">New Product:</h3>
-            <p className="text-gray-700 mb-2">{submitResult.product.productDescription}</p>
-            
-            {submitResult.product.url && submitResult.product.url.trim() && (
-              <p className="text-sm text-gray-600 mb-2">
-                URL: <a href={submitResult.product.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{submitResult.product.url}</a>
-              </p>
-            )}
-            
-            {isImage && fileUrl && (
-              <div className="mt-2">
-                <img 
-                  src={fileUrl} 
-                  alt="Product" 
-                  className="max-w-xs h-auto rounded-lg shadow-sm"
-                />
-              </div>
-            )}
-            
-            {/* Vision Linking Display */}
-            {submitResult.linkedVision && (
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <ThreadPrimitive.Suggestion
-                  prompt={`show vision ${submitResult.linkedVision.id}`}
-                  method="replace"
-                  autoSend={true}
-                  className="font-semibold text-blue-800 hover:text-blue-900 cursor-pointer underline mb-1 block"
-                >
-                  🔗 Linked to Vision:
-                </ThreadPrimitive.Suggestion>
-                <p className="text-sm text-blue-700 mb-1">{submitResult.linkedVision.visionDescription}</p>
-                <p className="text-xs text-blue-600">
-                  Similarity: {(submitResult.linkedVision.similarityScore * 100).toFixed(1)}%
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Products List */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            All My Products ({products.length})
-          </h3>
-          
-          {products.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No products found.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {products.map((product: Product) => (
-                <ExpandableProductCard 
-                  key={product.id} 
-                  product={product}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex gap-3">
-          <ThreadPrimitive.Suggestion
-            prompt="Create a new product"
-            method="replace"
-            autoSend={true}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            Create Another Product
-          </ThreadPrimitive.Suggestion>
-          
-          <ThreadPrimitive.Suggestion
-            prompt="list my products"
-            method="replace"
-            autoSend={true}
-            className="px-4 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            Refresh List
-          </ThreadPrimitive.Suggestion>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6 bg-white rounded-lg shadow-lg max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Create New Product</h2>
-        <p className="text-gray-600">Fill in the details to create your product</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product Description */}
-        <div>
-          <label htmlFor="productDescription" className="block text-sm font-medium text-gray-700 mb-2">
-            Product Description *
-          </label>
-          <textarea
-            id="productDescription"
-            name="productDescription"
-            value={formData.productDescription}
-            onChange={handleInputChange}
-            required
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Describe your product..."
-          />
-        </div>
-
-        {/* URL */}
-        <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
-            Product URL *
-          </label>
-          <input
-            type="url"
-            id="url"
-            name="url"
-            value={formData.url}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="https://example.com/product-page"
-            required
-          />
-        </div>
-
-        {/* Image Upload */}
-        <div>
-          <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 mb-2">
-            Product Image
-          </label>
-          <input
-            type="file"
-            id="imageFile"
-            onChange={handleFileChange}
-            accept="image/*"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {formData.imageFile && (
-            <p className="text-sm text-gray-600 mt-1">
-              Selected: {formData.imageFile.name}
-            </p>
-          )}
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting || !formData.productDescription.trim() || !formData.url.trim()}
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-        >
-          {isSubmitting ? 'Creating Product...' : 'Create Product'}
-        </button>
-      </form>
-    </div>
-  );
-}
-
-export const ProductCreationToolUI = makeAssistantToolUI<
-  CreateProductFormArgs,
-  CreateProductFormResult
->({
-  toolName: "create_product",
-  render: ProductCreationToolUIComponent,
-});
 
 // Product Created with List UI Component
 type ProductCreatedWithListArgs = {

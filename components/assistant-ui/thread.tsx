@@ -91,49 +91,7 @@ const ThreadWelcomeSuggestions: FC = () => {
 const PersistentSuggestions: FC = () => {
   return (
     <div className="mb-3 flex w-full items-stretch justify-center gap-2">
-      <div className="grid grid-cols-5 gap-2 w-full max-w-4xl">
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-blue-100 hover:border-blue-300 flex flex-col items-center justify-center rounded-lg border border-blue-200 p-2 transition-colors ease-in bg-blue-50/80 backdrop-blur-sm"
-          prompt="Create a new vision"
-          method="replace"
-          autoSend
-        >
-          <span className="line-clamp-2 text-ellipsis text-xs font-medium text-blue-700">
-            Create a new vision
-          </span>
-        </ThreadPrimitive.Suggestion>
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-green-100 hover:border-green-300 flex flex-col items-center justify-center rounded-lg border border-green-200 p-2 transition-colors ease-in bg-green-50/80 backdrop-blur-sm"
-          prompt="List all my visions"
-          method="replace"
-          autoSend
-        >
-          <span className="line-clamp-2 text-ellipsis text-xs font-medium text-green-700">
-            List all my visions
-          </span>
-        </ThreadPrimitive.Suggestion>
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-teal-100 hover:border-teal-300 flex flex-col items-center justify-center rounded-lg border border-teal-200 p-2 transition-colors ease-in bg-teal-50/80 backdrop-blur-sm"
-          prompt="search for vision about:"
-          method="replace"
-          autoSend={false}
-          onClick={() => {
-            // Focus the input after the text is inserted
-            setTimeout(() => {
-              const input = document.querySelector('textarea[placeholder="Write a message..."]') as HTMLTextAreaElement;
-              if (input) {
-                input.focus();
-                // Position cursor at the end of the text
-                const length = input.value.length;
-                input.setSelectionRange(length, length);
-              }
-            }, 100);
-          }}
-        >
-          <span className="line-clamp-2 text-ellipsis text-xs font-medium text-teal-700">
-            Search for visions
-          </span>
-        </ThreadPrimitive.Suggestion>
+      <div className="grid grid-cols-2 gap-2 w-full max-w-4xl">
         <ThreadPrimitive.Suggestion
           className="hover:bg-purple-100 hover:border-purple-300 flex flex-col items-center justify-center rounded-lg border border-purple-200 p-2 transition-colors ease-in bg-purple-50/80 backdrop-blur-sm"
           prompt="Create a new product"

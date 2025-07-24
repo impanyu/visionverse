@@ -28,12 +28,34 @@ export async function POST(req: Request) {
 
     // Check if this is a form data request (file upload)
     const contentType = req.headers.get("content-type");
+    console.log("📝 Content-Type:", contentType);
+    
     if (contentType?.includes("multipart/form-data")) {
       // Handle form data request (file upload)
+      console.log("🔍 PROCESSING MULTIPART FORM DATA");
       const formData = await req.formData();
+      
+      // Debug: Log all FormData entries
+      console.log("📋 FormData entries:");
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: File(name="${value.name}", size=${value.size}, type="${value.type}")`);
+        } else {
+          console.log(`  ${key}: "${value}"`);
+        }
+      }
+      
       productDescription = formData.get("productDescription") as string;
       const file = formData.get("imageFile") as File;
       const urlStr = formData.get("url") as string;
+      
+      console.log("🔍 File details:", {
+        exists: !!file,
+        name: file?.name || 'N/A',
+        size: file?.size || 0,
+        type: file?.type || 'N/A',
+        isFileInstance: file instanceof File
+      });
       
       if (!urlStr || !urlStr.trim()) {
         return new Response("URL is required", { status: 400 });
