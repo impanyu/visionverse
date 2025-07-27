@@ -95,13 +95,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
       setError(null);
 
       if (!formData.productDescription.trim()) {
-        setError("Product description is required");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!formData.url.trim()) {
-        setError("Product URL is required");
+        setError("Description is required");
         setIsSubmitting(false);
         return;
       }
@@ -110,10 +104,22 @@ export const ProductFormToolUI = makeAssistantToolUI<
         setIsSubmitting(true);
         setError("");
 
+        // Check if URL is provided to determine which API to call
+        const hasUrl = formData.url.trim().length > 0;
+        
+        console.log('🔀 ROUTING DECISION:', hasUrl ? 'CREATE PRODUCT (URL provided)' : 'CREATE VISION (no URL)');
+
         // Create FormData for file upload
         const formDataToSend = new FormData();
-        formDataToSend.append("productDescription", formData.productDescription);
-        formDataToSend.append("url", formData.url.trim());
+        
+        if (hasUrl) {
+          // Create Product - use existing field names
+          formDataToSend.append("productDescription", formData.productDescription);
+          formDataToSend.append("url", formData.url.trim());
+        } else {
+          // Create Vision - use vision API field names
+          formDataToSend.append("visionDescription", formData.productDescription);
+        }
         
         console.log('🔍 FRONTEND SUBMIT: Current formData.imageFile:', {
           exists: !!formData.imageFile,
@@ -140,42 +146,73 @@ export const ProductFormToolUI = makeAssistantToolUI<
           }
         }
 
-        const response = await fetch("/api/create_product", {
+        // Call appropriate API endpoint
+        const apiEndpoint = hasUrl ? "/api/create_product" : "/api/create_vision";
+        console.log('🎯 CALLING API:', apiEndpoint);
+
+        const response = await fetch(apiEndpoint, {
           method: "POST",
           credentials: "include",
           body: formDataToSend,
         });
 
         if (response.ok) {
-          const result: CreateProductResponse = await response.json();
+          const result = await response.json();
           
-          // Fetch updated product list
+          // Fetch updated list based on what was created
           try {
-            const productListResponse = await fetch("/api/create_product", {
-              method: "GET",
-              credentials: "include",
-            });
-            
-            if (productListResponse.ok) {
-              const productListData = await productListResponse.json();
-              
-              // Set the result to include the product list
-              setSubmitResult({
-                ...result,
-                products: productListData.products || [],
+            if (hasUrl) {
+              // Product was created - fetch product list
+              const productListResponse = await fetch("/api/create_product", {
+                method: "GET",
+                credentials: "include",
               });
+              
+              if (productListResponse.ok) {
+                const productListData = await productListResponse.json();
+                
+                // Set the result to include the product list
+                setSubmitResult({
+                  ...result,
+                  products: productListData.products || [],
+                  type: 'product'
+                });
+              } else {
+                // If product list fetch fails, just show the success message
+                setSubmitResult({...result, type: 'product'});
+              }
             } else {
-              // If product list fetch fails, just show the success message
-              setSubmitResult(result);
+              // Vision was created - fetch vision list (if endpoint exists)
+              try {
+                const visionListResponse = await fetch("/api/create_vision", {
+                  method: "GET",
+                  credentials: "include",
+                });
+                
+                if (visionListResponse.ok) {
+                  const visionListData = await visionListResponse.json();
+                  
+                  setSubmitResult({
+                    ...result,
+                    visions: visionListData.visions || [],
+                    type: 'vision'
+                  });
+                } else {
+                  setSubmitResult({...result, type: 'vision'});
+                }
+              } catch {
+                // Vision list endpoint might not exist, just show success
+                setSubmitResult({...result, type: 'vision'});
+              }
             }
           } catch (listError) {
-            console.error("Error fetching product list:", listError);
-            // If product list fetch fails, just show the success message
-            setSubmitResult(result);
+            console.error("Error fetching list:", listError);
+            // If list fetch fails, just show the success message
+            setSubmitResult({...result, type: hasUrl ? 'product' : 'vision'});
           }
         } else {
           const errorText = await response.text();
-          setError(`Failed to create product: ${errorText}`);
+          setError(`Failed to create ${hasUrl ? 'product' : 'vision'}: ${errorText}`);
         }
       } catch (err) {
         setError(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -211,26 +248,35 @@ export const ProductFormToolUI = makeAssistantToolUI<
     };
 
     if (submitResult) {
-      const fileUrl = getFileUrl(submitResult.product.filePath);
-      const isImage = submitResult.product.filePath !== "/no-file" && isImageFile(submitResult.product.filePath);
-      const products = submitResult.products || [];
+      const isProduct = (submitResult as any).type === 'product';
+      const item = isProduct ? (submitResult as any).product : (submitResult as any).vision;
+      const fileUrl = getFileUrl(item?.filePath || '');
+      const isImage = item?.filePath !== "/no-file" && isImageFile(item?.filePath || '');
+      const products = (submitResult as any).products || [];
+      const visions = (submitResult as any).visions || [];
 
       return (
         <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-3 h-3 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full shadow-sm"></div>
-              <h2 className="text-xl font-bold text-gray-800">Product Created Successfully!</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                {isProduct ? 'Product' : 'Vision'} Created Successfully!
+              </h2>
             </div>
             
-            {/* Created Product Display */}
+            {/* Created Item Display */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <h3 className="font-semibold text-green-800 mb-2">New Product:</h3>
-              <p className="text-gray-700 mb-2">{submitResult.product.productDescription}</p>
+              <h3 className="font-semibold text-green-800 mb-2">
+                New {isProduct ? 'Product' : 'Vision'}:
+              </h3>
+              <p className="text-gray-700 mb-2">
+                {isProduct ? item?.productDescription : item?.visionDescription}
+              </p>
               
-              {submitResult.product.url && submitResult.product.url.trim() && (
+              {isProduct && item?.url && item.url.trim() && (
                 <p className="text-sm text-gray-600 mb-2">
-                  URL: <a href={submitResult.product.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{submitResult.product.url}</a>
+                  URL: <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.url}</a>
                 </p>
               )}
               
@@ -238,14 +284,14 @@ export const ProductFormToolUI = makeAssistantToolUI<
                 <div className="mt-2">
                   <img 
                     src={fileUrl} 
-                    alt="Product" 
+                    alt={isProduct ? "Product" : "Vision"} 
                     className="max-w-xs h-auto rounded-lg shadow-sm"
                   />
                 </div>
               )}
               
-              {/* Vision Linking Display */}
-              {submitResult.linkedVision && (
+              {/* Vision Linking Display (for products) */}
+              {isProduct && submitResult.linkedVision && (
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <ThreadPrimitive.Suggestion
                     prompt={`show vision ${submitResult.linkedVision.id}`}
@@ -258,6 +304,24 @@ export const ProductFormToolUI = makeAssistantToolUI<
                   <p className="text-sm text-blue-700 mb-1">{submitResult.linkedVision.visionDescription}</p>
                   <p className="text-xs text-blue-600">
                     Similarity: {(submitResult.linkedVision.similarityScore * 100).toFixed(1)}%
+                  </p>
+                </div>
+              )}
+
+              {/* Product Linking Display (for visions) */}
+              {!isProduct && (submitResult as any).linkedProduct && (
+                <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <ThreadPrimitive.Suggestion
+                    prompt={`show product ${(submitResult as any).linkedProduct.id}`}
+                    method="replace"
+                    autoSend={true}
+                    className="font-semibold text-purple-800 hover:text-purple-900 cursor-pointer underline mb-1 block"
+                  >
+                    🔗 Linked to Product:
+                  </ThreadPrimitive.Suggestion>
+                  <p className="text-sm text-purple-700 mb-1">{(submitResult as any).linkedProduct.productDescription}</p>
+                  <p className="text-xs text-purple-600">
+                    Similarity: {((submitResult as any).linkedProduct.similarityScore * 100).toFixed(1)}%
                   </p>
                 </div>
               )}
@@ -320,7 +384,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
               {result.ui_components.title}
             </CardTitle>
             <CardDescription>
-              Describe your product and optionally upload supporting files. You can also specify a price if you want to sell your product.
+              Describe your idea and optionally add a product URL. With a URL, we'll create a product. Without a URL, we'll create a vision.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -342,7 +406,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
 
               <div className="space-y-2">
                 <label htmlFor="url" className="text-sm font-medium text-gray-700">
-                  Product URL *
+                  Product URL (Optional)
                 </label>
                 <input
                   type="url"
@@ -351,9 +415,11 @@ export const ProductFormToolUI = makeAssistantToolUI<
                   value={formData.url}
                   onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/product-page"
-                  required
+                  placeholder="https://example.com/product-page (leave empty to create a vision)"
                 />
+                <p className="text-xs text-gray-500">
+                  💡 <strong>Tip:</strong> If you don't provide a URL, you'll create a virtual product
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -421,17 +487,17 @@ export const ProductFormToolUI = makeAssistantToolUI<
 
               <Button
                 type="submit"
-                disabled={isSubmitting || !formData.productDescription.trim() || !formData.url.trim()}
+                disabled={isSubmitting || !formData.productDescription.trim()}
                 className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
                 onClick={() => console.log('🎯 SUBMIT BUTTON CLICKED!')}
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Product...
+                    {formData.url.trim() ? 'Creating Product...' : 'Creating Vision...'}
                   </>
                 ) : (
-                  "Create Product"
+                  formData.url.trim() ? 'Create Product' : 'Create Vision'
                 )}
               </Button>
             </form>
