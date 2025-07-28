@@ -6,6 +6,8 @@ import { z } from "zod";
 import clientPromise from "@/lib/mongodb";
 import { VisionDocument, Vision } from "@/types/vision";
 import { storeVisionEmbedding, searchSimilarVisions, searchAllVisions } from "@/lib/vector-db";
+import amazonSearchService, { AmazonProduct } from "@/lib/amazon-search";
+import { ProductSearchResult, SearchStep } from "@/components/product-search-ui";
 import { ObjectId } from "mongodb";
 import { ProductDocument, Product } from "@/types/product";
 
@@ -52,6 +54,22 @@ export async function POST(req: Request) {
     forcedTool = 'list_my_products';
   } else if (userMessage.includes('create product') || userMessage.includes('create a product') || userMessage.includes('new product')) {
     forcedTool = 'create_product_form';
+  } else if (userMessage.includes('manage my shops') || userMessage.includes('manage shops') || userMessage.includes('my shops')) {
+    forcedTool = 'manage_my_shops';
+  } else {
+    // Default behavior: treat as product search if not explicitly asking for other tools
+    const visionKeywords = ['vision', 'idea', 'dream', 'concept', 'design'];
+    const productKeywords = ['product', 'list', 'show', 'manage', 'create'];
+    const shopKeywords = ['shop', 'store'];
+    
+    const hasVisionKeyword = visionKeywords.some(keyword => userMessage.includes(keyword));
+    const hasProductKeyword = productKeywords.some(keyword => userMessage.includes(keyword));
+    const hasShopKeyword = shopKeywords.some(keyword => userMessage.includes(keyword));
+    
+    // Only use product search if not explicitly asking for other features
+    if (!hasVisionKeyword && !hasProductKeyword && !hasShopKeyword && userMessage.trim().length > 0) {
+      forcedTool = 'intelligent_product_search';
+    }
   }
 
   // Enhanced system prompt with user context
@@ -74,6 +92,12 @@ CRITICAL TOOL USAGE RULES:
 5. When the user asks to search all visions, IMMEDIATELY use search_all_visions - DO NOT generate any text
 
 6. When the user asks to list/show their products, IMMEDIATELY use list_my_products - DO NOT generate any text
+
+7. When the user asks to manage their shops, IMMEDIATELY use manage_my_shops - DO NOT generate any text
+
+8. When the user searches for products (e.g., "birthday gift for wife", "wireless headphones"), IMMEDIATELY use intelligent_product_search - DO NOT generate any text
+
+DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query.
 
 IMPORTANT: Use the EXACT words the user provided as the description - do not add, modify, or interpret their words
 
@@ -1235,6 +1259,227 @@ For all other interactions (non-tool related), respond normally with helpful tex
                 type: "error_card",
                 title: "Failed to Delete Product",
                 description: error instanceof Error ? error.message : 'Unknown error'
+              }
+            };
+          }
+        },
+      },
+      manage_my_shops: {
+        description: "Show the user's shops management interface with their current shops and option to add new ones.",
+        parameters: z.object({}),
+        execute: async () => {
+          try {
+            // Connect to MongoDB
+            const client = await clientPromise;
+            const db = client.db("visionverse");
+            const shopCollection = db.collection("shops");
+
+            // Get user's current shops
+            const shops = await shopCollection
+              .find({ userId: token.id as string })
+              .sort({ createdAt: -1 })
+              .toArray();
+
+            // Convert to Shop interface format
+            const shopsData = shops.map(shop => ({
+              id: shop._id.toString(),
+              userId: shop.userId,
+              userName: shop.userName,
+              userEmail: shop.userEmail,
+              platform: shop.platform,
+              name: shop.name,
+              url: shop.url,
+              createdAt: shop.createdAt,
+              updatedAt: shop.updatedAt,
+            }));
+
+            return {
+              type: "manage_shops",
+              shops: shopsData,
+              ui: {
+                type: "manage_shops",
+                title: "Manage Your Shops",
+                description: `You have ${shopsData.length} shop${shopsData.length !== 1 ? 's' : ''} configured`,
+                shops: shopsData
+              }
+            };
+          } catch (error) {
+            console.error("Error fetching shops:", error);
+            return {
+              type: "error",
+              ui: {
+                type: "error",
+                title: "Failed to Load Shops",
+                description: error instanceof Error ? error.message : 'Unknown error'
+              }
+            };
+          }
+        },
+      },
+      intelligent_product_search: {
+        description: "Search for products across Amazon and local stores with intelligent keyword refinement and quality evaluation.",
+        parameters: z.object({
+          query: z.string().describe("The search query for products (e.g., 'birthday gift for wife', 'wireless headphones')"),
+        }),
+        execute: async ({ query }) => {
+          try {
+            console.log(`🔍 Starting intelligent product search for: "${query}"`);
+            
+            const searchSteps: SearchStep[] = [];
+            let currentQuery = query;
+            let bestProduct: (AmazonProduct & { evaluation: any; source: 'amazon' | 'local' }) | null = null;
+            let allProducts: Array<AmazonProduct & { evaluation: any; source: 'amazon' | 'local' }> = [];
+            const maxIterations = 3;
+            let iteration = 0;
+
+            while (iteration < maxIterations && !bestProduct) {
+              iteration++;
+              console.log(`🔄 Search iteration ${iteration}: "${currentQuery}"`);
+
+              // Search Amazon
+              let amazonProducts: AmazonProduct[] = [];
+              try {
+                amazonProducts = await amazonSearchService.searchProducts({
+                  query: currentQuery,
+                  maxResults: 10,
+                  sortBy: 'average_review', // Prioritize well-reviewed products
+                });
+                console.log(`🛒 Amazon: Found ${amazonProducts.length} products`);
+              } catch (error) {
+                console.error('Amazon search error:', error);
+              }
+
+              // Search local products in ChromaDB
+              let localProducts: any[] = [];
+              try {
+                const { findSimilarProductsForVision } = await import("@/lib/vector-db");
+                const vectorResults = await findSimilarProductsForVision(
+                  currentQuery,
+                  token.id as string,
+                  10
+                );
+
+                if (vectorResults.ids[0]?.length > 0) {
+                  const client = await clientPromise;
+                  const db = client.db("visionverse");
+                  const productCollection = db.collection<ProductDocument>("products");
+
+                  const productIds = vectorResults.ids[0].map(id => new ObjectId(id));
+                  const foundProducts = await productCollection
+                    .find({ _id: { $in: productIds } })
+                    .toArray();
+
+                  localProducts = foundProducts.map(p => ({
+                    asin: p._id?.toString() || '',
+                    title: p.productDescription,
+                    link: p.url,
+                    position: 0,
+                    rating: 4.0, // Default rating for local products
+                    reviews: 1,
+                    source: 'local'
+                  }));
+                }
+                console.log(`🏪 Local: Found ${localProducts.length} products`);
+              } catch (error) {
+                console.error('Local search error:', error);
+              }
+
+              // Record this search step
+              searchSteps.push({
+                keywords: currentQuery,
+                amazonResults: amazonProducts.length,
+                localResults: localProducts.length,
+                refinementReason: iteration > 1 ? `Refining search to find better matches` : undefined
+              });
+
+              // Combine and evaluate all products
+              const combinedProducts = [
+                ...amazonProducts.map(p => ({ ...p, source: 'amazon' as const })),
+                ...localProducts.map(p => ({ ...p, source: 'local' as const }))
+              ];
+
+              // Evaluate each product
+              const evaluatedProducts = combinedProducts.map(product => ({
+                ...product,
+                evaluation: amazonSearchService.evaluateProductQuality(product)
+              }));
+
+              // Add to all products list
+              allProducts.push(...evaluatedProducts);
+
+              // Find the best product from this iteration
+              const recommendedProducts = evaluatedProducts.filter(p => p.evaluation.isRecommended);
+              
+              if (recommendedProducts.length > 0) {
+                // Sort by evaluation score and pick the best one
+                const sortedProducts = recommendedProducts.sort((a, b) => b.evaluation.score - a.evaluation.score);
+                const topProduct = sortedProducts[0];
+                if (topProduct) {
+                  bestProduct = topProduct;
+                  console.log(`✅ Found recommended product: "${bestProduct.title}" (Score: ${bestProduct.evaluation.score})`);
+                  break;
+                }
+              }
+
+              // If no good product found and we can iterate more, refine the search
+              if (iteration < maxIterations) {
+                console.log(`🤖 Generating refinements based on iteration ${iteration} results...`);
+                const refinements = await amazonSearchService.generateRefinedKeywords(currentQuery, amazonProducts);
+                console.log(`📝 Generated refinements:`, refinements);
+                
+                // Always use the first refinement for the next iteration
+                currentQuery = refinements[0] || query;
+                console.log(`🔄 Refining search to: "${currentQuery}"`);
+              }
+            }
+
+            // If still no recommended product, pick the best from all searches
+            if (!bestProduct && allProducts.length > 0) {
+              const sortedAllProducts = allProducts.sort((a, b) => b.evaluation.score - a.evaluation.score);
+              bestProduct = sortedAllProducts[0];
+              if (bestProduct) {
+                console.log(`⚠️ No ideal product found, selected best available: "${bestProduct.title}" (Score: ${bestProduct.evaluation.score})`);
+              }
+            }
+
+            // Prepare alternative products (excluding the recommended one)
+            const alternativeProducts = allProducts
+              .filter(p => p.asin !== bestProduct?.asin)
+              .sort((a, b) => b.evaluation.score - a.evaluation.score)
+              .slice(0, 4);
+
+             let searchSummary: string;
+             if (bestProduct && bestProduct.title) {
+               searchSummary = `Found "${bestProduct.title}" after ${iteration} search iteration${iteration > 1 ? 's' : ''} with a quality score of ${bestProduct.evaluation.score}/100.`;
+             } else {
+               searchSummary = `Searched through ${allProducts.length} products across ${iteration} iterations but no ideal match was found.`;
+             }
+
+            const result: ProductSearchResult = {
+              originalQuery: query,
+              searchSteps,
+              recommendedProduct: bestProduct || undefined,
+              alternativeProducts,
+              searchSummary
+            };
+
+            return {
+              type: "product_search",
+              result,
+              ui: {
+                type: "product_search",
+                title: "Product Search Results",
+                description: `Found ${allProducts.length} products for "${query}"`
+              }
+            };
+          } catch (error) {
+            console.error("Error in intelligent product search:", error);
+            return {
+              type: "error",
+              ui: {
+                type: "error",
+                title: "Product Search Failed",
+                description: error instanceof Error ? error.message : 'Unknown error occurred'
               }
             };
           }
