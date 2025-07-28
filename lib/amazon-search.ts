@@ -181,7 +181,7 @@ class AmazonSearchService {
         score += 20;
         reasons.push(`On sale: ${discount.toFixed(0)}% off`);
       } else {
-        score += 10;
+        score += 0;
         reasons.push('Regular pricing');
       }
     }
