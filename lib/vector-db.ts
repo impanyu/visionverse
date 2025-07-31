@@ -15,6 +15,8 @@ const chroma = new ChromaClient({
 const COLLECTION_NAME = "vision_descriptions";
 // Collection name for product descriptions
 const PRODUCT_COLLECTION_NAME = "product_descriptions";
+// Collection name for historical product queries
+const HISTORICAL_QUERIES_COLLECTION_NAME = "historical_product_queries";
 
 // Custom embedding function that tells Chroma we handle embeddings manually
 class ManualEmbeddingFunction {
@@ -73,6 +75,25 @@ async function getProductCollection(): Promise<Collection> {
     // Create collection if it doesn't exist
     return await chroma.createCollection({
       name: PRODUCT_COLLECTION_NAME,
+      embeddingFunction: manualEmbedder,
+    });
+  }
+}
+
+/**
+ * Get or create the historical queries collection
+ */
+async function getHistoricalQueriesCollection(): Promise<Collection> {
+  try {
+    // Try to get existing collection
+    return await chroma.getCollection({
+      name: HISTORICAL_QUERIES_COLLECTION_NAME,
+      embeddingFunction: manualEmbedder,
+    });
+  } catch (error) {
+    // Create collection if it doesn't exist
+    return await chroma.createCollection({
+      name: HISTORICAL_QUERIES_COLLECTION_NAME,
       embeddingFunction: manualEmbedder,
     });
   }
@@ -456,4 +477,121 @@ export interface SearchResult {
     createdAt: string;
     description: string;
   };
-} 
+}
+
+/**
+ * Store a historical product query in the vector database
+ * @param query - The user's search query
+ * @param userId - User ID
+ * @returns Promise<string> - The vector ID
+ */
+export async function storeHistoricalQuery(
+  query: string,
+  userId: string
+): Promise<string> {
+  try {
+    console.log(`💾 Storing historical query: "${query}" for user: ${userId}`);
+    
+    const collection = await getHistoricalQueriesCollection();
+    
+    // Generate embedding using OpenAI
+    console.log(`🤖 Generating embedding for: "${query}"`);
+    const embedding = await generateEmbedding(query);
+    console.log(`✅ Generated embedding with ${embedding.length} dimensions`);
+    
+    // Create unique ID for this query
+    const queryId = `${userId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Store in Chroma with metadata
+    await collection.add({
+      ids: [queryId],
+      embeddings: [embedding],
+      documents: [query],
+      metadatas: [{
+        userId: userId,
+        createdAt: new Date().toISOString(),
+        query: query
+      }]
+    });
+    
+    console.log(`✅ Historical query stored with ID: ${queryId}`);
+    return queryId;
+  } catch (error) {
+    console.error("❌ Error storing historical query:", error);
+    throw error;
+  }
+}
+
+/**
+ * Search for similar historical queries for a specific user
+ * @param query - Current search query to find similar historical queries for
+ * @param userId - User ID to search within
+ * @param limit - Maximum number of results to return (default: 10)
+ * @returns Promise with similar historical queries
+ */
+export async function searchSimilarHistoricalQueries(
+  query: string,
+  userId: string,
+  limit: number = 10
+): Promise<{
+  ids: string[][];
+  distances: number[][];
+  documents: string[][];
+  metadatas: any[][];
+}> {
+  try {
+    console.log(`🔍 Searching for similar historical queries for user: ${userId}, query: "${query}"`);
+    
+    const collection = await getHistoricalQueriesCollection();
+    
+    // Generate embedding for the current query
+    console.log(`🤖 Generating embedding for: "${query}"`);
+    const queryEmbedding = await generateEmbedding(query);
+    console.log(`✅ Generated embedding with ${queryEmbedding.length} dimensions`);
+    
+    console.log(`🔍 Searching historical queries collection for user: ${userId}...`);
+    
+    // Search in ChromaDB with user filtering
+    const results = await collection.query({
+      queryEmbeddings: [queryEmbedding],
+      nResults: limit,
+      where: { userId: userId }, // Filter by user
+      include: ["documents", "metadatas", "distances"]
+    });
+    
+    console.log(`🔍 Raw historical queries results: {
+      foundIds: ${results.ids?.[0]?.length || 0},
+      distances: [${results.distances?.[0]?.slice(0, 3).map(d => d?.toFixed(8)).join(', ')}...]
+    }`);
+    
+    // Filter out the exact same query (distance very close to 0)
+    const filteredResults = {
+      ids: [[]] as string[][],
+      distances: [[]] as number[][],
+      documents: [[]] as string[][],
+      metadatas: [[]] as any[][]
+    };
+    
+    if (results.ids?.[0] && results.distances?.[0] && results.documents?.[0] && results.metadatas?.[0]) {
+      for (let i = 0; i < results.ids[0].length; i++) {
+        const distance = results.distances[0][i];
+        const document = results.documents[0][i];
+        
+        // Skip if it's exactly the same query (very low distance) or if distance is null
+        if (distance != null && distance > 0.05 && document && document.toLowerCase() !== query.toLowerCase()) {
+          filteredResults.ids[0].push(results.ids[0][i]);
+          filteredResults.distances[0].push(distance);
+          filteredResults.documents[0].push(document);
+          filteredResults.metadatas[0].push(results.metadatas[0][i]);
+        }
+      }
+    }
+    
+    console.log(`🔍 Found ${filteredResults.ids[0].length} similar historical queries for user`);
+    
+    return filteredResults;
+  } catch (error) {
+    console.error("❌ Error searching historical queries:", error);
+    throw error;
+  }
+}

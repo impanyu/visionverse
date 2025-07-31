@@ -46,7 +46,6 @@ export const Thread: FC = () => {
         />
         <div className="fixed bottom-0 left-0 right-0 mt-3 flex w-full flex-col items-center justify-end bg-inherit pb-4 px-4 z-50">
           <div className="w-full max-w-4xl mx-auto">
-            <ThreadScrollToBottom />
             <PersistentSuggestions />
             <Composer />
           </div>
@@ -89,32 +88,7 @@ const ThreadWelcomeSuggestions: FC = () => {
 };
 
 const PersistentSuggestions: FC = () => {
-  return (
-    <div className="mb-3 flex w-full items-stretch justify-center gap-2">
-      <div className="grid grid-cols-2 gap-2 w-full max-w-4xl">
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-purple-100 hover:border-purple-300 flex flex-col items-center justify-center rounded-lg border border-purple-200 p-2 transition-colors ease-in bg-purple-50/80 backdrop-blur-sm"
-          prompt="Create a new product"
-          method="replace"
-          autoSend
-        >
-          <span className="line-clamp-2 text-ellipsis text-xs font-medium text-purple-700">
-            Create a new product
-          </span>
-        </ThreadPrimitive.Suggestion>
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-orange-100 hover:border-orange-300 flex flex-col items-center justify-center rounded-lg border border-orange-200 p-2 transition-colors ease-in bg-orange-50/80 backdrop-blur-sm"
-          prompt="List all my products"
-          method="replace"
-          autoSend
-        >
-          <span className="line-clamp-2 text-ellipsis text-xs font-medium text-orange-700">
-            List all my products
-          </span>
-        </ThreadPrimitive.Suggestion>
-      </div>
-    </div>
-  );
+  return null;
 };
 
 const Composer: FC = () => {
