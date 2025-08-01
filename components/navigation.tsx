@@ -24,13 +24,10 @@ export default function Navigation() {
   // Show loading state until mounted to prevent hydration mismatch
   if (!mounted || status === "loading") {
     return (
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between pl-6">
+      <nav className="border-b border-slate-700 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 shadow-lg">
+        <div className="container flex h-12 items-center pl-6">
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl brand-title">VisionVerse</h1>
-          </div>
-          <div className="animate-pulse">
-            <div className="h-8 w-20 bg-gray-300 rounded"></div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</h1>
           </div>
         </div>
       </nav>
@@ -38,17 +35,17 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between pl-6">
+    <nav className="border-b border-slate-700 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 shadow-lg">
+      <div className={`container flex h-12 items-center pl-6 ${session ? 'justify-between' : ''}`}>
         <div className="flex items-center space-x-2">
-          <h1 className="text-xl brand-title">VisionVerse</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</h1>
         </div>
         
-        <div className="flex items-center space-x-4">
-          {session ? (
+        {session && (
+          <div className="flex items-center space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-slate-700">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={session.user.image || undefined} alt={session.user.name || ""} />
                     <AvatarFallback>
@@ -72,10 +69,8 @@ export default function Navigation() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button onClick={() => signIn()}>Sign in</Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </nav>
   );

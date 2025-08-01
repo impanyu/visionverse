@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Store } from "lucide-react";
+import { LogOut, User, Store, Plus, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useThread, useComposer, ThreadPrimitive } from "@assistant-ui/react";
 import { VisionCreationToolUI, VisionCreationDirectToolUI, ListMyVisionsToolUI, SearchMyVisionsToolUI, SearchAllVisionsToolUI, DeleteVisionWithListToolUI, VisionCreatedWithListToolUI, VisionDuplicateFoundToolUI, ShowVisionToolUI } from "@/components/vision-creation-tool-ui";
@@ -28,6 +28,19 @@ import { ProductSearchToolUI } from "@/components/product-search-ui";
 
 function ThreadWrapper({ onUserMessageChange }: { onUserMessageChange: (message: string) => void }) {
   const { messages = [] } = useThread() || {};
+
+  // Add debugging for message changes
+  useEffect(() => {
+    console.log('🎯 ThreadWrapper: Messages changed, count:', messages.length);
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      console.log('🎯 ThreadWrapper: Last message:', {
+        role: lastMessage.role,
+        content: typeof lastMessage.content === 'string' ? lastMessage.content : 'complex content',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [messages]);
 
   useEffect(() => {
     const lastUserMessage = messages
@@ -70,6 +83,22 @@ export default function AssistantPage() {
   const handleManageShops = () => {
     // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
     const hiddenButton = document.getElementById('hidden-manage-shops-suggestion');
+    if (hiddenButton) {
+      hiddenButton.click();
+    }
+  };
+
+  const handleAddProduct = () => {
+    // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
+    const hiddenButton = document.getElementById('hidden-add-product-suggestion');
+    if (hiddenButton) {
+      hiddenButton.click();
+    }
+  };
+
+  const handleManageProducts = () => {
+    // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
+    const hiddenButton = document.getElementById('hidden-manage-products-suggestion');
     if (hiddenButton) {
       hiddenButton.click();
     }
@@ -129,20 +158,20 @@ export default function AssistantPage() {
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <header className="flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-10 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 border-b border-slate-700 shadow-lg">
             <div className="flex items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+              <SidebarTrigger className="-ml-1 text-slate-300 hover:text-white" />
+            <Separator orientation="vertical" className="mr-2 h-4 bg-slate-600" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                     <BreadcrumbLink href="/">
-                      <span className="brand-title">VisionVerse</span>
+                      <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbSeparator className="hidden md:block text-slate-500" />
                 <BreadcrumbItem>
-                    <BreadcrumbPage>{displayTitle}</BreadcrumbPage>
+                    <BreadcrumbPage className="text-slate-200">{displayTitle}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -150,7 +179,7 @@ export default function AssistantPage() {
             <div className="ml-auto flex items-center gap-2 px-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-slate-700">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={session.user?.image || undefined} alt={session.user?.name || "User"} />
                       <AvatarFallback>
@@ -167,6 +196,14 @@ export default function AssistantPage() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAddProduct}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    <span>add a product</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleManageProducts}>
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>manage my products</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleManageShops}>
                     <Store className="mr-2 h-4 w-4" />
                     <span>manage my shops</span>
@@ -189,6 +226,24 @@ export default function AssistantPage() {
       <ThreadPrimitive.Suggestion
         id="hidden-manage-shops-suggestion"
         prompt="manage my shops"
+        method="replace"
+        autoSend={true}
+        style={{ display: 'none' }}
+      />
+      
+      {/* Hidden suggestion button for add product */}
+      <ThreadPrimitive.Suggestion
+        id="hidden-add-product-suggestion"
+        prompt="add a product"
+        method="replace"
+        autoSend={true}
+        style={{ display: 'none' }}
+      />
+      
+      {/* Hidden suggestion button for manage products */}
+      <ThreadPrimitive.Suggestion
+        id="hidden-manage-products-suggestion"
+        prompt="manage my products"
         method="replace"
         autoSend={true}
         style={{ display: 'none' }}

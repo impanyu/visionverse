@@ -16,6 +16,22 @@ import { ProductDocument, Product } from "@/types/product";
 // Removed edge runtime since MongoDB requires Node.js modules
 export const maxDuration = 30;
 
+// In-memory store to track active searches by user ID
+const activeSearches = new Map<string, { timestamp: number; searchId: string }>();
+
+// Clean up old search records (older than 40 seconds)
+const cleanupActiveSearches = () => {
+  const now = Date.now();
+  const timeoutThreshold = now - 40 * 1000; // 40 seconds - longer than frontend timeout
+  
+  for (const [userId, search] of activeSearches.entries()) {
+    if (search.timestamp < timeoutThreshold) {
+      activeSearches.delete(userId);
+      console.log(`🧹 Cleaned up timed-out search record for user: ${userId} (search was running for ${Math.round((now - search.timestamp) / 1000)}s)`);
+    }
+  }
+};
+
 // Helper function to handle product search refresh requests
 async function handleProductSearchRefresh(refreshRequest: any, token: any) {
   console.log(`🔄 Handling refresh: iteration ${refreshRequest.refreshFromIteration}, type ${refreshRequest.refreshType}`);
@@ -305,8 +321,48 @@ export async function POST(req: Request) {
 
   const { messages, system, tools } = await req.json();
 
+  // Add debugging for received messages
+  console.log("🎯 API: Received messages count:", messages?.length || 0);
+  if (messages && messages.length > 0) {
+    const lastUserMessage = messages.slice().reverse().find((m: any) => m.role === 'user');
+    if (lastUserMessage) {
+      console.log("🎯 API: Last user message:", typeof lastUserMessage.content === 'string' ? lastUserMessage.content : 'complex content');
+      console.log("🎯 API: This should trigger product search if it's a product query");
+    }
+  }
+
   // Check for specific button commands that should force tool usage
   const lastMessage = messages[messages.length - 1];
+  
+  // Debug: Write conversation history to file for easy checking
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const userMessages = messages.filter((msg: any) => msg.role === 'user');
+    const debugContent = [
+      `🚨 CONVERSATION HISTORY DEBUG - ${new Date().toISOString()}`,
+      `📊 Total messages: ${messages.length}`,
+      `👤 User messages: ${userMessages.length}`,
+      '',
+      '📝 USER MESSAGE HISTORY:',
+      ...userMessages.map((msg: any, idx: number) => {
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+        return `  [${idx + 1}/${userMessages.length}] ${content}`;
+      }),
+      '',
+      '🔍 LATEST MESSAGE:',
+      `  ${typeof lastMessage?.content === 'string' ? lastMessage.content : JSON.stringify(lastMessage?.content)}`,
+      '',
+      '='.repeat(80)
+    ].join('\n');
+    
+    const debugFilePath = path.join(process.cwd(), 'conversation-debug.txt');
+    fs.writeFileSync(debugFilePath, debugContent);
+    console.log(`🚨 CONVERSATION HISTORY saved to: conversation-debug.txt (${userMessages.length} user messages)`);
+  } catch (error) {
+    console.error('Failed to write conversation debug file:', error);
+  }
   
   // Handle both string and array content types
   let userMessage = '';
@@ -368,17 +424,37 @@ export async function POST(req: Request) {
     const hasProductKeyword = productKeywords.some(keyword => userMessage.includes(keyword));
     const hasShopKeyword = shopKeywords.some(keyword => userMessage.includes(keyword));
     
-    // Only use product search if not explicitly asking for other features
-    if (!hasVisionKeyword && !hasProductKeyword && !hasShopKeyword && userMessage.trim().length > 0) {
-      forcedTool = 'intelligent_product_search';
-    }
+    // For general user input, let AI decide naturally (like landing page)
+    console.log("🤖 API: General user input - letting AI choose appropriate tool naturally");
   }
 
   // Enhanced system prompt with user context
   const userName = token.name || token.email || "User";
-  const enhancedSystem = `${system || "You are a helpful assistant."}\n\nUser context: You are chatting with ${userName}. Be personable and remember this is a personalized conversation.
+  let enhancedSystem = `${system || "You are a helpful assistant."}\n\nUser context: You are chatting with ${userName}. Be personable and remember this is a personalized conversation.
 
-CRITICAL TOOL USAGE RULES:
+🚨🚨🚨 ABSOLUTELY CRITICAL: ZERO TEXT WITH TOOLS! 🚨🚨🚨
+
+WHEN YOU CALL ANY TOOL:
+❌ NO TEXT BEFORE THE TOOL CALL
+❌ NO TEXT AFTER THE TOOL CALL  
+❌ NO EXPLANATIONS
+❌ NO DESCRIPTIONS
+❌ NO JSON OUTPUT
+❌ NO "Here are some..." messages
+❌ NO ANYTHING - JUST THE TOOL CALL
+
+EXAMPLES OF FORBIDDEN RESPONSES:
+❌ "Here are some swimming pool options for home use: [tool call]"
+❌ "[tool call] These products should meet your needs."
+❌ "I found these products: [tool call]"
+❌ "[tool call] \n\n{'products': [...]}"
+
+✅ CORRECT RESPONSE: [tool call only]
+
+TOOL = COMPLETE RESPONSE. STAY SILENT!
+
+TOOL USAGE RULES:
+
 1. When the user asks to create a VISION, idea, complaint, dream, or design:
    - If they provide ANY description/content (even brief), IMMEDIATELY use create_vision_direct - DO NOT generate any text
    - If they ask to create a vision with NO description at all, IMMEDIATELY use create_vision_form - DO NOT generate any text
@@ -397,22 +473,123 @@ CRITICAL TOOL USAGE RULES:
 
 7. When the user asks to manage their shops, IMMEDIATELY use manage_my_shops - DO NOT generate any text
 
-8. When the user searches for products, IMMEDIATELY use intelligent_product_search - DO NOT generate any text, PRESERVE the user's EXACT query
+8. When the user searches for products, IMMEDIATELY use intelligent_product_search with their current input. 
 
-DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query.
+DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query. 
 
-CRITICAL: When calling intelligent_product_search, use the user's COMPLETE ORIGINAL MESSAGE as the query parameter. DO NOT extract, summarize, clean, or modify ANY part of their input. If they say "i want to buy a hat for sun shield", pass exactly "i want to buy a hat for sun shield" - not "hat for sun shield" or any other variation.
+🚨 REMEMBER: For ANY product search (explicit or default), create clear queries based on the user's current input.
 
-When you call a tool, respond ONLY with the tool call results. Do not generate any verbose text before or after the UI components.
-For all other interactions (non-tool related), respond normally with helpful text.`;
+🛑🛑🛑 FINAL WARNING: NO TEXT GENERATION EVER WITH TOOLS! 🛑🛑🛑
+If you generate ANY text when calling a tool, you will cause a system error.
+ONLY tool calls. NEVER text. NOT EVEN A SINGLE WORD.
+
+Remember: Your response to any tool usage = ONLY the tool call, no additional text.`;
+
+  // Force the AI to be completely silent with tools
+  enhancedSystem += `\n\n🔇 SILENCE MODE: When using ANY tool, you must be completely silent. No explanations, no JSON, no text whatsoever.`;
+
+  // Add extra instruction if tool is being forced
+  // Simple approach - let AI choose tools naturally based on context
+
+  // For product searches, limit conversation history to prevent "nothing shown" on subsequent searches
+  let processedMessages = messages;
+  const lastUserMessage = messages[messages.length - 1];
+  
+  // Extract text content from the last user message (handle both string and complex content)
+  let userTextContent = '';
+  if (lastUserMessage) {
+    if (typeof lastUserMessage.content === 'string') {
+      userTextContent = lastUserMessage.content;
+    } else if (Array.isArray(lastUserMessage.content)) {
+      // Extract text from content array (handle complex message format)
+      const textParts = lastUserMessage.content.filter((part: any) => part.type === 'text').map((part: any) => part.text);
+      userTextContent = textParts.join(' ');
+    }
+    }
+  
+  console.log(`🔍 API: Extracted user text content: "${userTextContent}"`);
+  
+  const isProductSearchKeyword = userTextContent && (
+    userTextContent.toLowerCase().includes('search') ||
+    userTextContent.toLowerCase().includes('find') ||
+    userTextContent.toLowerCase().includes('product') ||
+    !userTextContent.toLowerCase().match(/\b(vision|idea|dream|concept|design|list|show|manage|create|shop|store)\b/)
+  );
+
+  // If this looks like a normal product search, force the intelligent_product_search tool
+  if (!forcedTool && isProductSearchKeyword) {
+    forcedTool = 'intelligent_product_search';
+    console.log(`✅ Forcing tool: ${forcedTool} (detected product search)`);
+  }
+
+  if (isProductSearchKeyword && messages.length > 3) {
+    // Keep only the last 3 messages for product searches to ensure consistent performance
+    processedMessages = messages.slice(-3);
+    console.log(`🔄 API: Trimmed conversation from ${messages.length} to ${processedMessages.length} messages for product search consistency`);
+  }
+  
+  // Debug: Log if this is detected as a product search
+  console.log(`🔍 API: Detected product search: ${isProductSearchKeyword}, Messages: ${messages.length}, Will trim: ${isProductSearchKeyword && messages.length > 3}`);
 
   // Track if vision tools are being used
-  const result = streamText({
+  console.log("🤖 API: About to call streamText with:");
+  console.log("🤖 API: System message length:", enhancedSystem?.length || 0);
+  console.log("🤖 API: Messages count:", processedMessages?.length || 0);
+  console.log(`🤖 API: Tool choice: ${forcedTool ? `FORCED ${forcedTool}` : 'auto (natural AI decision)'}`);
+  console.log("🤖 API: Available tools:", Object.keys({
+    ...frontendTools(tools),
+    create_vision_direct: "create_vision_direct",
+    intelligent_product_search: "intelligent_product_search"
+  }));
+  
+  // Add debugging for the last few messages
+  if (processedMessages && processedMessages.length > 0) {
+    console.log("🤖 API: Last 3 messages:");
+    const lastThree = processedMessages.slice(-3);
+    lastThree.forEach((msg: any, idx: number) => {
+      console.log(`  [${idx}] ${msg.role}: ${typeof msg.content === 'string' ? msg.content.substring(0, 100) : 'complex content'}`);
+      if (msg.tool_calls) {
+        console.log(`    Tool calls: ${JSON.stringify(msg.tool_calls)}`);
+      }
+    });
+  }
+  
+  // Debug: Log what we're sending to the AI
+  console.log(`🤖 API: Sending to AI - Last message content: "${userTextContent}" (forcedTool=${forcedTool || 'none'})`);
+  console.log(`🤖 API: System prompt contains "NEVER GENERATE TEXT WITH TOOLS": ${enhancedSystem.includes('NEVER GENERATE TEXT WITH TOOLS')}`);
+
+  let result;
+  try {
+    console.log(`🤖 API: Calling streamText...`);
+    result = streamText({
     model: openai('gpt-4o'),
     system: enhancedSystem,
-    messages: messages,
-    // Force tool usage for specific commands, otherwise auto
-    toolChoice: forcedTool ? { type: "tool", toolName: forcedTool as any } : "auto",
+      messages: processedMessages,
+      // Force intelligent_product_search tool for product searches to prevent verbose text
+      toolChoice: forcedTool ? { type: "tool", toolName: forcedTool } : "auto",
+      onStepFinish: async (step) => {
+        // Debug: Check if AI generates text with tool calls
+        if (step.text && step.toolCalls && step.toolCalls.length > 0) {
+          console.error(`🚨 AI VIOLATED RULE: Generated text with tool calls!`);
+          console.error(`🚨 Text: "${step.text}"`);
+          console.error(`🚨 Tool calls: ${step.toolCalls.length}`);
+          
+          // Check if the text looks like JSON
+          if (step.text.includes('{') || step.text.includes('[') || step.text.includes('}')) {
+            console.error(`🚨 The text appears to be JSON format - this is what the user is seeing!`);
+          }
+        }
+        
+        // Also log any text generation during tool calls
+        if (step.toolCalls && step.toolCalls.length > 0) {
+          console.log(`🔧 Tool calls made: ${step.toolCalls.map(tc => tc.toolName).join(', ')}`);
+          if (step.text) {
+            console.warn(`⚠️ Text generated with tools: "${step.text}"`);
+          } else {
+            console.log(`✅ No text generated with tools - good!`);
+          }
+        }
+      },
     tools: {
       ...frontendTools(tools),
       create_vision_direct: {
@@ -1621,12 +1798,53 @@ For all other interactions (non-tool related), respond normally with helpful tex
       intelligent_product_search: {
         description: "Search for products across Amazon and local stores with intelligent keyword refinement and quality evaluation.",
         parameters: z.object({
-          query: z.string().describe("The search query for products (e.g., 'birthday gift for wife', 'wireless headphones')"),
+          query: z.string().describe("A clear, complete search query based on the user's current input for finding relevant products"),
         }),
         execute: async ({ query }) => {
           try {
+            console.log(`🎯 Backend: TOOL CALLED - intelligent_product_search`);
             console.log(`🔍 Backend: Starting intelligent product search for: "${query}"`);
             console.log(`🔍 Backend: refreshRequest:`, refreshRequest);
+            console.log(`🔍 Backend: User ID: ${token.id}`);
+            
+            // Clean up old search records
+            cleanupActiveSearches();
+            
+            // Check for concurrent searches from the same user (unless it's a refresh)
+            if (!refreshRequest && activeSearches.has(token.id as string)) {
+              const existingSearch = activeSearches.get(token.id as string);
+              const searchDuration = Math.round((Date.now() - existingSearch!.timestamp) / 1000);
+              console.log(`🚫 Backend: Blocking concurrent search for user ${token.id}. Existing search: ${existingSearch?.searchId} (running for ${searchDuration}s)`);
+              
+              return {
+                type: 'product_search' as const,
+                result: {
+                  originalQuery: query,
+                  searchSteps: [{
+                    keywords: `⚠️ SEARCH BLOCKED: ${query}`,
+                    amazonResults: 0,
+                    googleShoppingResults: 0,
+                    localResults: 0,
+                    refinementReason: `🚫 Another search is already in progress (running for ${searchDuration}s). Please wait for it to complete or try again in a few moments.`,
+                    stepType: 'intent' as const
+                  }],
+                  recommendedProducts: [],
+                  recommendedProduct: null,
+                  searchSummary: `⚠️ Search blocked: Another product search is currently in progress. Please wait for the current search to complete before starting a new one.`,
+                  sessionId: `blocked_${Date.now()}`,
+                  allAccumulatedProducts: [],
+                  suggestedKeywords: ['try again later', 'wait for current search', 'refresh page if stuck']
+                }
+              };
+            }
+            
+            // Register this search
+            const searchId = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            activeSearches.set(token.id as string, {
+              timestamp: Date.now(),
+              searchId
+            });
+            console.log(`✅ Backend: Registered new search ${searchId} for user ${token.id}`);
             
             // Check if this is a refresh request
             if (refreshRequest) {
@@ -1651,9 +1869,18 @@ For all other interactions (non-tool related), respond normally with helpful tex
             storeHistoricalQuery(query, token.id as string).catch(error => {
               console.warn('⚠️ Failed to store historical query:', error);
             });
+
+            // Set up timeout to automatically clean up this search if it takes too long
+            const searchTimeout = setTimeout(() => {
+              if (activeSearches.has(token.id as string) && activeSearches.get(token.id as string)?.searchId === searchId) {
+                console.log(`⏰ Backend: Force cleaning up timed-out search ${searchId} for user ${token.id} after 60 seconds`);
+                activeSearches.delete(token.id as string);
+              }
+            }, 60000); // 60 seconds - longer than typical searches but still prevents indefinite blocking
             
                           // Search for similar historical queries to understand user intent
               let rewrittenQuery = query;
+            let suggestedKeywords: string[] = [];
               const searchSteps: SearchStep[] = [];
               
               // Get last searched product for context
@@ -1662,6 +1889,11 @@ For all other interactions (non-tool related), respond normally with helpful tex
               try {
                 console.log(`🕒 Searching for similar historical queries...`);
                 const historicalQueries = await searchSimilarHistoricalQueries(query, token.id as string, 10);
+              
+              console.log(`📚 BACKEND: Historical queries search result:`, {
+                hasDocuments: !!historicalQueries.documents[0],
+                queryCount: historicalQueries.documents[0]?.length || 0
+              });
               
               if (historicalQueries.documents[0] && historicalQueries.documents[0].length > 0) {
                 console.log(`📚 Found ${historicalQueries.documents[0].length} similar historical queries:`);
@@ -1682,6 +1914,17 @@ For all other interactions (non-tool related), respond normally with helpful tex
                   console.log(`  ${i + 1}. "${item.query}" (distance: ${item.distance?.toFixed(4)}, date: ${timeAgo})`);
                 });
                 
+                // Check if this is a comparative query
+                const comparativeTerms = ['more expensive', 'cheaper', 'more costly', 'less expensive', 'pricier', 'budget', 'premium', 'better', 'higher quality', 'lower quality', 'upgraded', 'downgrade', 'similar but', 'like this but', 'alternative', 'compare', 'versus'];
+                const isComparativeQuery = comparativeTerms.some(term => query.toLowerCase().includes(term));
+                
+                if (isComparativeQuery && lastSearchedProduct) {
+                  console.log(`🔄 COMPARATIVE QUERY DETECTED: "${query}"`);
+                  console.log(`📊 Reference product: "${lastSearchedProduct.finalProduct.title}" ($${lastSearchedProduct.finalProduct.price})`);
+                } else {
+                  console.log(`🔍 Standard query processing: "${query}"`);
+                }
+
                 // Use LLM to reason about user intent and rewrite query
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                 
@@ -1704,7 +1947,33 @@ Last searched product (most recent product search):
 - Rating: ${lastSearchedProduct.finalProduct.rating || 'N/A'} (${lastSearchedProduct.finalProduct.reviews || 0} reviews)
 - Search Date: ${lastSearchedProduct.createdAt.toLocaleDateString()}
 - Recommend Score: ${lastSearchedProduct.finalProduct.evaluation.score}/100
+- Category: ${lastSearchedProduct.finalProduct.title.split(' ').slice(0, 2).join(' ')}
 ` : 'No previous product searches found.'}
+
+🔥 CRITICAL: COMPARATIVE QUERY DETECTION 🔥
+If the current query contains comparative language (like "more expensive", "cheaper", "better", "higher quality", "lower price", "more premium", "budget version", "upgraded", "similar but", etc.), you MUST:
+
+1. **PRICE COMPARISONS**: When user asks for "more expensive", "cheaper", "higher/lower price":
+   - Include EXACT price reference: "more expensive than $${lastSearchedProduct?.finalProduct.price || 'N/A'}" or "cheaper than $${lastSearchedProduct?.finalProduct.price || 'N/A'}"
+   - For "more expensive": specify range "above $${lastSearchedProduct ? (() => {
+     const currentPrice = parseFloat(lastSearchedProduct.finalProduct.price.replace(/[$,]/g, '')) || 0;
+     return Math.ceil(currentPrice * 1.25);
+   })() : 'N/A'}"
+   - For "cheaper": specify range "under $${lastSearchedProduct ? (() => {
+     const currentPrice = parseFloat(lastSearchedProduct.finalProduct.price.replace(/[$,]/g, '')) || 0;
+     return Math.floor(currentPrice * 0.75);
+   })() : 'N/A'}"
+   - For "much more expensive": use 1.5x multiplier, for "slightly more": use 1.1x multiplier
+   - For "much cheaper": use 0.5x multiplier, for "slightly cheaper": use 0.9x multiplier
+
+2. **QUALITY COMPARISONS**: When user asks for "better", "higher quality", "more premium":
+   - Include current product category and upgrade context
+   - Reference current rating: "better than ${lastSearchedProduct?.finalProduct.rating || 'N/A'} star rating"
+   - Mention specific improvements over current product
+
+3. **FEATURE COMPARISONS**: When user mentions "similar but", "with better", "without":
+   - Keep the same category: "${lastSearchedProduct?.finalProduct.title.split(' ').slice(0, 3).join(' ') || 'N/A'}"
+   - Include specific feature modifications
 
 Based on these historical queries and the last searched product, try to understand the user's profile, who the user is, what is the user preference, sex, age, hobbies, etc, ignore those one time queries.
 
@@ -1726,39 +1995,221 @@ Guidelines:
 - Do not guess or add any unneccesary keywords to the current query
 - Make the query more specific and targeted, but don't change the core intent
 - Use natural language, don't just add keywords
+- **MOST IMPORTANT**: For comparative queries, ALWAYS include precise context from the previous search
 
+IMPORTANT: Respond in JSON format with TWO fields:
+1. "rewritten_query": The improved search query
+2. "suggested_keywords": Array of EXACTLY 8-15 short keyword phrases (2-6 words each), about the categories, features, price ranges and etc, that the user might want to add to refine their search. These should be related to the user's profile and search history. MINIMUM 8 keywords required!
 
-Return ONLY the rewritten query, no explanation.`;
+Example responses:
+
+Standard query:
+{
+  "rewritten_query": "high-quality bluetooth headphones for working from home", 
+  "suggested_keywords": ["noise cancelling", "under $100", "wireless charging", "long battery life", "comfortable padding", "over-ear", "bluetooth 5.0", "quick pairing", "premium brand", "sweat resistant"]
+}
+
+Comparative query - "more expensive one" (when last product was $80 headphones):
+{
+  "rewritten_query": "premium bluetooth headphones more expensive than $80 for working from home",
+  "suggested_keywords": ["above $100", "luxury brand", "premium materials", "noise cancelling", "high-end features", "professional grade", "wireless charging", "long battery life", "audiophile quality", "flagship model"]
+}
+
+Comparative query - "cheaper option" (when last product was $150 smart watch):
+{
+  "rewritten_query": "budget smart watch cheaper than $150 price range with fitness tracking",
+  "suggested_keywords": ["under $100", "budget friendly", "basic features", "fitness tracking", "heart rate monitor", "water resistant", "long battery life", "affordable brand", "good value", "entry level"]
+}
+
+Return ONLY valid JSON, no explanation.`;
 
                 const intentResponse = await openaiClient.chat.completions.create({
                   model: "gpt-4o",
                   messages: [{ role: "user", content: intentPrompt }],
                   temperature: 0.4,
-                  max_tokens: 100
+                  max_tokens: 300
                 });
 
-                const suggestedQuery = intentResponse.choices[0]?.message?.content?.trim();
-                if (suggestedQuery && suggestedQuery !== query) {
-                  rewrittenQuery = suggestedQuery;
-                  console.log(`🧠 Intent-based rewritten query: "${rewrittenQuery}"`);
-                  
-                  // Add the intent step to search steps
-                  searchSteps.push({
-                    keywords: rewrittenQuery,
-                    amazonResults: 0,
-                    localResults: 0,
-                    refinementReason: `Intent-based rewrite from ${historicalQueries.documents[0].length} historical queries`,
-                    stepType: 'intent'
-                  });
+                const responseContent = intentResponse.choices[0]?.message?.content?.trim();
+                
+                if (responseContent) {
+                  console.log(`🔍 BACKEND: Raw intent response:`, responseContent);
+                  try {
+                    // Strip markdown code blocks if present
+                    let cleanJson = responseContent.trim();
+                    if (cleanJson.startsWith('```json')) {
+                      cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                    } else if (cleanJson.startsWith('```')) {
+                      cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                    }
+                    
+                    console.log(`🔍 BACKEND: Cleaned JSON for parsing:`, cleanJson);
+                    const intentData = JSON.parse(cleanJson);
+                    if (intentData.rewritten_query && intentData.rewritten_query !== query) {
+                      rewrittenQuery = intentData.rewritten_query;
+                      if (isComparativeQuery) {
+                        console.log(`🔄 COMPARATIVE REWRITE SUCCESS:`);
+                        console.log(`   Original: "${query}"`);
+                        console.log(`   Enhanced: "${rewrittenQuery}"`);
+                        console.log(`   Reference: $${lastSearchedProduct?.finalProduct.price || 'N/A'} ${lastSearchedProduct?.finalProduct.title || 'N/A'}`);
+                      } else {
+                        console.log(`🧠 Intent-based rewritten query: "${rewrittenQuery}"`);
+                      }
+                    }
+                    
+                    if (intentData.suggested_keywords && Array.isArray(intentData.suggested_keywords)) {
+                      suggestedKeywords = intentData.suggested_keywords;
+                      console.log(`🏷️ BACKEND: Generated suggested keywords:`, suggestedKeywords);
+                    } else {
+                      console.log(`🏷️ BACKEND: No suggested keywords found in response:`, intentData);
+                    }
+                    
+                    // Add the intent step to search steps if we have a rewritten query
+                    if (rewrittenQuery !== query) {
+                      searchSteps.push({
+                        keywords: rewrittenQuery,
+                        amazonResults: 0,
+                        localResults: 0,
+                        refinementReason: `Intent-based rewrite from ${historicalQueries.documents[0].length} historical queries`,
+                        stepType: 'intent'
+                      });
+                    }
+                  } catch (jsonError) {
+                    console.error('🚨 Error parsing intent JSON response:', jsonError);
+                    console.error('🚨 Raw response content:', responseContent);
+                    
+                    // Try to extract just the rewritten_query from the JSON string manually
+                    try {
+                      const rewrittenQueryMatch = responseContent.match(/"rewritten_query"\s*:\s*"([^"]*)"/)
+                      if (rewrittenQueryMatch && rewrittenQueryMatch[1] && rewrittenQueryMatch[1] !== query) {
+                        rewrittenQuery = rewrittenQueryMatch[1];
+                        console.log(`🧠 Intent-based rewritten query (manual extraction): "${rewrittenQuery}"`);
+                      } else {
+                        console.log(`🔄 Fallback: Using original query since extraction failed`);
+                        // Don't change rewrittenQuery, keep it as original query
+                      }
+                      
+                      // Try to extract suggested keywords manually too
+                      const keywordsMatch = responseContent.match(/"suggested_keywords"\s*:\s*\[([^\]]*)\]/);
+                      if (keywordsMatch && keywordsMatch[1]) {
+                        try {
+                          const keywordsArray = JSON.parse(`[${keywordsMatch[1]}]`);
+                          if (Array.isArray(keywordsArray)) {
+                            suggestedKeywords = keywordsArray;
+                            console.log(`🏷️ BACKEND: Manually extracted suggested keywords:`, suggestedKeywords);
+                          }
+                        } catch (keywordError) {
+                          console.error('🚨 Error parsing extracted keywords:', keywordError);
+                        }
+                      }
+                    } catch (extractionError) {
+                      console.error('🚨 Error in manual extraction:', extractionError);
+                      console.log(`🔄 Complete fallback: Using original query`);
+                      // Don't change rewrittenQuery, keep it as original query
+                    }
+                  }
                 } else {
                   console.log(`🧠 No significant intent rewriting needed`);
                 }
               } else {
-                console.log(`📚 No similar historical queries found for this user`);
+                console.log(`📚 No similar historical queries found for this user - generating fallback keywords`);
+                
+                // Fallback: generate suggested keywords without historical context
+                try {
+                  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                  
+                  const fallbackPrompt = `You are generating helpful keyword suggestions for a product search query.
+
+Current query: "${query}"
+
+Since there's no historical data available, generate relevant keyword suggestions that would help refine this search query. Consider common refinement categories like:
+- Price ranges (under $X, budget-friendly, premium, etc.)
+- Quality indicators (high-quality, durable, reliable, etc.)
+- Features (wireless, portable, compact, waterproof, etc.)
+- Use cases (for work, for home, for travel, for gifts, etc.)
+- Brand preferences (popular brands, bestseller, top-rated, etc.)
+
+IMPORTANT: Respond in JSON format with TWO fields:
+1. "rewritten_query": Keep the original query unchanged (no rewriting without historical context)
+2. "suggested_keywords": Array of EXACTLY 8-15 short keyword phrases (2-6 words each), about the categories, features, price ranges and etc, that the user might want to add to refine their search. These should be related to the user's profile and search history. MINIMUM 8 keywords required!
+
+Example response:
+{
+  "rewritten_query": "${query}",
+  "suggested_keywords": ["under $50", "high quality", "wireless", "portable", "top rated", "gift wrapping", "fast shipping", "bestseller", "premium", "waterproof"]
+}
+
+Return ONLY valid JSON, no explanation.`;
+
+                  const fallbackResponse = await openaiClient.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [{ role: "user", content: fallbackPrompt }],
+                    temperature: 0.6,
+                    max_tokens: 250
+                  });
+
+                  const fallbackContent = fallbackResponse.choices[0]?.message?.content?.trim();
+                  
+                  if (fallbackContent) {
+                    try {
+                      const fallbackData = JSON.parse(fallbackContent);
+                      if (fallbackData.suggested_keywords && Array.isArray(fallbackData.suggested_keywords)) {
+                        suggestedKeywords = fallbackData.suggested_keywords;
+                        console.log(`🏷️ BACKEND: Generated fallback suggested keywords:`, suggestedKeywords);
+                      }
+                    } catch (fallbackJsonError) {
+                      console.error('🚨 Error parsing fallback JSON response:', fallbackJsonError);
+                    }
+                  }
+                } catch (fallbackError) {
+                  console.error('⚠️ Error generating fallback keywords:', fallbackError);
+                }
               }
             } catch (error) {
               console.error('⚠️ Error in historical query analysis:', error);
               // Continue with original query if historical analysis fails
+            }
+            
+            // Final fallback: if no keywords were generated, create some basic ones
+            if (!suggestedKeywords || suggestedKeywords.length === 0) {
+              console.log(`🏷️ BACKEND: No keywords generated, using basic fallback`);
+              // Generate basic keywords based on query type
+              if (query.toLowerCase().includes('gift')) {
+                suggestedKeywords = ['under $30', 'under $50', 'personalized', 'practical', 'popular', 'gift wrapping', 'fast shipping', 'premium brand', 'thoughtful', 'unique'];
+              } else if (query.toLowerCase().includes('tech') || query.toLowerCase().includes('electronic')) {
+                suggestedKeywords = ['wireless', 'rechargeable', 'portable', 'waterproof', 'top rated', 'latest model', 'smart features', 'bluetooth', 'premium', 'durable'];
+              } else {
+                suggestedKeywords = ['budget friendly', 'high quality', 'durable', 'bestseller', 'highly rated', 'top brand', 'fast shipping', 'premium', 'reliable', 'versatile'];
+              }
+              console.log(`🏷️ BACKEND: Using fallback keywords:`, suggestedKeywords);
+            }
+
+            // Ensure we have at least 8 keywords
+            if (suggestedKeywords && suggestedKeywords.length < 8) {
+              console.log(`🏷️ BACKEND: Only ${suggestedKeywords.length} keywords generated, padding to reach minimum of 8`);
+              
+              const additionalKeywords = [
+                'premium quality', 'top rated', 'bestseller', 'highly reviewed', 
+                'fast shipping', 'warranty included', 'trending', 'customer favorite',
+                'budget friendly', 'value for money', 'durable', 'reliable',
+                'compact', 'lightweight', 'easy to use', 'versatile', 'waterproof',
+                'wireless', 'portable', 'rechargeable', 'smart', 'advanced'
+              ];
+              
+              // Add keywords that aren't already in the list (case insensitive check)
+              const uniqueAdditional = additionalKeywords.filter(keyword => 
+                !suggestedKeywords.some(existing => 
+                  existing.toLowerCase().includes(keyword.toLowerCase()) || 
+                  keyword.toLowerCase().includes(existing.toLowerCase())
+                )
+              );
+              
+              // Add until we have at least 8
+              while (suggestedKeywords.length < 8 && uniqueAdditional.length > 0) {
+                suggestedKeywords.push(uniqueAdditional.shift()!);
+              }
+              
+              console.log(`🏷️ BACKEND: Padded to ${suggestedKeywords.length} keywords:`, suggestedKeywords);
             }
             
             let currentQuery = rewrittenQuery;
@@ -2110,8 +2561,8 @@ Return ONLY a JSON object with min and max numbers:
                   console.log(`🔄 Iteration ${iteration}: Collected ${allProducts.length} products so far, continuing search...`);
                   // Don't select products yet, continue to next iteration
                 } else {
-                  // Final iteration: Use AI to select top 10 products
-                  console.log(`🤖 Using AI to select top 10 products from ${allProducts.length} total collected products`);
+                          // Final iteration: Use AI to select top 10 products
+        console.log(`🤖 Using AI to select top 10 products from ${allProducts.length} total collected products`);
                   
                   try {
                     const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -2367,9 +2818,9 @@ Your top ${Math.min(10, allProducts.length)} products (best first):`;
              
              if (allSelectedProductsForResult.length > 0) {
                if (allSelectedProductsForResult.length === 1) {
-                 searchSummary = `Found "${allSelectedProductsForResult[0].title}" after ${iteration} search iteration${iteration > 1 ? 's' : ''}. Swipe to browse products.`;
-               } else {
-                 searchSummary = `Found ${allSelectedProductsForResult.length} great products after ${iteration} search iteration${iteration > 1 ? 's' : ''}. Swipe to browse them all!`;
+                         searchSummary = `Found "${allSelectedProductsForResult[0].title}" after ${iteration} search iteration${iteration > 1 ? 's' : ''}.`;
+      } else {
+        searchSummary = `Found ${allSelectedProductsForResult.length} great products after ${iteration} search iteration${iteration > 1 ? 's' : ''}. Best one selected for you.`;
                }
              } else if (bestProduct && bestProduct.title) {
                searchSummary = `Found "${bestProduct.title}" after ${iteration} search iteration${iteration > 1 ? 's' : ''} with a recommend score of ${bestProduct.evaluation.score}/100.`;
@@ -2388,8 +2839,11 @@ Your top ${Math.min(10, allProducts.length)} products (best first):`;
               recommendedProducts: allSelectedProductsForResult.length > 0 ? allSelectedProductsForResult : (bestProduct ? [bestProduct] : []),
               searchSummary,
               sessionId: `session_${Date.now()}`,
-              allAccumulatedProducts: allProducts
+              allAccumulatedProducts: allProducts,
+              suggestedKeywords: suggestedKeywords || []
             };
+            
+            console.log(`🏷️ BACKEND: Final result contains suggested keywords:`, result.suggestedKeywords);
 
             // Store the search result if a product was found
             if (bestProduct) {
@@ -2429,6 +2883,16 @@ Your top ${Math.min(10, allProducts.length)} products (best first):`;
               }
             }
 
+            // Clean up search registration and cancel timeout
+            const searchDuration = Math.round((Date.now() - activeSearches.get(token.id as string)!.timestamp) / 1000);
+            activeSearches.delete(token.id as string);
+            clearTimeout(searchTimeout);
+            console.log(`🧹 Backend: Completed search ${searchId} for user ${token.id} in ${searchDuration}s, removed from active searches`);
+            
+            if (searchDuration > 30) {
+              console.log(`⚠️ Backend: Search took ${searchDuration}s (longer than maxDuration=30s) - this may cause frontend timeout issues`);
+            }
+
             return {
               type: "product_search",
               result,
@@ -2439,6 +2903,14 @@ Your top ${Math.min(10, allProducts.length)} products (best first):`;
               }
             };
           } catch (error) {
+            // Clean up search registration on error (timeout will clean itself up)
+            const searchRecord = activeSearches.get(token.id as string);
+            if (searchRecord) {
+              const searchDuration = Math.round((Date.now() - searchRecord.timestamp) / 1000);
+              console.log(`🧹 Backend: Search failed for user ${token.id} after ${searchDuration}s, removed from active searches`);
+            }
+            activeSearches.delete(token.id as string);
+            
             console.error("Error in intelligent product search:", error);
             return {
               type: "error",
@@ -2454,5 +2926,19 @@ Your top ${Math.min(10, allProducts.length)} products (best first):`;
     },
   });
 
-  return result.toDataStreamResponse();
+    console.log("🤖 API: streamText completed, returning data stream response");
+    console.log("🤖 API: If this was a product search, we should see tool calls in the stream");
+    
+    // Add debugging to track what's being streamed back
+    const response = result.toDataStreamResponse();
+    
+    // Debug logging
+    console.log("🎯 API: Response streaming initiated - tool UIs should render based on AI's tool calls");
+    
+    return response;
+  } catch (error) {
+    console.error("🚨 API: Error in streamText call:", error);
+    console.error("🚨 API: This might be why the second search is failing");
+    throw error;
+  }
 }

@@ -92,13 +92,29 @@ const PersistentSuggestions: FC = () => {
 };
 
 const Composer: FC = () => {
+  console.log('🎯 Composer: Component rendered at', new Date().toISOString());
+  
   return (
-    <ComposerPrimitive.Root className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in">
+    <ComposerPrimitive.Root 
+      className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in"
+      onSubmit={(e) => {
+        console.log('🚀 Composer: Form submitted!', e);
+        console.log('🚀 Composer: This should trigger a new search');
+      }}
+    >
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
         placeholder="Write a message..."
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+        onChange={(e) => {
+          console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            console.log('🎯 Composer: Enter key pressed - should submit form');
+          }
+        }}
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
@@ -114,21 +130,33 @@ const ComposerAction: FC = () => {
             tooltip="Send"
             variant="default"
             className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            onClick={() => {
+              console.log('🚀 ComposerAction: Send button clicked!');
+              console.log('🚀 ComposerAction: This should trigger message sending');
+            }}
           >
             <SendHorizontalIcon />
           </TooltipIconButton>
         </ComposerPrimitive.Send>
       </ThreadPrimitive.If>
       <ThreadPrimitive.If running>
-        <ComposerPrimitive.Cancel asChild>
-          <TooltipIconButton
-            tooltip="Cancel"
-            variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
-          >
-            <CircleStopIcon />
-          </TooltipIconButton>
-        </ComposerPrimitive.Cancel>
+        {(() => {
+          console.log('🔄 ComposerAction: Assistant is RUNNING - search in progress');
+          return (
+            <ComposerPrimitive.Cancel asChild>
+              <TooltipIconButton
+                tooltip="Cancel"
+                variant="default"
+                className="my-2.5 size-8 p-2 transition-opacity ease-in"
+                onClick={() => {
+                  console.log('🛑 ComposerAction: Cancel button clicked');
+                }}
+              >
+                <CircleStopIcon />
+              </TooltipIconButton>
+            </ComposerPrimitive.Cancel>
+          );
+        })()}
       </ThreadPrimitive.If>
     </>
   );
@@ -293,11 +321,15 @@ if (typeof window !== 'undefined' && !document.getElementById('only-last-assista
       
       // Hide all but last assistant message
       const assistantMessages = viewport.querySelectorAll('.assistant-message');
+      console.log(`🎭 THREAD: Found ${assistantMessages.length} assistant messages, hiding all but last`);
+      
       assistantMessages.forEach((msg, index) => {
         if (index < assistantMessages.length - 1) {
           msg.classList.add('hidden-by-js');
+          console.log(`🎭 THREAD: Hiding assistant message ${index + 1}`);
         } else {
           msg.classList.remove('hidden-by-js');
+          console.log(`🎭 THREAD: Showing assistant message ${index + 1} (last)`);
         }
       });
     }

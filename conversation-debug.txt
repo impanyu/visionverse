@@ -1,0 +1,17 @@
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-01T22:49:46.214Z
+📊 Total messages: 19
+👤 User messages: 7
+
+📝 USER MESSAGE HISTORY:
+  [1/7] [{"type":"text","text":"a chocolate"}]
+  [2/7] [{"type":"text","text":"more expensive one"}]
+  [3/7] [{"type":"text","text":"a cheaper one"}]
+  [4/7] [{"type":"text","text":"expensive than this one"}]
+  [5/7] [{"type":"text","text":"a chocolate"}]
+  [6/7] [{"type":"text","text":"a more expensive one"}]
+  [7/7] [{"type":"text","text":"a even more expensive one"}]
+
+🔍 LATEST MESSAGE:
+  [{"type":"text","text":"a even more expensive one"}]
+
+================================================================================

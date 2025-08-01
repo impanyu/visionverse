@@ -447,12 +447,28 @@ class ProductSearchService {
               // For each Google Shopping product, fetch its offers and convert to unified format
         for (const googleProduct of googleProducts) {
           console.log(`🔍 Processing Google product: "${googleProduct.title}" (ID: ${googleProduct.product_id})`);
+          console.log(`🔍 Base product seller: ${googleProduct.seller || 'N/A'}`);
+          
           const offers = await this.getProductOffers(googleProduct.product_id);
           console.log(`📊 Offers received: ${offers.length} offers`);
+          
+          if (offers.length === 0) {
+            console.log(`⚠️ No offers found for "${googleProduct.title}" - will show as single product with seller: ${googleProduct.seller || 'N/A'}`);
+          } else {
+            console.log(`✅ Found ${offers.length} offers for "${googleProduct.title}" - will split into individual products:`);
+            offers.forEach((offer, i) => {
+              console.log(`   ${i + 1}. ${offer.seller || 'Unknown seller'} - $${offer.extracted_price || offer.price || 'N/A'}`);
+            });
+          }
           
           const unifiedProducts = this.convertGoogleShoppingToUnified(googleProduct, offers);
           allUnifiedProducts.push(...unifiedProducts);
           console.log(`✅ Created ${unifiedProducts.length} unified products from this Google product`);
+          
+          // Debug: Log the resulting products
+          unifiedProducts.forEach((product, i) => {
+            console.log(`   Product ${i + 1}: "${product.title}" - Seller: ${product.seller || 'N/A'} - Price: $${product.extracted_price || 'N/A'}`);
+          });
         }
       
       console.log(`🛒 Google Shopping: Fetched ${googleProducts.length} base products (limit: ${options.maxResults || 'unlimited'}), expanded to ${allUnifiedProducts.length} total products`);
