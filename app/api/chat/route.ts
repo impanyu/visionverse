@@ -2468,8 +2468,9 @@ ${searchResults.length > 0 ? searchResults.slice(0, 3).map((p, i) =>
 🔥 CRITICAL: GENERATE TRULY DISTINCT & COMPLEMENTARY CATEGORIES 🔥
 
 Instructions:
-1. Each subquery must serve a DIFFERENT PURPOSE/FUNCTION - no overlap! 
-2. Cover all the aspects of the original need as much as possible.
+1. Each subquery must serve a DIFFERENT PURPOSE/FUNCTION - no overlap! Different subqueries should be totally different from each other.
+2. PAY ATTENTION: cover all the aspects of the original need as thoroughly as possible!!! Do not miss any major aspect.
+3. Consinder what to eat, what to use, what to wear, what for health, what to play and etc...
 3. Think about different USE CASES, not just different adjectives
 4. Each branch should complement the others to form a complete solution
 5. Avoid semantic similarity - "waterproof mats" vs "sandproof blankets" = BAD (same function)
@@ -2554,15 +2555,31 @@ CRITICAL: Return ONLY a JSON array of 1-4 strings, no other text:
                   return { selectedProduct: null, shouldRefine: level < 3 };
                 }
 
-                                    // Check if this is a broad query that should be refined regardless of quality
-                    const broadQueryTerms = ['items', 'things', 'stuff', 'accessories', 'equipment', 'supplies', 'products', 'goods'];
-                    const isBroadQuery = broadQueryTerms.some(term => query.toLowerCase().includes(term));
-                    
-                    const prompt = `You are a product selection expert. Analyze these products for the query and decide if they're good enough or if we need to refine the search further.
+                    const prompt = `You are a product selection expert. Analyze the query and available products to decide if they're good enough or if we need to refine the search further.
 
+STEP 1 - QUERY ANALYSIS:
 Query: "${query}"
 Search Level: ${level}/3
-Query Type: ${isBroadQuery ? 'BROAD (should prefer refinement)' : 'SPECIFIC'}
+
+First, determine if this query is BROAD or SPECIFIC:
+
+A query should be considered BROAD if it:
+- Could encompass multiple different product categories (e.g., "beach day essentials" covers blankets, sunscreen, games, food storage, etc.)
+- Uses vague descriptors without specific product focus (e.g., "nice things for the garden") 
+- Asks for collections/sets of items rather than a specific product
+- Would benefit from being broken down into subcategories for better user experience
+
+A query should be considered SPECIFIC if it:
+- By common sense, it is specific enough and no need to split into subcategories
+- Clearly refers to one specific product type (e.g., "wireless bluetooth headphones")
+- Has clear product specifications or features mentioned
+- Would likely result in very similar products regardless of refinement
+
+Examples:
+- BROAD: "kitchen essentials", "camping gear", "workout equipment", "baby items", "travel accessories"
+- SPECIFIC: "wireless mouse", "running shoes", "coffee maker", "baby stroller", "laptop bag"
+
+STEP 2 - PRODUCT EVALUATION:
 Available Products: ${topProducts.length} recommended products
 
 Products to analyze:
@@ -2574,26 +2591,31 @@ ${topProducts.map((p, i) =>
      • Source: ${p.source}`
 ).join('\n\n')}
 
-Decision Criteria:
-${isBroadQuery && level === 1 ? `
-🔄 BROAD QUERY AT LEVEL 1: For broad queries like "swimming pool items", "kitchen accessories", etc., ALWAYS REFINE to break into specific categories, even if products look good. This provides better user experience through divide-and-conquer.
-- REFINE the search to break into specific subcategories
-- Only SELECT if you find an exceptionally perfect match (score ≥85 AND rating ≥4.5)
-` : `
-📍 SPECIFIC QUERY OR DEEPER LEVEL:
-- If any product has quality score ≥70 AND rating ≥4.0, SELECT the best one
-- If level = 3 (max depth), SELECT the best available product regardless of quality
-- Otherwise, REFINE the search for better results
-`}
+STEP 3 - DECISION LOGIC:
 
-CRITICAL: Return ONLY valid JSON:
-{"action": "select", "productIndex": 1} OR {"action": "refine"}`;
+For BROAD queries:
+- ✅ REFINE the search to break into specific subcategories 
+- ❌ Do NOT select any product unless it's absolutely exceptional (score ≥90 AND rating ≥4.8 AND perfectly matches the entire query scope)
+- 🎯 Goal: Divide-and-conquer approach provides users with better organized, comprehensive results
+
+For SPECIFIC queries:
+- ✅ If any product has quality score ≥70 AND rating ≥4.0, SELECT the best one
+- 🔄 If level < 3 and no good products found, REFINE for better results  
+- 🏁 If level = 3 (max depth), SELECT the best available product regardless of quality
+
+Return JSON with:
+{
+  "query_type": "BROAD" or "SPECIFIC",
+  "reasoning": "Brief explanation of your decision including query analysis",
+  "action": "select" or "refine",
+  "productIndex": 1 (if select, 1-based index, null if refine)
+}`;
 
                 const response = await openaiClient.chat.completions.create({
                   model: "gpt-4o",
                   messages: [{ role: "user", content: prompt }],
                   temperature: 0.3,
-                  max_tokens: 100
+                  max_tokens: 200
                 });
 
                 const content = response.choices[0]?.message?.content?.trim();
@@ -2606,6 +2628,11 @@ CRITICAL: Return ONLY valid JSON:
                   }
                   
                   const decision = JSON.parse(cleanJson);
+                  const queryType = decision.query_type || 'UNKNOWN';
+                  
+                  console.log(`🤖 Product Selection Model: Query classified as ${queryType}`);
+                  console.log(`🤖 Decision: ${decision.action} - ${decision.reasoning || 'No reasoning provided'}`);
+                  
                   if (decision.action === 'select' && decision.productIndex && topProducts[decision.productIndex - 1]) {
                     const selectedProduct = topProducts[decision.productIndex - 1];
                     console.log(`✅ Product Selection Model: Selected "${selectedProduct.title}" (Score: ${selectedProduct.evaluation.score})`);
@@ -2616,33 +2643,43 @@ CRITICAL: Return ONLY valid JSON:
                   }
                 }
                 
-                                    // Fallback: simple selection logic with broad query consideration
-                    const bestProduct = topProducts[0];
-                    
-                    // For broad queries at level 1, be more selective
-                    if (isBroadQuery && level === 1) {
-                      if (bestProduct.evaluation.score >= 85 && bestProduct.rating >= 4.5) {
-                        console.log(`✅ Product Selection Model (fallback): Selected exceptional product "${bestProduct.title}" for broad query`);
-                        return { selectedProduct: bestProduct, shouldRefine: false };
-                      } else {
-                        console.log(`🔄 Product Selection Model (fallback): Refining broad query "${query}" - best score: ${bestProduct.evaluation.score}`);
-                        return { selectedProduct: null, shouldRefine: level < 3 };
-                      }
-                    } else {
-                      // Standard logic for specific queries or deeper levels
-                      if (bestProduct.evaluation.score >= 70 && bestProduct.rating >= 4.0) {
-                        console.log(`✅ Product Selection Model (fallback): Selected "${bestProduct.title}"`);
-                        return { selectedProduct: bestProduct, shouldRefine: false };
-                      } else {
-                        console.log(`🔄 Product Selection Model (fallback): Should refine, best score: ${bestProduct.evaluation.score}`);
-                        return { selectedProduct: null, shouldRefine: level < 3 };
-                      }
-                    }
+                // Fallback: selection logic based on level
+                const bestProduct = topProducts[0];
+                console.log(`⚠️ Product Selection Model: JSON parsing failed, using fallback logic`);
+                
+                // Conservative fallback: assume broad at level 1, specific at deeper levels
+                const assumeBroad = level === 1;
+                
+                if (assumeBroad) {
+                  // For broad queries, be much more selective
+                  const requiredScore = level === 1 ? 90 : level === 2 ? 85 : 75;
+                  const requiredRating = level === 1 ? 4.8 : level === 2 ? 4.5 : 4.0;
+                  
+                  if (bestProduct.evaluation.score >= requiredScore && (bestProduct.rating || 0) >= requiredRating) {
+                    console.log(`✅ Product Selection Model (fallback): Assumed broad but EXCEPTIONAL product "${bestProduct.title}" (Score: ${bestProduct.evaluation.score}, Rating: ${bestProduct.rating})`);
+                    return { selectedProduct: bestProduct, shouldRefine: false };
+                  } else {
+                    console.log(`🔄 Product Selection Model (fallback): Assumed broad query "${query}" should refine (Level ${level}, Score: ${bestProduct.evaluation.score}/${requiredScore})`);
+                    return { selectedProduct: null, shouldRefine: level < 3 };
+                  }
+                } else {
+                  // For specific queries, use standard logic
+                  if (bestProduct.evaluation.score >= 70 && (bestProduct.rating || 0) >= 4.0) {
+                    console.log(`✅ Product Selection Model (fallback): Assumed specific query, selected "${bestProduct.title}" (Score: ${bestProduct.evaluation.score})`);
+                    return { selectedProduct: bestProduct, shouldRefine: false };
+                  } else {
+                    console.log(`🔄 Product Selection Model (fallback): Low quality products for assumed specific query (best: ${bestProduct.evaluation.score}), should refine`);
+                    return { selectedProduct: null, shouldRefine: level < 3 };
+                  }
+                }
               } catch (error) {
                 console.error('🚨 Product Selection Model error:', error);
-                // At level 3, always select best available
+                // At level 3, always select best available (even for broad queries)
                 if (level >= 3 && products.length > 0) {
-                  const bestProduct = products.sort((a, b) => b.evaluation.score - a.evaluation.score)[0];
+                  const bestProduct = products
+                    .filter(p => p.evaluation?.isRecommended)
+                    .sort((a, b) => b.evaluation.score - a.evaluation.score)[0] || products[0];
+                  console.log(`✅ Product Selection Model (error fallback): Max level reached, selecting best available "${bestProduct.title}"`);
                   return { selectedProduct: bestProduct, shouldRefine: false };
                 }
                 return { selectedProduct: null, shouldRefine: level < 3 };
