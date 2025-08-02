@@ -21,6 +21,9 @@ export interface SearchStep {
   // Add iteration-specific data for refresh functionality
   iterationProducts?: any[]; // Products found in this specific iteration
   allProductsUpToHere?: any[]; // Accumulated products up to this iteration
+  // Add depth-first search tracking
+  level?: number; // Search depth level (1, 2, 3)
+  searchPath?: string; // Path like "ROOT", "1", "1.2", "2.1.3" for DFS visualization
 }
 
 export interface ProductSearchResult {
@@ -1236,6 +1239,16 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                     <span className={`font-medium ${colors.textPrimary}`}>
                       {`🔍 Search ${index + 1}`}
                     </span>
+                    {step.level && (
+                      <span className={`text-xs px-2 py-1 rounded-full bg-gray-100 ${colors.textTertiary}`}>
+                        Level {step.level}
+                      </span>
+                    )}
+                    {step.searchPath && step.searchPath !== 'ROOT' && (
+                      <span className={`text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700`}>
+                        Path: {step.searchPath}
+                      </span>
+                    )}
                   </div>
                   <p className={`font-medium mb-2 ${colors.textSecondary}`}>
                     {step.keywords}
@@ -1265,163 +1278,229 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
         </div>
       )}
 
-              {/* Best Product Display - Original Styling */}
-        {(result.recommendedProducts && result.recommendedProducts.length > 0) ? (
-          <Card key={`product-${refreshKey}-${Date.now()}-${result.recommendedProducts[0]?.title?.slice(0,10) || 'no-product'}`} className={`border border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 shadow-lg hover:shadow-xl transition-all duration-300 ${
-            refreshingProduct ? 'opacity-60' : ''
-          }`}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-blue-800">Recommended Product</h3>
-              </div>
+
               
-              {/* Product Details */}
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 mr-4">
-                    <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                      {result.recommendedProducts[0].title}
-                    </h4>
-                    
-                    {/* Source Badge - Prominent Position */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        result.recommendedProducts[0].source === 'amazon' 
-                          ? 'bg-orange-100 text-orange-800 border border-orange-200' 
-                          : result.recommendedProducts[0].source === 'google_shopping'
-                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                          : 'bg-purple-100 text-purple-800 border border-purple-200'
-                      }`}>
-                        {result.recommendedProducts[0].source === 'amazon' 
-                          ? '🛒 Amazon' 
-                          : result.recommendedProducts[0].source === 'google_shopping'
-                          ? '🛍️ Google Shopping'
-                          : '🏪 Local Store'}
+              {/* Recommended Products - All Products in One Container */}
+        {(result.recommendedProducts && result.recommendedProducts.length > 0) ? (
+          (() => {
+            console.log('✅ RENDERING BUNDLE with', result.recommendedProducts.length, 'products');
+            return (
+            <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 shadow-xl">
+              <CardContent className="p-6">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                      Recommended Products Bundle
+                    </h3>
+                    <div className="flex items-center gap-4">
+                      <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                        {result.recommendedProducts.length} products
                       </span>
-                      {result.recommendedProducts[0].seller && result.recommendedProducts[0].source === 'google_shopping' && (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
-                          📍 {result.recommendedProducts[0].seller}
-                        </span>
-                      )}
-                      {result.recommendedProducts[0].is_prime && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full border border-blue-200">
-                          Prime
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center mb-2">
-                      <div className="flex items-center text-yellow-400 mr-3">
-                        <Star className="h-4 w-4 fill-current" />
-                        <span className="ml-1 text-sm font-medium text-gray-700">
-                          {result.recommendedProducts[0].rating}
+                      <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
+                        <span className="text-sm font-medium">Bundle Total: </span>
+                        <span className="text-lg font-bold">
+                          ${(() => {
+                            const total = result.recommendedProducts.reduce((sum: number, product: any) => {
+                              const price = parseFloat(product.price?.toString().replace('$', '') || '0');
+                              return sum + (isNaN(price) ? 0 : price);
+                            }, 0);
+                            return total.toFixed(2);
+                          })()}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        ({result.recommendedProducts[0].reviews?.toLocaleString()} reviews)
-                      </span>
-                    </div>
-                    
-                    <div className="text-2xl font-bold text-indigo-700 mb-3">
-                      {result.recommendedProducts[0].price?.toString().startsWith('$') 
-                        ? result.recommendedProducts[0].price 
-                        : `$${result.recommendedProducts[0].price}`}
                     </div>
                   </div>
-                  
-                  {/* Product Image */}
-                  <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
-                    {(() => {
-                      const imageUrl = result.recommendedProducts[0].thumbnail || result.recommendedProducts[0].image || 
-                                     result.recommendedProducts[0].product_photos?.[0] || result.recommendedProducts[0].images?.[0] || 
-                                     result.recommendedProducts[0].photo || result.recommendedProducts[0].img;
-                      
-                      if (imageUrl) {
-                        return (
-                          <img 
-                            src={imageUrl} 
-                            alt={result.recommendedProducts[0].title}
-                            className="w-full h-full object-cover rounded-xl"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const parent = e.currentTarget.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `
-                                  <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                                    <span class="text-gray-500 text-xs font-medium">No image</span>
-                                  </div>
-                                `;
-                              }
-                            }}
-                          />
-                        );
-                      }
-                      
-                      return (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                          <span className="text-gray-500 text-xs font-medium">No image</span>
-                        </div>
-                      );
-                    })()}
+                  <div className="text-right">
+                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200">
+                      <div className="text-xs font-medium">Curated Selection</div>
+                      <div className="text-sm">✨ Bundle Deal</div>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Evaluation Score & Reasoning */}
-                {result.recommendedProducts[0].evaluation && (
-                  <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border border-slate-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-800">AI Recommendation Score</span>
-                      <div className="flex items-center">
-                        <TrendingUp className="h-4 w-4 text-indigo-600 mr-1" />
-                        <span className="font-bold text-indigo-700">
-                          {result.recommendedProducts[0].evaluation.score}/100
+              
+              {/* Products Grid */}
+              <div className="space-y-4">
+                {result.recommendedProducts.map((product: any, index: number) => (
+                  <div key={`product-${refreshKey}-${index}-${product?.title?.slice(0,10) || 'no-product'}`} 
+                       className={`border border-gray-200 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
+                         refreshingProduct ? 'opacity-60' : ''
+                       }`}>
+                    
+                    {/* Bundle Item Header */}
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full min-w-[32px] text-center">
+                          {index + 1}
                         </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-green-600">
+                          {product.price?.toString().startsWith('$') 
+                            ? product.price 
+                            : `$${product.price}`}
+                        </div>
                       </div>
                     </div>
                     
-                    {result.recommendedProducts[0].evaluation.reasoning && (
-                      <p className="text-sm text-slate-700 mb-3 leading-relaxed">
-                        {result.recommendedProducts[0].evaluation.reasoning}
-                      </p>
-                    )}
-                    
-                    {result.recommendedProducts[0].evaluation.reasons && result.recommendedProducts[0].evaluation.reasons.length > 0 && (
-                      <div>
-                        <span className="text-xs font-medium text-slate-800 uppercase tracking-wide block mb-2">
-                          Key Features
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {result.recommendedProducts[0].evaluation.reasons.map((reason: string, index: number) => (
-                            <span 
-                              key={index} 
-                              className="inline-block bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 text-xs px-3 py-1.5 rounded-full border border-violet-300 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-                            >
-                              {reason}
+                                        {/* Product Details */}
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 mr-4">
+                          <h4 className="font-medium text-gray-900 mb-3 line-clamp-2 text-lg">
+                            {product.title}
+                          </h4>
+                          
+                          {/* Source Badge and Rating */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                              product.source === 'amazon' 
+                                ? 'bg-orange-100 text-orange-800 border border-orange-200' 
+                                : product.source === 'google_shopping'
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : 'bg-purple-100 text-purple-800 border border-purple-200'
+                            }`}>
+                              {product.source === 'amazon' 
+                                ? '🛒 Amazon' 
+                                : product.source === 'google_shopping'
+                                ? '🛍️ Google Shopping'
+                                : '🏪 Local Store'}
                             </span>
-                          ))}
+                            {product.seller && product.source === 'google_shopping' && (
+                              <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
+                                📍 {product.seller}
+                              </span>
+                            )}
+                            {product.is_prime && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full border border-blue-200">
+                                Prime
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Source Query Badge */}
+                          {(product as any).sourceQuery && (
+                            <div className="mb-3">
+                              <span className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full border border-indigo-200">
+                                🔍 From: {(product as any).sourceQuery} (Level {(product as any).sourceLevel})
+                              </span>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center mb-3">
+                            <div className="flex items-center text-yellow-400 mr-3">
+                              <Star className="h-4 w-4 fill-current" />
+                              <span className="ml-1 text-sm font-medium text-gray-700">
+                                {product.rating}
+                              </span>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              ({product.reviews?.toLocaleString()} reviews)
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Product Image */}
+                        <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
+                          {(() => {
+                            const imageUrl = product.thumbnail || product.image || 
+                                           product.product_photos?.[0] || product.images?.[0] || 
+                                           product.photo || product.img;
+                            
+                            if (imageUrl) {
+                              return (
+                                <img 
+                                  src={imageUrl} 
+                                  alt={product.title}
+                                  className="w-full h-full object-cover rounded-xl"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `
+                                        <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                                          <span class="text-gray-500 text-xs font-medium">No image</span>
+                                        </div>
+                                      `;
+                                    }
+                                  }}
+                                />
+                              );
+                            }
+                            
+                            return (
+                              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                                <span className="text-gray-500 text-xs font-medium">No image</span>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Evaluation Score & Reasoning */}
+                    {product.evaluation && (
+                        <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-slate-800">AI Recommendation Score</span>
+                            <div className="flex items-center">
+                              <TrendingUp className="h-4 w-4 text-indigo-600 mr-1" />
+                              <span className="font-bold text-indigo-700">
+                                {product.evaluation.score}/100
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {product.evaluation.reasoning && (
+                            <p className="text-sm text-slate-700 mb-3 leading-relaxed">
+                              {product.evaluation.reasoning}
+                            </p>
+                          )}
+                          
+                          {product.evaluation.reasons && product.evaluation.reasons.length > 0 && (
+                            <div>
+                              <span className="text-xs font-medium text-slate-800 uppercase tracking-wide block mb-2">
+                                Key Features
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {product.evaluation.reasons.map((reason: string, reasonIndex: number) => (
+                                  <span 
+                                    key={reasonIndex} 
+                                    className="inline-block bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 text-xs px-3 py-1.5 rounded-full border border-violet-300 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+                                  >
+                                    {reason}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    
+                    {/* Action Button */}
+                    {product.link && (
+                      <Button 
+                        onClick={() => product.link && window.open(product.link, '_blank')}
+                        className="w-full mt-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Product
+                      </Button>
                     )}
                   </div>
-                )}
-                
-                {/* Action Button */}
-                {result.recommendedProducts[0].link && (
-                  <Button 
-                    onClick={() => result.recommendedProducts?.[0]?.link && window.open(result.recommendedProducts[0].link, '_blank')}
-                    className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Product
-                  </Button>
-                )}
-              </div>
+              ))}
+            </div>
             </CardContent>
           </Card>
+            );
+          })()
         ) : result.recommendedProduct && (
-        <Card key={`product-${refreshKey}-${Date.now()}-${result.recommendedProduct?.title?.slice(0,10) || 'no-product'}`} className={`border border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 shadow-sm hover:shadow-md transition-shadow duration-200 ${
-          refreshingProduct ? 'opacity-60' : ''
-        }`}>
+          (() => {
+            console.log('⚠️ FALLING BACK TO SINGLE PRODUCT SECTION');
+            return (
+            <Card key={`product-${refreshKey}-${Date.now()}-${result.recommendedProduct?.title?.slice(0,10) || 'no-product'}`} className={`border border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 shadow-sm hover:shadow-md transition-shadow duration-200 ${
+              refreshingProduct ? 'opacity-60' : ''
+            }`}>
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-green-800">Recommended Product</h3>
@@ -1488,6 +1567,15 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                       )}
                     </div>
                     
+                    {/* Source Query Badge */}
+                    {(result.recommendedProduct as any).sourceQuery && (
+                      <div>
+                        <span className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full border border-indigo-200">
+                          🔍 From: {(result.recommendedProduct as any).sourceQuery} (Level {(result.recommendedProduct as any).sourceLevel})
+                        </span>
+                      </div>
+                    )}
+                    
                     <div className="flex items-center gap-4">
                       {result.recommendedProduct.rating && (
                         <div className="flex items-center gap-1">
@@ -1550,6 +1638,8 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
               )}
             </CardContent>
           </Card>
+            );
+          })()
         )}
 
 
@@ -1613,13 +1703,37 @@ export const ProductSearchToolUI = makeAssistantToolUI<
     }
 
     console.log('✅ ProductSearchToolUI: result received:', result);
+    console.log('🔍 Result type:', typeof result);
+    console.log('🔍 Result keys:', Object.keys(result || {}));
+    console.log('🔍 Has result.result:', !!result.result);
+    console.log('🔍 Has result.originalQuery:', !!(result as any).originalQuery);
+    console.log('🔍 result.result type:', typeof result.result);
+    console.log('🔍 result.result keys:', Object.keys(result.result || {}));
     
+    // Check if this is an error response from the backend
+    if ((result as any).type === 'error') {
+      console.error('🚨 ProductSearchToolUI: Backend returned error:', result);
+      const errorMessage = result.ui?.description || 'Product search failed';
+      return (
+        <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">!</span>
+            </div>
+            <h3 className="text-red-700 font-semibold">Product Search Failed</h3>
+          </div>
+          <p className="text-red-600 text-sm">{errorMessage}</p>
+          <p className="text-red-500 text-xs mt-2">Please try searching again in a few moments.</p>
+        </div>
+      );
+    }
+
     // The assistant-ui library passes the tool return object as result
     // Backend returns: { type: "product_search", result: ProductSearchResult, ui: {...} }
-    // So the actual ProductSearchResult is in the top-level result, not result.result
+    // So the actual ProductSearchResult is in result.result
     let productSearchResult: any;
     
-    if (result.result) {
+    if (result.result && typeof result.result === 'object') {
       // New structure: result contains the tool return object
       productSearchResult = result.result;
       console.log('🔍 Using result.result structure');
@@ -1629,7 +1743,7 @@ export const ProductSearchToolUI = makeAssistantToolUI<
       console.log('🔍 Using direct result structure');
     } else {
       console.error('🚨 ProductSearchToolUI: Cannot find ProductSearchResult in result structure');
-      console.error('🔍 Full result object received:', result);
+      console.error('🔍 Full result object received:', JSON.stringify(result, null, 2));
       return <div className="p-4 text-red-600">Error: No search results data found</div>;
     }
 

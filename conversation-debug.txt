@@ -1,17 +1,12 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-01T22:49:46.214Z
-📊 Total messages: 19
-👤 User messages: 7
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-02T02:07:17.853Z
+📊 Total messages: 4
+👤 User messages: 2
 
 📝 USER MESSAGE HISTORY:
-  [1/7] [{"type":"text","text":"a chocolate"}]
-  [2/7] [{"type":"text","text":"more expensive one"}]
-  [3/7] [{"type":"text","text":"a cheaper one"}]
-  [4/7] [{"type":"text","text":"expensive than this one"}]
-  [5/7] [{"type":"text","text":"a chocolate"}]
-  [6/7] [{"type":"text","text":"a more expensive one"}]
-  [7/7] [{"type":"text","text":"a even more expensive one"}]
+  [1/2] [{"type":"text","text":"i want to have picnic in the park"}]
+  [2/2] [{"type":"text","text":"i want to go the the beach and stay for 1 day, what should i prepare?"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"a even more expensive one"}]
+  [{"type":"text","text":"i want to go the the beach and stay for 1 day, what should i prepare?"}]
 
 ================================================================================
