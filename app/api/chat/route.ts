@@ -2212,7 +2212,7 @@ Examples:
                   
                   const geminiPrompt = `Query: "${query}"
 
-You will help the user to make a shopping plan for the query. 
+You will help the user to make a plan for the query. 
 
 TASK: Based on my need: ${query}, 
 

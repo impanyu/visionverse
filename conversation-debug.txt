@@ -1,13 +1,9 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-05T19:26:01.557Z
-📊 Total messages: 13
-👤 User messages: 5
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-05T19:42:23.212Z
+📊 Total messages: 1
+👤 User messages: 1
 
 📝 USER MESSAGE HISTORY:
-  [1/5] [{"type":"text","text":"i want to find someone to clean my house in LA"}]
-  [2/5] [{"type":"text","text":"i want a chocolate"}]
-  [3/5] [{"type":"text","text":"i want to go to resteraunt"}]
-  [4/5] [{"type":"text","text":"i want to go to resteraunt"}]
-  [5/5] [{"type":"text","text":"add a product"}]
+  [1/1] [{"type":"text","text":"add a product"}]
 
 🔍 LATEST MESSAGE:
   [{"type":"text","text":"add a product"}]

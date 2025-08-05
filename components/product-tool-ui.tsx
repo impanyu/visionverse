@@ -435,7 +435,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
               {result.ui_components.title}
             </CardTitle>
             <CardDescription>
-              Describe your idea and optionally add a product URL. With a URL, we'll create a product. Without a URL, we'll create a vision.
+              Describe your product and optionally add a product URL for additional information.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -466,10 +466,10 @@ export const ProductFormToolUI = makeAssistantToolUI<
                   value={formData.url}
                   onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/product-page (leave empty to create a vision)"
+                  placeholder="https://example.com/product-page"
                 />
                 <p className="text-xs text-gray-500">
-                  💡 <strong>Tip:</strong> If you don't provide a URL, you'll create a virtual product
+                  💡 <strong>Tip:</strong> Add a URL to link to an existing product page, or leave empty for a custom product
                 </p>
               </div>
 
