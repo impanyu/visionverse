@@ -2,11 +2,11 @@ import { getToken } from "next-auth/jwt";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { ProductDocument, CreateProductRequest, CreateProductResponse, GetProductsResponse } from "@/types/product";
-import { VisionDocument } from "@/types/vision";
+
 import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
-import { storeProductEmbedding, deleteProductEmbedding, findSimilarVisionsForProduct, findSimilarProductsForVision } from "@/lib/vector-db";
+import { storeProductEmbedding, deleteProductEmbedding } from "@/lib/vector-db";
 
 export const maxDuration = 30;
 
@@ -59,10 +59,8 @@ export async function POST(req: Request) {
         isFileInstance: file instanceof File
       });
       
-      if (!urlStr || !urlStr.trim()) {
-        return new Response("URL is required", { status: 400 });
-      }
-      url = urlStr.trim();
+      // URL is optional for product creation
+      url = urlStr?.trim() || "";
       
       // Parse price if provided
       if (priceStr && priceStr.trim()) {
@@ -106,10 +104,8 @@ export async function POST(req: Request) {
       productDescription = jsonData.productDescription;
       filePath = jsonData.filePath || "/no-file";
       
-      if (!jsonData.url || !jsonData.url.trim()) {
-        return new Response("URL is required", { status: 400 });
-      }
-      url = jsonData.url.trim();
+      // URL is optional for product creation
+      url = jsonData.url?.trim() || "";
       
       // Parse price if provided in JSON
       if ((jsonData as any).price !== undefined) {
@@ -130,135 +126,15 @@ export async function POST(req: Request) {
       return new Response("Product description is required and must be a string", { status: 400 });
     }
 
-    // Validate URL (now required)
-    if (!url || typeof url !== 'string' || !url.trim()) {
-      return new Response("URL is required and must be a non-empty string", { status: 400 });
+    // URL is optional but if provided, must be a string
+    if (url && typeof url !== 'string') {
+      return new Response("URL must be a string if provided", { status: 400 });
     }
 
     // Connect to MongoDB
     const client = await clientPromise;
     const db = client.db("visionverse");
     const productCollection = db.collection<ProductDocument>("products");
-    const visionCollection = db.collection<VisionDocument>("visions");
-
-    // VISION LINKING: Find similar visions and check if this product would be in top 3
-    let linkedVision: { [visionId: string]: number } | undefined;
-    let linkedVisionInfo: { id: string; visionDescription: string; similarityScore: number } | undefined;
-    
-    console.log(`🔍 Searching for similar visions for product: "${productDescription.trim()}"`);
-    console.log(`🔍 User ID: ${token.id} (searching across ALL users)`);
-    
-    // Debug: Check how many visions this user has in MongoDB vs all visions
-    const userVisionsInMongo = await visionCollection.countDocuments({ userId: token.id as string });
-    const totalVisionsInMongo = await visionCollection.countDocuments({});
-    console.log(`📊 User has ${userVisionsInMongo} visions in MongoDB`);
-    console.log(`📊 Total visions in MongoDB: ${totalVisionsInMongo}`);
-    
-    try {
-      // Check total embeddings in vector DB
-      const { debugAllEmbeddings } = await import('@/lib/vector-db');
-      const embeddingData = await debugAllEmbeddings();
-      console.log(`📊 Total embeddings in vector DB: ${embeddingData?.ids?.length || 0}`);
-    } catch (debugError) {
-      console.log(`⚠️ Could not check vector DB: ${debugError}`);
-    }
-    
-    try {
-      // Search for similar visions using vector database
-      const vectorResults = await findSimilarVisionsForProduct(
-        productDescription.trim(),
-        token.id as string,
-        10 // Get top 10 similar visions to have more candidates
-      );
-
-      console.log(`🔍 Vector search results:`, {
-        foundResults: vectorResults.ids[0]?.length || 0,
-        ids: vectorResults.ids[0],
-        distances: vectorResults.distances?.[0],
-        documents: vectorResults.documents?.[0]
-      });
-
-      // Check if we found any similar visions
-      if (vectorResults.ids[0] && vectorResults.ids[0].length > 0 && vectorResults.distances && vectorResults.distances[0]) {
-        const linkedVisionMap: { [visionId: string]: number } = {};
-        
-        // Process each similar vision
-        for (let i = 0; i < vectorResults.ids[0].length; i++) {
-          const visionId = vectorResults.ids[0][i];
-          const distance = vectorResults.distances[0][i];
-          
-          // Convert ChromaDB's squared L2 distance to cosine similarity
-          // For normalized embeddings: squared_L2 = 2 * (1 - cosine_similarity)
-          // So: cosine_similarity = 1 - (squared_L2 / 2)
-          const similarityScore = 1 - (distance / 2);
-          
-          console.log(`🔍 Processing vision ${visionId}, similarity: ${similarityScore.toFixed(3)}`);
-          
-          // Only consider visions with similarity >= 0.5
-          if (similarityScore >= 0.5) {
-            // Get the vision document from MongoDB to check its current linkedProducts
-            const existingVision = await visionCollection.findOne({ 
-              _id: new ObjectId(visionId)
-            });
-            
-            if (existingVision) {
-              console.log(`📄 Vision ${visionId} found in MongoDB`);
-              
-              // Get current linked products for this vision
-              const currentLinkedProducts = existingVision.linkedProducts || {};
-              console.log(`📊 Vision ${visionId} has ${Object.keys(currentLinkedProducts).length} linked products`);
-              
-              // Create a temporary map including this new product
-              const tempLinkedProducts = { ...currentLinkedProducts };
-              tempLinkedProducts[`temp_${Date.now()}`] = similarityScore; // Use temp ID for new product
-              
-              // Sort by similarity score (highest first) and check if new product is in top 3
-              const sortedProducts = Object.entries(tempLinkedProducts)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 3);
-              
-              console.log(`🔍 Top 3 products for vision ${visionId}:`, sortedProducts.map(([id, score]) => `${id}: ${score.toFixed(3)}`));
-              
-              // Check if the new product (with temp ID) is in the top 3
-              const isInTop3 = sortedProducts.some(([id]) => id.startsWith('temp_'));
-              
-              if (isInTop3) {
-                console.log(`✅ Product will be in top 3 for vision ${visionId} - adding to linking list`);
-                linkedVisionMap[visionId] = similarityScore;
-                
-                // Set the first valid vision as the primary linked vision for UI display
-                if (!linkedVisionInfo) {
-                  linkedVisionInfo = {
-                    id: visionId,
-                    visionDescription: existingVision.visionDescription,
-                    similarityScore: similarityScore
-                  };
-                }
-              } else {
-                console.log(`❌ Product would not be in top 3 for vision ${visionId} - skipping`);
-              }
-            } else {
-              console.log(`❌ Vision ${visionId} not found in MongoDB`);
-            }
-          } else {
-            console.log(`❌ Similarity score ${similarityScore.toFixed(3)} is below threshold 0.5 for vision ${visionId}`);
-          }
-        }
-        
-        // Set the linkedVision if we found any valid connections
-        if (Object.keys(linkedVisionMap).length > 0) {
-          linkedVision = linkedVisionMap;
-          console.log(`🔗 Product will be linked to ${Object.keys(linkedVisionMap).length} visions:`, Object.keys(linkedVisionMap));
-        } else {
-          console.log(`❌ No visions found where product would be in top 3`);
-        }
-      } else {
-        console.log(`❌ No similar visions found for product (searched across all users)`);
-      }
-    } catch (searchError) {
-      console.error("❌ Error during vision linking:", searchError);
-      // Continue with creation if search fails
-    }
 
     // Insert product into MongoDB
     const productData: Omit<ProductDocument, '_id'> = {
@@ -270,8 +146,6 @@ export async function POST(req: Request) {
       url: url.trim(),
       price: price, // Include price in cents
       onSale: false, // Default to false
-      linkedVision: linkedVision || {}, // Always initialize as empty object
-      clicks: {}, // Initialize clicks as empty object
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -306,95 +180,7 @@ export async function POST(req: Request) {
       // Continue without vector storage if it fails
     }
 
-    // Update the linked visions to include this product in their linkedProducts dictionary
-    if (linkedVision) {
-      for (const visionId in linkedVision) {
-        try {
-          const newProductSimilarity = linkedVision[visionId];
-          
-          // Get the current vision document to check existing linkedProducts
-          const currentVision = await visionCollection.findOne({ _id: new ObjectId(visionId) });
-          
-          if (currentVision) {
-            const currentLinkedProducts = currentVision.linkedProducts || {};
-            const newLinkedProducts = { ...currentLinkedProducts };
-            
-            // Add the new product
-            newLinkedProducts[productId] = newProductSimilarity;
-            
-            // Sort by similarity score (highest first) and keep only top 3
-            const sortedProducts = Object.entries(newLinkedProducts)
-              .sort(([, a], [, b]) => b - a)
-              .slice(0, 3);
-            
-            // Create the final linkedProducts object with only top 3
-            const finalLinkedProducts: { [productId: string]: number } = {};
-            sortedProducts.forEach(([id, score]) => {
-              finalLinkedProducts[id] = score;
-            });
-            
-            // Check if any products were evicted
-            const evictedProducts = Object.keys(newLinkedProducts).filter(
-              id => !finalLinkedProducts.hasOwnProperty(id)
-            );
-            
-            if (evictedProducts.length > 0) {
-              console.log(`🔄 Vision ${visionId}: Evicted ${evictedProducts.length} product(s) with lower similarity scores:`, evictedProducts);
-              
-              // Update the evicted products to remove this vision from their linkedVision
-              for (const evictedProductId of evictedProducts) {
-                try {
-                  await productCollection.updateOne(
-                    { _id: new ObjectId(evictedProductId) },
-                    { $unset: { [`linkedVision.${visionId}`]: "" } }
-                  );
-                  console.log(`🔄 Removed vision ${visionId} from evicted product ${evictedProductId}'s linkedVision`);
-                } catch (evictError) {
-                  console.error(`❌ Error updating evicted product ${evictedProductId}:`, evictError);
-                }
-              }
-            }
-            
-            // Update the vision with the final top 3 products
-            await visionCollection.updateOne(
-              { _id: new ObjectId(visionId) },
-              { $set: { linkedProducts: finalLinkedProducts } }
-            );
-            
-            // Initialize clicks for any new products that don't have click tracking yet
-            const vision = await visionCollection.findOne({ _id: new ObjectId(visionId) });
-            if (vision) {
-              const currentClicks = vision.clicks || {};
-              let clicksUpdated = false;
-              
-              // Add clicks entry for any product that doesn't have one
-              for (const productId in finalLinkedProducts) {
-                if (!(productId in currentClicks)) {
-                  currentClicks[productId] = 0;
-                  clicksUpdated = true;
-                }
-              }
-              
-              // Update clicks if new products were added
-              if (clicksUpdated) {
-                await visionCollection.updateOne(
-                  { _id: new ObjectId(visionId) },
-                  { $set: { clicks: currentClicks } }
-                );
-                console.log(`✅ Updated clicks tracking for vision ${visionId}, products: ${Object.keys(currentClicks)}`);
-              }
-            }
-            
-            console.log(`✅ Updated vision ${visionId} linkedProducts:`, Object.keys(finalLinkedProducts).map(id => `${id}: ${finalLinkedProducts[id].toFixed(3)}`));
-          } else {
-            console.error(`❌ Vision ${visionId} not found when trying to update linkedProducts`);
-          }
-        } catch (error) {
-          console.error(`❌ Error updating vision ${visionId}'s linkedProducts:`, error);
-          // Continue even if this fails
-        }
-      }
-    }
+    // Vision linking removed - products are now created independently
 
     // Return the created product
     const response: CreateProductResponse = {
@@ -405,7 +191,6 @@ export async function POST(req: Request) {
         ...productData,
         vectorId,
       },
-      linkedVision: linkedVisionInfo,
     };
 
     return Response.json(response);

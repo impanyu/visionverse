@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Store, Plus, Package } from "lucide-react";
+import { LogOut, User, Plus, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useThread, useComposer, ThreadPrimitive } from "@assistant-ui/react";
 import { VisionCreationToolUI, VisionCreationDirectToolUI, ListMyVisionsToolUI, SearchMyVisionsToolUI, SearchAllVisionsToolUI, DeleteVisionWithListToolUI, VisionCreatedWithListToolUI, VisionDuplicateFoundToolUI, ShowVisionToolUI } from "@/components/vision-creation-tool-ui";
@@ -23,7 +23,7 @@ import {
   ProductDeletedWithListToolUI,
   ShowProductToolUI 
 } from "@/components/product-tool-ui";
-import { ShopManagementUI, ManageShopsToolUI } from "@/components/shop-management-ui";
+
 import { ProductSearchToolUI } from "@/components/product-search-ui";
 
 function ThreadWrapper({ onUserMessageChange }: { onUserMessageChange: (message: string) => void }) {
@@ -80,13 +80,7 @@ export default function AssistantPage() {
     api: "/api/chat",
   });
 
-  const handleManageShops = () => {
-    // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
-    const hiddenButton = document.getElementById('hidden-manage-shops-suggestion');
-    if (hiddenButton) {
-      hiddenButton.click();
-    }
-  };
+
 
   const handleAddProduct = () => {
     // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
@@ -153,7 +147,7 @@ export default function AssistantPage() {
       <ProductsListToolUI />
       <ProductDeletedWithListToolUI />
       <ShowProductToolUI />
-      <ManageShopsToolUI />
+
       <ProductSearchToolUI />
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
@@ -204,10 +198,7 @@ export default function AssistantPage() {
                     <Package className="mr-2 h-4 w-4" />
                     <span>manage my products</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleManageShops}>
-                    <Store className="mr-2 h-4 w-4" />
-                    <span>manage my shops</span>
-                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -222,14 +213,7 @@ export default function AssistantPage() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-      {/* Hidden suggestion button for manage shops */}
-      <ThreadPrimitive.Suggestion
-        id="hidden-manage-shops-suggestion"
-        prompt="manage my shops"
-        method="replace"
-        autoSend={true}
-        style={{ display: 'none' }}
-      />
+
       
       {/* Hidden suggestion button for add product */}
       <ThreadPrimitive.Suggestion

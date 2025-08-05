@@ -1,20 +1,15 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-05T02:41:13.489Z
-📊 Total messages: 28
-👤 User messages: 10
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-05T19:26:01.557Z
+📊 Total messages: 13
+👤 User messages: 5
 
 📝 USER MESSAGE HISTORY:
-  [1/10] [{"type":"text","text":"I want to go to india"}]
-  [2/10] [{"type":"text","text":"i want to hang out with my girlfriend at the sea beach"}]
-  [3/10] [{"type":"text","text":"i want to buy a chocolate"}]
-  [4/10] [{"type":"text","text":"i want to study in the library for a whole day"}]
-  [5/10] [{"type":"text","text":"i want a chocolate"}]
-  [6/10] [{"type":"text","text":"i want a chocloate"}]
-  [7/10] [{"type":"text","text":"i want a chocolate"}]
-  [8/10] [{"type":"text","text":"i want a chocolate"}]
-  [9/10] [{"type":"text","text":"i want a unbrella"}]
-  [10/10] [{"type":"text","text":"i want some snacks"}]
+  [1/5] [{"type":"text","text":"i want to find someone to clean my house in LA"}]
+  [2/5] [{"type":"text","text":"i want a chocolate"}]
+  [3/5] [{"type":"text","text":"i want to go to resteraunt"}]
+  [4/5] [{"type":"text","text":"i want to go to resteraunt"}]
+  [5/5] [{"type":"text","text":"add a product"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want some snacks"}]
+  [{"type":"text","text":"add a product"}]
 
 ================================================================================

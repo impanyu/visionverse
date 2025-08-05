@@ -106,27 +106,22 @@ export const ProductFormToolUI = makeAssistantToolUI<
         setIsSubmitting(true);
         setError("");
 
-        // Check if URL is provided to determine which API to call
+        // Always create product when using this form (form was triggered by create_product_form tool)
         const hasUrl = formData.url.trim().length > 0;
+        const isProductCreation = true; // This form is specifically for product creation
         
-        console.log('🔀 ROUTING DECISION:', hasUrl ? 'CREATE PRODUCT (URL provided)' : 'CREATE VISION (no URL)');
+        console.log('🔀 ROUTING DECISION: CREATE PRODUCT (product creation form)', hasUrl ? 'with URL' : 'without URL');
 
         // Create FormData for file upload
         const formDataToSend = new FormData();
         
+        // Always create product in this form
+        formDataToSend.append("productDescription", formData.productDescription);
         if (hasUrl) {
-          // Create Product - use existing field names
-          formDataToSend.append("productDescription", formData.productDescription);
           formDataToSend.append("url", formData.url.trim());
-          if (formData.price.trim()) {
-            formDataToSend.append("price", formData.price.trim());
-          }
-        } else {
-          // Create Vision - use vision API field names
-          formDataToSend.append("visionDescription", formData.productDescription);
-          if (formData.price.trim()) {
-            formDataToSend.append("price", formData.price.trim());
-          }
+        }
+        if (formData.price.trim()) {
+          formDataToSend.append("price", formData.price.trim());
         }
         
         console.log('🔍 FRONTEND SUBMIT: Current formData.imageFile:', {
@@ -154,11 +149,11 @@ export const ProductFormToolUI = makeAssistantToolUI<
           }
         }
 
-        if (hasUrl) {
+        if (isProductCreation) {
           // Product creation - use AI chat to trigger proper tool
           const productData = {
             role: 'user',
-            content: `create product directly: ${formData.productDescription}${formData.price ? ` (price: $${formData.price})` : ''}`
+            content: `create product directly: ${formData.productDescription}${formData.price ? ` (price: $${formData.price})` : ''}${hasUrl ? ` (url: ${formData.url})` : ''}`
           };
 
           const chatResponse = await fetch('/api/chat', {
@@ -210,8 +205,8 @@ export const ProductFormToolUI = makeAssistantToolUI<
           console.log('🔄 AI flow failed, falling back to direct API');
         }
 
-        // Call appropriate API endpoint (fallback or vision creation)
-        const apiEndpoint = hasUrl ? "/api/create_product" : "/api/create_vision";
+        // Call appropriate API endpoint (always product creation for this form)
+        const apiEndpoint = "/api/create_product";
         console.log('🎯 CALLING API:', apiEndpoint);
 
         const response = await fetch(apiEndpoint, {
@@ -223,60 +218,35 @@ export const ProductFormToolUI = makeAssistantToolUI<
         if (response.ok) {
           const result = await response.json();
           
-          // Fetch updated list based on what was created
+          // Fetch updated product list since we always create products in this form
           try {
-            if (hasUrl) {
-              // Product was created - fetch product list
-              const productListResponse = await fetch("/api/create_product", {
-                method: "GET",
-                credentials: "include",
-              });
+            // Product was created - fetch product list
+            const productListResponse = await fetch("/api/create_product", {
+              method: "GET",
+              credentials: "include",
+            });
+            
+            if (productListResponse.ok) {
+              const productListData = await productListResponse.json();
               
-              if (productListResponse.ok) {
-                const productListData = await productListResponse.json();
-                
-                // Set the result to include the product list
-                setSubmitResult({
-                  ...result,
-                  products: productListData.products || [],
-                  type: 'product'
-                });
-              } else {
-                // If product list fetch fails, just show the success message
-                setSubmitResult({...result, type: 'product'});
-              }
+              // Set the result to include the product list
+              setSubmitResult({
+                ...result,
+                products: productListData.products || [],
+                type: 'product'
+              });
             } else {
-              // Vision was created - fetch vision list (if endpoint exists)
-              try {
-                const visionListResponse = await fetch("/api/create_vision", {
-                  method: "GET",
-                  credentials: "include",
-                });
-                
-                if (visionListResponse.ok) {
-                  const visionListData = await visionListResponse.json();
-                  
-                  setSubmitResult({
-                    ...result,
-                    visions: visionListData.visions || [],
-                    type: 'vision'
-                  });
-                } else {
-                  setSubmitResult({...result, type: 'vision'});
-                }
-              } catch {
-                // Vision list endpoint might not exist, just show success
-                setSubmitResult({...result, type: 'vision'});
-              }
+              // If product list fetch fails, just show the success message
+              setSubmitResult({...result, type: 'product'});
             }
           } catch (listError) {
-            console.error("Error fetching list:", listError);
+            console.error("Error fetching product list:", listError);
             // If list fetch fails, just show the success message
-            setSubmitResult({...result, type: hasUrl ? 'product' : 'vision'});
+            setSubmitResult({...result, type: 'product'});
           }
         } else {
           const errorText = await response.text();
-          setError(`Failed to create ${hasUrl ? 'product' : 'vision'}: ${errorText}`);
+          setError(`Failed to create product: ${errorText}`);
         }
       } catch (err) {
         setError(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -698,23 +668,7 @@ function ProductCreatedWithListToolUIComponent({ args }: { args: ProductCreatedW
             </div>
           )}
           
-          {/* Vision Linking Display */}
-          {linkedVision && (
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <ThreadPrimitive.Suggestion
-                prompt={`show vision ${linkedVision.id}`}
-                method="replace"
-                autoSend={true}
-                className="font-semibold text-blue-800 hover:text-blue-900 cursor-pointer underline mb-1 block"
-              >
-                🔗 Linked to Vision:
-              </ThreadPrimitive.Suggestion>
-              <p className="text-sm text-blue-700 mb-1">{linkedVision.visionDescription}</p>
-              <p className="text-xs text-blue-600">
-                Similarity: {(linkedVision.similarityScore * 100).toFixed(1)}%
-              </p>
-            </div>
-          )}
+
         </div>
       </div>
 
@@ -1336,86 +1290,7 @@ function ShowProductToolUIComponent({ args, result, status }: { args: ShowProduc
               </div>
             )}
 
-            {/* Linked Vision Section - Moved to bottom */}
-            {product.linkedVision && Object.keys(product.linkedVision).length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Linked Visions ({Object.keys(product.linkedVision).length})
-                  {product.clicks && Object.keys(product.clicks).length > 0 && (
-                    <span className="ml-2 text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                      {Object.values(product.clicks).reduce((sum: number, count: number) => sum + count, 0)} total clicks
-                    </span>
-                  )}
-                </h3>
-                <div className="space-y-4">
-                  {Object.entries(product.linkedVision).map(([visionId, similarityScore]) => {
-                    const vision = visionDetails[visionId];
-                    const isLoading = loadingVisions[visionId];
-                    
-                    // Trigger fetch if not already loaded
-                    if (!vision && !isLoading) {
-                      fetchVisionDetails(visionId);
-                    }
 
-                    return (
-                      <div key={visionId} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <Eye className="h-5 w-5 text-blue-600" />
-                            <span className="font-medium text-blue-900">
-                              {vision ? vision.visionDescription : isLoading ? 'Loading...' : `Vision ${visionId.slice(-8)}`}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                              {(similarityScore * 100).toFixed(1)}% match
-                            </span>
-                            {product.clicks && product.clicks[visionId] !== undefined && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                                {product.clicks[visionId]} clicks from this vision
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {vision && (
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">
-                              By {vision.userName} • {new Date(vision.createdAt).toLocaleDateString()}
-                            </p>
-                            
-                            {vision.filePath && vision.filePath !== "/no-file" && isImageFile(vision.filePath) && (() => {
-                              const visionFileUrl = getFileUrl(vision.filePath);
-                              return visionFileUrl ? (
-                                <div className="mt-2">
-                                  <img
-                                    src={visionFileUrl}
-                                    alt="Vision"
-                                    className="w-20 h-20 object-cover rounded border"
-                                  />
-                                </div>
-                              ) : null;
-                            })()}
-                          </div>
-                        )}
-                        
-                        <div className="mt-3 flex gap-2">
-                          <ThreadPrimitive.Suggestion
-                            prompt={`show vision ${visionId}`}
-                            method="replace"
-                            autoSend={true}
-                            className="px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 text-sm shadow-md hover:shadow-lg"
-                          >
-                            View Vision Details
-                          </ThreadPrimitive.Suggestion>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4 border-t">
@@ -1462,8 +1337,6 @@ interface ExpandableProductCardProps {
 
 function ExpandableProductCard({ product, isNewlyCreated = false }: ExpandableProductCardProps) {
   const [isExpanded, setIsExpanded] = useState(isNewlyCreated);
-  const [visionDetails, setVisionDetails] = useState<{ [visionId: string]: any }>({});
-  const [loadingVisions, setLoadingVisions] = useState<{ [visionId: string]: boolean }>({});
   
   // Add state for current user
   const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -1661,7 +1534,7 @@ function ExpandableProductCard({ product, isNewlyCreated = false }: ExpandablePr
           </div>
 
           {/* Linked Visions Section - Enhanced for Expanded View */}
-          {product.linkedVision && Object.keys(product.linkedVision).length > 0 && (
+          {false && (
             <div className="mt-6 pt-4 border-t border-gray-200">
               <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <Eye className="h-5 w-5 text-blue-600" />

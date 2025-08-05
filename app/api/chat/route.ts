@@ -414,8 +414,7 @@ export async function POST(req: Request) {
     forcedTool = 'list_my_products';
   } else if (userMessage.includes('create product') || userMessage.includes('create a product') || userMessage.includes('new product') || userMessage.includes('add product') || userMessage.includes('add a product')) {
     forcedTool = 'create_product_form';
-  } else if (userMessage.includes('manage my shops') || userMessage.includes('manage shops') || userMessage.includes('my shops')) {
-    forcedTool = 'manage_my_shops';
+
   } else {
     // Default behavior: treat as product search if not explicitly asking for other tools
     const visionKeywords = ['vision', 'idea', 'dream', 'concept', 'design'];
@@ -473,13 +472,11 @@ TOOL USAGE RULES:
 
 6. When the user asks to list/show their products, IMMEDIATELY use list_my_products - DO NOT generate any text
 
-7. When the user asks to manage their shops, IMMEDIATELY use manage_my_shops - DO NOT generate any text
-
-8. When the user searches for products, IMMEDIATELY use intelligent_product_search with their original query without any change. 
+7. When the user searches for products, IMMEDIATELY use intelligent_product_search, just input the user's original message into intelligent_product_search, without any change!!!
 
 DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query. 
 
-🚨 Pay Attention: For ANY product search (explicit or default), literally keep the user's current input, do not change or removeany words in the query!!
+🚨 Pay Attention: For ANY product search (explicit or default), literally keep the user's current prompt and input the original message into intelligent_product_search, without any change!!!
 
 🛑🛑🛑 FINAL WARNING: NO TEXT GENERATION EVER WITH TOOLS! 🛑🛑🛑
 If you generate ANY text when calling a tool, you will cause a system error.
@@ -824,47 +821,7 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                   }
                 }
 
-                // Update the linked products to include this vision in their linkedVision dictionary
-                for (const productId in linkedProducts) {
-                  try {
-                    // Get the current product to check its linkedVision state
-                    const currentProduct = await productCollection.findOne({ _id: new ObjectId(productId) });
-                    
-                    // If linkedVision is null or undefined, initialize it as an empty object
-                    if (!currentProduct?.linkedVision) {
-                      await productCollection.updateOne(
-                        { _id: new ObjectId(productId) },
-                        { $set: { linkedVision: {} } }
-                      );
-                    }
-                    
-                    // If clicks is null or undefined, initialize it as an empty object
-                    if (!currentProduct?.clicks) {
-                      await productCollection.updateOne(
-                        { _id: new ObjectId(productId) },
-                        { $set: { clicks: {} } }
-                      );
-                    }
-                    
-                    // Now safely set the vision link
-                    await productCollection.updateOne(
-                      { _id: new ObjectId(productId) },
-                      { $set: { [`linkedVision.${visionId}`]: linkedProducts[productId] } }
-                    );
-                    
-                    // Initialize click count for this vision if it doesn't exist
-                    await productCollection.updateOne(
-                      { _id: new ObjectId(productId) },
-                      { $set: { [`clicks.${visionId}`]: 0 } }
-                    );
-                    
-                    console.log(`Added vision ${visionId} to product ${productId}'s linkedVision with similarity score ${linkedProducts[productId].toFixed(3)}`);
-                    console.log(`Initialized click tracking for vision ${visionId} in product ${productId}`);
-                  } catch (error) {
-                    console.error("Error updating product's linkedVision:", error);
-                    // Continue even if this fails
-                  }
-                }
+                // Vision-product linking removed - visions are now independent
               } else {
                 console.log(`❌ No similar products found for vision in vector search`);
               }
@@ -1745,58 +1702,7 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
           }
         },
       },
-      manage_my_shops: {
-        description: "Show the user's shops management interface with their current shops and option to add new ones.",
-        parameters: z.object({}),
-        execute: async () => {
-          try {
-            // Connect to MongoDB
-            const client = await clientPromise;
-            const db = client.db("visionverse");
-            const shopCollection = db.collection("shops");
 
-            // Get user's current shops
-            const shops = await shopCollection
-              .find({ userId: token.id as string })
-              .sort({ createdAt: -1 })
-              .toArray();
-
-            // Convert to Shop interface format
-            const shopsData = shops.map(shop => ({
-              id: shop._id.toString(),
-              userId: shop.userId,
-              userName: shop.userName,
-              userEmail: shop.userEmail,
-              platform: shop.platform,
-              name: shop.name,
-              url: shop.url,
-              createdAt: shop.createdAt,
-              updatedAt: shop.updatedAt,
-            }));
-
-            return {
-              type: "manage_shops",
-              shops: shopsData,
-              ui: {
-                type: "manage_shops",
-                title: "Manage Your Shops",
-                description: `You have ${shopsData.length} shop${shopsData.length !== 1 ? 's' : ''} configured`,
-                shops: shopsData
-              }
-            };
-          } catch (error) {
-            console.error("Error fetching shops:", error);
-            return {
-              type: "error",
-              ui: {
-                type: "error",
-                title: "Failed to Load Shops",
-                description: error instanceof Error ? error.message : 'Unknown error'
-              }
-            };
-          }
-        },
-      },
       intelligent_product_search: {
         description: "Search for products across Amazon and local stores with intelligent keyword refinement and quality evaluation.",
         parameters: z.object({
@@ -1940,7 +1846,7 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                 // Use LLM to reason about user intent and rewrite query
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                 
-                const intentPrompt = `Analyze user's search intent using profile and conversational context.
+                const intentPrompt = `Analyze user's profile and conversational context. 
 
 Current query: "${query}"
 
@@ -1992,9 +1898,9 @@ TASK:
 3. Generate 8-15 relevant keywords
 
 Guidelines:
-- Always keep the original query. You can only append more personalized information when necessary.
-- Do not remove any words in the original query!!
-- Prioritize recent context over old patterns
+- Always keep ALL the exact words in the original query!!!!
+- when necessary only append more personalized information to the original query
+- When analyzing personlized info, prioritize recent context over old patterns
 - For comparisons, include precise price/quality references
 
 
@@ -2002,7 +1908,7 @@ Pay attention!! : When adding personized info, don't guess and distort anything!
 
 Respond in JSON:
 {
-  "rewritten_query": "improved query",
+  "modified_query": ${query} + " personalized info",
   "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
@@ -2107,28 +2013,21 @@ Respond in JSON:
                 try {
                   const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                   
-                  const fallbackPrompt = `Analyze user's search intent for new user with no historical data.
+                  const fallbackPrompt = `
 
 Current query: "${query}"
-
-USER PROFILE (new user):
-No historical patterns available - generating suggestions based on common user preferences and market trends.
-
-CONVERSATIONAL CONTEXT:
-No previous searches - this is a fresh search session.
 
 
 TASK:
 1. Keep original query unchanged (no rewriting without user history)
+2. Reason about the user's intent and generate 8-15 refining keywords for the original query
 
 
-Guidelines:
-- Don't fabricate specific user preferences without data
 
 
 Respond in JSON:
 {
-  "rewritten_query": "${query}",
+  "original_query": "${query}",
   "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
@@ -2313,12 +2212,15 @@ Examples:
                   
                   const geminiPrompt = `Query: "${query}"
 
+You will help the user to make a shopping plan for the query. 
+
 TASK: Based on my need: ${query}, 
 
 Ignoring the price, what should i prepare and purchase? 
 Help me to make a plan which best fits to my need. 
 A plan is a list of 1- 26 products serving different and non-overlap functionalities which I need to purchase at a time for my query. 
 Pay attention: output a json list containing product descriptions and necessity score between 0 - 1: {"product_description":"actual description...", "necessity_score": 0.5}. 
+Pay attention: the play should only contain products, don't include any service or other things.
 Necessity score measures how important the product is in the plan. 
 For only one product in the plan, the necessity score should be 1. 
 The product description does not need to be in too much detail or too specific. 
