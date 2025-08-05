@@ -109,6 +109,8 @@ export interface GoogleProductOffersResponse {
   };
 }
 
+
+
 // Unified product interface that combines Amazon and Google Shopping products
 export interface UnifiedProduct {
   position: number;
@@ -290,6 +292,8 @@ class ProductSearchService {
     }
   }
 
+
+
   async getProductOffers(productId: string): Promise<GoogleProductOffer[]> {
     if (!this.apiKey) {
       throw new Error('SearchAPI key not configured');
@@ -354,12 +358,28 @@ class ProductSearchService {
       extracted_offers: product.extracted_offers
     });
     
+    // Apply fallback price extraction for base product
+    let basePrice = product.price;
+    let baseExtractedPrice = product.extracted_price;
+    
+    if (!basePrice && !baseExtractedPrice) {
+      const fallbackPrice = this.extractPriceFromText(product.title);
+      basePrice = fallbackPrice.price || basePrice;
+      baseExtractedPrice = fallbackPrice.extracted_price || baseExtractedPrice;
+      
+      if (basePrice || baseExtractedPrice) {
+        console.log(`✅ Fallback price extraction successful for Google product "${product.title}": ${basePrice || `$${baseExtractedPrice}`}`);
+      } else {
+        console.log(`⚠️ No price found for Google product "${product.title}" - will be treated as price unavailable`);
+      }
+    }
+    
     const baseProduct: UnifiedProduct = {
       position: product.position,
       title: product.title,
       link: product.product_link,
-      price: product.price,
-      extracted_price: product.extracted_price,
+      price: basePrice,
+      extracted_price: baseExtractedPrice,
       original_price: product.original_price,
       extracted_original_price: product.extracted_original_price,
       rating: product.rating,
@@ -382,18 +402,34 @@ class ProductSearchService {
       // Priority:link > product_link do not change offer.link, it is correct!!!
       const finalLink = offer.link || baseProduct.link;
       
+      // Apply fallback price extraction for offer if needed
+      let offerPrice = offer.price;
+      let offerExtractedPrice = offer.extracted_price;
+      
+      if (!offerPrice && !offerExtractedPrice) {
+        // Try to extract from seller name or other offer text
+        const fallbackPrice = this.extractPriceFromText(offer.seller || '');
+        offerPrice = fallbackPrice.price || offerPrice;
+        offerExtractedPrice = fallbackPrice.extracted_price || offerExtractedPrice;
+        
+        if (offerPrice || offerExtractedPrice) {
+          console.log(`✅ Fallback price extraction successful for offer from "${offer.seller}": ${offerPrice || `$${offerExtractedPrice}`}`);
+        }
+      }
+      
       console.log(`🔗 Offer ${index + 1} for "${product.title}":`);
       console.log(`   seller_link: ${offer.seller_link || 'N/A'}`);
       console.log(`   offers_link: ${product.offers_link || 'N/A'}`);
       console.log(`   final_link: ${finalLink}`);
       console.log(`   seller: ${offer.seller || 'N/A'}`);
+      console.log(`   price: ${offerPrice || offerExtractedPrice || 'N/A'}`);
       
       return {
         ...baseProduct,
         position: product.position + index * 0.1, // Slight position adjustment to maintain order
         link: finalLink, // Use best available link
-        price: offer.price,
-        extracted_price: offer.extracted_price,
+        price: offerPrice,
+        extracted_price: offerExtractedPrice,
         original_price: offer.original_price,
         extracted_original_price: offer.extracted_original_price,
         seller: offer.seller,
@@ -404,14 +440,63 @@ class ProductSearchService {
     });
   }
 
+  // Fallback price extraction from text
+  private extractPriceFromText(text: string): { price?: string; extracted_price?: number } {
+    if (!text) return {};
+    
+    // Common price patterns
+    const pricePatterns = [
+      /\$(\d+(?:,\d{3})*(?:\.\d{2})?)/g, // $123.45, $1,234.56
+      /(\d+(?:,\d{3})*(?:\.\d{2})?)\s*dollars?/gi, // 123.45 dollars
+      /(\d+(?:,\d{3})*(?:\.\d{2})?)\s*USD/gi, // 123.45 USD
+      /Price:\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/gi, // Price: $123.45
+      /(\d+(?:,\d{3})*(?:\.\d{2})?)\s*\$$/g, // 123.45$
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const matches = Array.from(text.matchAll(pattern));
+      if (matches.length > 0) {
+        const priceStr = matches[0][1];
+        const cleanPrice = priceStr.replace(/,/g, '');
+        const extractedPrice = parseFloat(cleanPrice);
+        
+        if (!isNaN(extractedPrice) && extractedPrice > 0) {
+          console.log(`💡 Fallback price extraction: Found $${extractedPrice} in text: "${text.substring(0, 100)}..."`);
+          return {
+            price: `$${extractedPrice}`,
+            extracted_price: extractedPrice
+          };
+        }
+      }
+    }
+    
+    return {};
+  }
+
   // Convert Amazon product to unified format
   private convertAmazonToUnified(product: AmazonProduct): UnifiedProduct {
+    let price = product.price;
+    let extracted_price = product.extracted_price;
+    
+    // If no price was extracted by SearchAPI, try fallback extraction
+    if (!price && !extracted_price) {
+      const fallbackPrice = this.extractPriceFromText(product.title);
+      price = fallbackPrice.price || price;
+      extracted_price = fallbackPrice.extracted_price || extracted_price;
+      
+      if (price || extracted_price) {
+        console.log(`✅ Fallback price extraction successful for "${product.title}": ${price || `$${extracted_price}`}`);
+      } else {
+        console.log(`⚠️ No price found for "${product.title}" - will be treated as price unavailable`);
+      }
+    }
+    
     return {
       position: product.position,
       title: product.title,
       link: product.link,
-      price: product.price,
-      extracted_price: product.extracted_price,
+      price: price,
+      extracted_price: extracted_price,
       original_price: product.original_price,
       extracted_original_price: product.extracted_original_price,
       rating: product.rating,
@@ -424,6 +509,8 @@ class ProductSearchService {
       more_offers: product.more_offers,
     };
   }
+
+
 
   // Search Amazon products and convert to unified format
   async searchAmazonProducts(options: ProductSearchOptions): Promise<UnifiedProduct[]> {
@@ -479,23 +566,60 @@ class ProductSearchService {
     }
   }
 
+  // Search Google Shopping products WITHOUT offers (fast version)
+  async searchGoogleShoppingProductsFast(options: ProductSearchOptions): Promise<UnifiedProduct[]> {
+    try {
+      const googleProducts = await this.searchGoogleShopping(options);
+      const allUnifiedProducts: UnifiedProduct[] = [];
+      
+      // Convert each Google Shopping product to unified format WITHOUT fetching offers
+      for (const googleProduct of googleProducts) {
+        console.log(`🚀 Fast processing Google product: "${googleProduct.title}" (skipping offers)`);
+        
+        // Convert without offers (just use base product data)
+        const unifiedProducts = this.convertGoogleShoppingToUnified(googleProduct, []);
+        allUnifiedProducts.push(...unifiedProducts);
+        
+        console.log(`✅ Created ${unifiedProducts.length} unified product (base data only)`);
+      }
+      
+      console.log(`🛒 Google Shopping (Fast): Fetched ${googleProducts.length} base products, created ${allUnifiedProducts.length} unified products`);
+      
+      return allUnifiedProducts;
+    } catch (error) {
+      console.error('❌ Google Shopping Products (Fast) Search Error:', error);
+      return [];
+    }
+  }
+
+
+
   // Calculate optimal search limits for each source
   private calculateSearchLimits(maxResults: number, includeAmazon: boolean, includeGoogleShopping: boolean): {
     amazonLimit: number;
     googleShoppingLimit: number;
   } {
-    if (includeAmazon && includeGoogleShopping) {
-      // Split budget: 60% Amazon, 40% Google Shopping (since Google Shopping expands with offers)
-      const amazonLimit = Math.ceil(maxResults * 0.6);
-      const googleShoppingLimit = Math.ceil(maxResults * 0.4 / 3); // Divide by 3 to account for average offers expansion
-      return { amazonLimit, googleShoppingLimit };
-    } else if (includeAmazon) {
-      return { amazonLimit: maxResults, googleShoppingLimit: 0 };
-    } else if (includeGoogleShopping) {
-      return { amazonLimit: 0, googleShoppingLimit: Math.ceil(maxResults / 3) }; // Account for offers expansion
-    } else {
+    const activeServices = [includeAmazon, includeGoogleShopping].filter(Boolean).length;
+    
+    if (activeServices === 0) {
       return { amazonLimit: 0, googleShoppingLimit: 0 };
     }
+    
+    if (activeServices === 2) {
+      // 60% Amazon, 40% Google Shopping
+      const amazonLimit = Math.ceil(maxResults * 0.6);
+      const googleShoppingLimit = Math.ceil(maxResults * 0.4 / 3); // Account for offers expansion
+      return { amazonLimit, googleShoppingLimit };
+    } else {
+      // Single service gets full budget
+      if (includeAmazon) {
+        return { amazonLimit: maxResults, googleShoppingLimit: 0 };
+      } else if (includeGoogleShopping) {
+        return { amazonLimit: 0, googleShoppingLimit: Math.ceil(maxResults / 3) };
+      }
+    }
+    
+    return { amazonLimit: 0, googleShoppingLimit: 0 };
   }
 
   // Main search method that combines Amazon and Google Shopping

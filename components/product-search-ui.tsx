@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Star, TrendingUp, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+import { ExternalLink, Star, TrendingUp, ChevronDown, ChevronRight, RefreshCw, X } from "lucide-react";
 import { AmazonProduct } from "@/lib/amazon-search";
 import { makeAssistantToolUI, ThreadPrimitive } from "@assistant-ui/react";
 
@@ -11,7 +11,7 @@ export interface SearchStep {
   keywords: string;
   amazonResults: number;
   googleShoppingResults?: number;
-  localResults: number;
+  localResults?: number;
   refinementReason?: string;
   stepType?: 'intent' | 'search' | 'refinement';
   priceRange?: {
@@ -35,7 +35,7 @@ export interface ProductSearchResult {
       reasons: string[];
       isRecommended: boolean;
     };
-    source: 'amazon' | 'local' | 'google_shopping';
+    source: 'amazon' | 'google_shopping';
   };
   // New field for TikTok-style product browsing
   recommendedProducts?: Array<any & {
@@ -44,7 +44,7 @@ export interface ProductSearchResult {
       reasons: string[];
       isRecommended: boolean;
     };
-    source: 'amazon' | 'local' | 'google_shopping';
+    source: 'amazon' | 'google_shopping';
   }>;
   searchSummary: string;
   // Add session data for refresh functionality
@@ -64,7 +64,7 @@ interface TikTokProductBrowserProps {
       reasons: string[];
       isRecommended: boolean;
     };
-    source: 'amazon' | 'local' | 'google_shopping';
+    source: 'amazon' | 'google_shopping';
   }>;
 }
 
@@ -362,9 +362,7 @@ function TikTokProductBrowser({ products }: TikTokProductBrowserProps) {
                 }`}>
                   {currentProduct.source === 'amazon' 
                     ? '🛒 Amazon' 
-                    : currentProduct.source === 'google_shopping'
-                    ? '🛍️ Google Shopping'
-                    : '🏪 Local Store'}
+                    : '🛍️ Google Shopping'}
                 </span>
                 {currentProduct.is_prime && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
@@ -433,6 +431,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
   const [refreshKey, setRefreshKey] = useState(0); // Force re-render key
   const [modifiedQuery, setModifiedQuery] = useState(initialResult.originalQuery); // Query with added keywords
   const [isSearching, setIsSearching] = useState(false); // Track if any search operation is in progress
+  const [removedProductIndices, setRemovedProductIndices] = useState<Set<number>>(new Set()); // Track removed products
   const abortControllerRef = useRef<AbortController | null>(null); // For cancelling ongoing requests
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null); // For debouncing search requests
   const lastSearchTimeRef = useRef<number>(0); // Track last search time
@@ -454,6 +453,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
     setRefreshingProduct(false);
     setRefreshingSearch(false);
     setIsSearching(false);
+    setRemovedProductIndices(new Set()); // Reset removed products for new search
     setRefreshKey(prev => prev + 1); // Force re-render for new search
   }, [initialResult]);
 
@@ -697,6 +697,12 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
       setRefreshingProduct(false);
       setIsSearching(false);
     }
+  };
+
+  // Handle removing a product from the display
+  const handleRemoveProduct = (indexToRemove: number) => {
+    console.log(`🗑️ Removing product at index ${indexToRemove}`);
+    setRemovedProductIndices(prev => new Set([...prev, indexToRemove]));
   };
 
   // Handle new search with current query, only updating search boxes and product box
@@ -1163,9 +1169,15 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
               
               {/* Search Sources Progress */}
               <div className="ml-6 space-y-1">
+                <p className="text-xs text-gray-600">🏠 Searching local products</p>
                 <p className="text-xs text-gray-600">🔍 Searching Amazon marketplace</p>
                 <p className="text-xs text-gray-600">🛒 Searching Google Shopping</p>
-                <p className="text-xs text-gray-600">🏪 Checking local products</p>
+                <p className="text-xs text-gray-600">🏪 Searching eBay marketplace</p>
+                <p className="text-xs text-gray-600">🏬 Searching Walmart</p>
+                <p className="text-xs text-gray-600">🎨 Searching Etsy</p>
+                <p className="text-xs text-gray-600">👗 Searching Shein</p>
+                <p className="text-xs text-gray-600">🛍️ Searching Temu</p>
+                <p className="text-xs text-gray-600">💬 Reading customer comments</p>
                 <p className="text-xs text-gray-600">🤖 Evaluating product quality</p>
               </div>
             </div>
@@ -1237,7 +1249,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`font-medium ${colors.textPrimary}`}>
-                      {`🔍 Search ${index + 1}`}
+                      {`🔍 ${step.keywords.slice(0, 30)}${step.keywords.length > 30 ? '...' : ''}`}
                     </span>
                     {step.level && (
                       <span className={`text-xs px-2 py-1 rounded-full bg-gray-100 ${colors.textTertiary}`}>
@@ -1258,11 +1270,10 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                       💡 {step.refinementReason}
                     </p>
                   )}
-                  {(step.amazonResults > 0 || step.localResults > 0 || step.googleShoppingResults && step.googleShoppingResults > 0) && (
+                  {(step.amazonResults > 0 || step.googleShoppingResults && step.googleShoppingResults > 0) && (
                     <div className={`flex gap-4 text-sm ${colors.textTertiary}`}>
                       <span>🛒 Amazon: {step.amazonResults} results</span>
                       {step.googleShoppingResults !== undefined && <span>🛍️ Google Shopping: {step.googleShoppingResults} results</span>}
-                      <span>🏪 Local: {step.localResults} results</span>
                     </div>
                   )}
                   {step.priceRange && (
@@ -1295,16 +1306,18 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                     </h3>
                     <div className="flex items-center gap-4">
                       <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                        {result.recommendedProducts.length} products
+                        {result.recommendedProducts.filter((_, index) => !removedProductIndices.has(index)).length} products
                       </span>
                       <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
                         <span className="text-sm font-medium">Bundle Total: </span>
                         <span className="text-lg font-bold">
                           ${(() => {
-                            const total = result.recommendedProducts.reduce((sum: number, product: any) => {
-                              const price = parseFloat(product.price?.toString().replace('$', '') || '0');
-                              return sum + (isNaN(price) ? 0 : price);
-                            }, 0);
+                            const total = result.recommendedProducts
+                              .filter((_, index) => !removedProductIndices.has(index))
+                              .reduce((sum: number, product: any) => {
+                                const price = parseFloat(product.price?.toString().replace('$', '') || '0');
+                                return sum + (isNaN(price) ? 0 : price);
+                              }, 0);
                             return total.toFixed(2);
                           })()}
                         </span>
@@ -1321,8 +1334,22 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
               
               {/* Products Grid */}
               <div className="space-y-4">
-                {result.recommendedProducts.map((product: any, index: number) => (
-                  <div key={`product-${refreshKey}-${index}-${product?.title?.slice(0,10) || 'no-product'}`} 
+                {(() => {
+                  const visibleProducts = result.recommendedProducts
+                    .map((product: any, index: number) => ({ product, originalIndex: index }))
+                    .filter(({ originalIndex }) => !removedProductIndices.has(originalIndex));
+                  
+                  if (visibleProducts.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <div className="text-gray-500 text-lg mb-2">🛒 No products in bundle</div>
+                        <p className="text-gray-400 text-sm">All products have been removed from this bundle.</p>
+                      </div>
+                    );
+                  }
+                  
+                  return visibleProducts.map(({ product, originalIndex }, displayIndex) => (
+                  <div key={`product-${refreshKey}-${originalIndex}-${product?.title?.slice(0,10) || 'no-product'}`} 
                        className={`border border-gray-200 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
                          refreshingProduct ? 'opacity-60' : ''
                        }`}>
@@ -1331,15 +1358,23 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex items-center gap-3">
                         <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full min-w-[32px] text-center">
-                          {index + 1}
+                          {displayIndex + 1}
                         </span>
                       </div>
-                      <div className="text-right">
+                      <div className="flex items-center gap-3">
                         <div className="text-lg font-bold text-green-600">
                           {product.price?.toString().startsWith('$') 
                             ? product.price 
                             : `$${product.price}`}
                         </div>
+                        {/* Remove Button */}
+                        <button
+                          onClick={() => handleRemoveProduct(originalIndex)}
+                          className="p-1 rounded-full hover:bg-red-50 transition-colors text-red-500 hover:text-red-700 hover:bg-red-100"
+                          title="Remove this product"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                     
@@ -1362,9 +1397,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                             }`}>
                               {product.source === 'amazon' 
                                 ? '🛒 Amazon' 
-                                : product.source === 'google_shopping'
-                                ? '🛍️ Google Shopping'
-                                : '🏪 Local Store'}
+                                : '🛍️ Google Shopping'}
                             </span>
                             {product.seller && product.source === 'google_shopping' && (
                               <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
@@ -1488,7 +1521,8 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                       </Button>
                     )}
                   </div>
-              ))}
+              ));
+                })()}
             </div>
             </CardContent>
           </Card>
@@ -1551,9 +1585,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                       }`}>
                         {result.recommendedProduct.source === 'amazon' 
                           ? '🛒 Amazon' 
-                          : result.recommendedProduct.source === 'google_shopping'
-                          ? '🛍️ Google Shopping'
-                          : '🏪 Local Store'}
+                          : '🛍️ Google Shopping'}
                       </span>
                       {result.recommendedProduct.seller && result.recommendedProduct.source === 'google_shopping' && (
                         <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
@@ -1688,9 +1720,15 @@ export const ProductSearchToolUI = makeAssistantToolUI<
                 <span className="text-lg font-medium text-gray-700">Searching for the most suitable product</span>
               </div>
           <div className="text-center space-y-2">
+            <p className="text-gray-600">🏠 Searching local products</p>
             <p className="text-gray-600">🔍 Searching Amazon marketplace</p>
             <p className="text-gray-600">🛒 Searching Google Shopping</p>
-            <p className="text-gray-600">🏪 Checking local products</p>
+            <p className="text-gray-600">🏪 Searching eBay marketplace</p>
+            <p className="text-gray-600">🏬 Searching Walmart</p>
+            <p className="text-gray-600">🎨 Searching Etsy</p>
+            <p className="text-gray-600">👗 Searching Shein</p>
+            <p className="text-gray-600">🛍️ Searching Temu</p>
+            <p className="text-gray-600">💬 Reading customer comments</p>
             <p className="text-gray-600">🤖 Evaluating product quality</p>
           </div>
         </div>

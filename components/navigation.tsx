@@ -27,7 +27,7 @@ export default function Navigation() {
       <nav className="border-b border-slate-700 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 shadow-lg">
         <div className="container flex h-12 items-center pl-6">
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</h1>
           </div>
         </div>
       </nav>
@@ -38,7 +38,7 @@ export default function Navigation() {
     <nav className="border-b border-slate-700 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 shadow-lg">
       <div className={`container flex h-12 items-center pl-6 ${session ? 'justify-between' : ''}`}>
         <div className="flex items-center space-x-2">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</h1>
         </div>
         
         {session && (

@@ -37,7 +37,7 @@ export async function storeHistoricalSearchResult(
       userName,
       userEmail,
       originalQuery: searchData.originalQuery,
-      finalProduct: searchData.finalProduct,
+      finalProducts: searchData.finalProducts,
       searchSteps: searchData.searchSteps,
       searchSummary: searchData.searchSummary,
       createdAt: new Date(),
@@ -55,44 +55,65 @@ export async function storeHistoricalSearchResult(
 }
 
 /**
- * Get the last searched product for a user
+ * Get the last 3 searched product bundles for a user (for use as LLM context)
  * @param userId - User ID
- * @returns Promise<HistoricalSearchResult | null> - The last search result or null
+ * @returns Promise<HistoricalSearchResult[]> - Array of the last 3 search results
  */
-export async function getLastSearchedProduct(userId: string): Promise<HistoricalSearchResult | null> {
+export async function getLastSearchedProductBundles(userId: string): Promise<HistoricalSearchResult[]> {
   try {
-    console.log(`🔍 Retrieving last searched product for user: ${userId}`);
+    console.log(`🔍 Retrieving last 3 searched product bundles for user: ${userId}`);
     
     const collection = await getHistoricalSearchesCollection();
     
-    const result = await collection.findOne(
-      { userId },
-      { sort: { createdAt: -1 } }
-    );
+    const results = await collection
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .toArray();
     
-    if (!result) {
+    if (results.length === 0) {
       console.log(`📭 No previous search results found for user: ${userId}`);
-      return null;
+      return [];
     }
     
-    const historicalSearch: HistoricalSearchResult = {
+    const historicalSearches: HistoricalSearchResult[] = results.map(result => ({
       id: result._id!.toString(),
       userId: result.userId,
       userName: result.userName,
       userEmail: result.userEmail,
       originalQuery: result.originalQuery,
-      finalProduct: result.finalProduct,
+      finalProducts: result.finalProducts,
       searchSteps: result.searchSteps,
       searchSummary: result.searchSummary,
       createdAt: result.createdAt,
       updatedAt: result.updatedAt
-    };
+    }));
     
-    console.log(`✅ Found last searched product: "${result.finalProduct.title}" for query: "${result.originalQuery}"`);
-    return historicalSearch;
+    console.log(`✅ Found ${historicalSearches.length} historical product bundles for context`);
+    historicalSearches.forEach((search, index) => {
+      console.log(`   ${index + 1}. "${search.originalQuery}" → ${search.finalProducts.length} products (${search.createdAt.toLocaleDateString()})`);
+    });
+    
+    return historicalSearches;
+  } catch (error) {
+    console.error("❌ Error retrieving last searched product bundles:", error);
+    return []; // Return empty array on error to not break the search flow
+  }
+}
+
+/**
+ * Get the last searched product for a user (backward compatibility - deprecated)
+ * @param userId - User ID
+ * @returns Promise<HistoricalSearchResult | null> - The last search result or null
+ * @deprecated Use getLastSearchedProductBundles instead
+ */
+export async function getLastSearchedProduct(userId: string): Promise<HistoricalSearchResult | null> {
+  try {
+    const bundles = await getLastSearchedProductBundles(userId);
+    return bundles.length > 0 ? bundles[0] : null;
   } catch (error) {
     console.error("❌ Error retrieving last searched product:", error);
-    return null; // Return null on error to not break the search flow
+    return null;
   }
 }
 
@@ -126,7 +147,7 @@ export async function getHistoricalSearchResults(
       userName: result.userName,
       userEmail: result.userEmail,
       originalQuery: result.originalQuery,
-      finalProduct: result.finalProduct,
+      finalProducts: result.finalProducts,
       searchSteps: result.searchSteps,
       searchSummary: result.searchSummary,
       createdAt: result.createdAt,

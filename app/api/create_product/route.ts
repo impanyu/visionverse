@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     let productDescription: string;
     let filePath: string = "/no-file";
     let url: string;
+    let price: number | undefined;
 
     // Check if this is a form data request (file upload)
     const contentType = req.headers.get("content-type");
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
       productDescription = formData.get("productDescription") as string;
       const file = formData.get("imageFile") as File;
       const urlStr = formData.get("url") as string;
+      const priceStr = formData.get("price") as string;
       
       console.log("🔍 File details:", {
         exists: !!file,
@@ -61,6 +63,15 @@ export async function POST(req: Request) {
         return new Response("URL is required", { status: 400 });
       }
       url = urlStr.trim();
+      
+      // Parse price if provided
+      if (priceStr && priceStr.trim()) {
+        const priceFloat = parseFloat(priceStr.trim());
+        if (!isNaN(priceFloat) && priceFloat >= 0) {
+          price = Math.round(priceFloat * 100); // Convert to cents
+          console.log(`💰 Price parsed: $${priceFloat} -> ${price} cents`);
+        }
+      }
 
       if (file && file.size > 0) {
         // Create user directory
@@ -99,6 +110,15 @@ export async function POST(req: Request) {
         return new Response("URL is required", { status: 400 });
       }
       url = jsonData.url.trim();
+      
+      // Parse price if provided in JSON
+      if ((jsonData as any).price !== undefined) {
+        const priceFloat = parseFloat((jsonData as any).price);
+        if (!isNaN(priceFloat) && priceFloat >= 0) {
+          price = Math.round(priceFloat * 100); // Convert to cents
+          console.log(`💰 Price parsed: $${priceFloat} -> ${price} cents`);
+        }
+      }
     }
     
     console.log("Received productDescription:", JSON.stringify(productDescription));
@@ -248,6 +268,7 @@ export async function POST(req: Request) {
       productDescription: productDescription.trim(),
       filePath: filePath,
       url: url.trim(),
+      price: price, // Include price in cents
       onSale: false, // Default to false
       linkedVision: linkedVision || {}, // Always initialize as empty object
       clicks: {}, // Initialize clicks as empty object
@@ -269,7 +290,8 @@ export async function POST(req: Request) {
       vectorId = await storeProductEmbedding(
         productId,
         productDescription.trim(),
-        token.id as string
+        token.id as string,
+        price // Pass price to embedding storage
       );
       
       // Update the product document with vectorId

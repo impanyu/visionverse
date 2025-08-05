@@ -45,6 +45,7 @@ export const ProductFormToolUI = makeAssistantToolUI<
       productDescription: "",
       imageFile: null as File | null,
       url: "" as string,
+      price: "" as string,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitResult, setSubmitResult] = useState<(CreateProductResponse & { products?: Product[] }) | null>(null);
@@ -62,7 +63,8 @@ export const ProductFormToolUI = makeAssistantToolUI<
         return {
           ...prev,
           productDescription: prev.productDescription || "",
-          url: prev.url || ""
+          url: prev.url || "",
+          price: prev.price || ""
           // Keep imageFile as-is to preserve selected file
         };
       });
@@ -116,9 +118,15 @@ export const ProductFormToolUI = makeAssistantToolUI<
           // Create Product - use existing field names
           formDataToSend.append("productDescription", formData.productDescription);
           formDataToSend.append("url", formData.url.trim());
+          if (formData.price.trim()) {
+            formDataToSend.append("price", formData.price.trim());
+          }
         } else {
           // Create Vision - use vision API field names
           formDataToSend.append("visionDescription", formData.productDescription);
+          if (formData.price.trim()) {
+            formDataToSend.append("price", formData.price.trim());
+          }
         }
         
         console.log('🔍 FRONTEND SUBMIT: Current formData.imageFile:', {
@@ -146,7 +154,63 @@ export const ProductFormToolUI = makeAssistantToolUI<
           }
         }
 
-        // Call appropriate API endpoint
+        if (hasUrl) {
+          // Product creation - use AI chat to trigger proper tool
+          const productData = {
+            role: 'user',
+            content: `create product directly: ${formData.productDescription}${formData.price ? ` (price: $${formData.price})` : ''}`
+          };
+
+          const chatResponse = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              messages: [productData],
+              tools: ['create_product_direct']
+            }),
+          });
+
+          if (chatResponse.ok) {
+            // Parse the streaming response to get the final result
+            const reader = chatResponse.body?.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            if (reader) {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                
+                // Look for tool result in the buffer
+                const lines = buffer.split('\n');
+                for (const line of lines) {
+                  if (line.startsWith('data: ') && line.includes('"type":"tool-result"')) {
+                    try {
+                      const data = JSON.parse(line.substring(6));
+                      if (data.type === 'tool-result' && data.toolName === 'create_product_direct') {
+                        // Success! The AI tool will handle the UI display
+                        setSubmitResult({ success: true, aiHandled: true });
+                        return;
+                      }
+                    } catch (e) {
+                      // Continue parsing
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          // Fallback to direct API call if AI flow fails
+          console.log('🔄 AI flow failed, falling back to direct API');
+        }
+
+        // Call appropriate API endpoint (fallback or vision creation)
         const apiEndpoint = hasUrl ? "/api/create_product" : "/api/create_vision";
         console.log('🎯 CALLING API:', apiEndpoint);
 
@@ -246,6 +310,23 @@ export const ProductFormToolUI = makeAssistantToolUI<
       const relativePath = filePath.replace('/data/', '');
       return `/api/files/${relativePath}`;
     };
+
+    // If AI tool is handling the response, show a simple success message
+    if ((submitResult as any)?.aiHandled) {
+      return (
+        <Card className="w-full max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              Product Created Successfully!
+            </CardTitle>
+            <CardDescription>
+              Your product has been created and added to your list. The AI assistant will display the updated list below.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      );
+    }
 
     if (submitResult) {
       const isProduct = (submitResult as any).type === 'product';
@@ -423,6 +504,29 @@ export const ProductFormToolUI = makeAssistantToolUI<
               </div>
 
               <div className="space-y-2">
+                <label htmlFor="price" className="text-sm font-medium text-gray-700">
+                  Price (Optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  💰 <strong>Tip:</strong> Enter the price in dollars (e.g., 19.99)
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <label htmlFor="imageFile1" className="text-sm font-medium">
                   Product Image (Optional)
                 </label>
@@ -494,10 +598,10 @@ export const ProductFormToolUI = makeAssistantToolUI<
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {formData.url.trim() ? 'Creating Product...' : 'Creating Vision...'}
+                    Creating Product...
                   </>
                 ) : (
-                  formData.url.trim() ? 'Create Product' : 'Create Vision'
+                  'Create Product'
                 )}
               </Button>
             </form>

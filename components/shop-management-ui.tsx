@@ -116,7 +116,7 @@ export function ShopManagementUI({ shops }: ShopManagementUIProps) {
             <Store className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-bold text-gray-800">Add New Shop</h2>
           </div>
-          <p className="text-gray-600">Connect a new online shop to your VisionVerse account</p>
+                          <p className="text-gray-600">Connect a new online shop to your ChoiceMade.ai account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -217,7 +217,7 @@ export function ShopManagementUI({ shops }: ShopManagementUIProps) {
             <Store className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <CardTitle className="text-gray-600 mb-2">No shops configured</CardTitle>
             <CardDescription className="mb-6">
-              Add your first online shop to get started with VisionVerse commerce features
+                              Add your first online shop to get started with ChoiceMade.ai commerce features
             </CardDescription>
             <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2 mx-auto">
               <Plus className="h-4 w-4" />

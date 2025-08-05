@@ -23,7 +23,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <MessagesSquare className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="brand-title">VisionVerse</span>
+                <span className="brand-title">ChoiceMade.ai</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

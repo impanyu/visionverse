@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VisionVerse - AI Assistant",
+  title: "ChoiceMade.ai - Shopping Planner",
   description: "AI-powered chat assistant with Google authentication",
 };
 

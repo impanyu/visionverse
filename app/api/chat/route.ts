@@ -6,7 +6,7 @@ import { z } from "zod";
 import clientPromise from "@/lib/mongodb";
 import { VisionDocument, Vision } from "@/types/vision";
 import { storeVisionEmbedding, searchSimilarVisions, searchAllVisions, storeHistoricalQuery, searchSimilarHistoricalQueries } from "@/lib/vector-db";
-import { storeHistoricalSearchResult, getLastSearchedProduct } from "@/lib/historical-search-db";
+import { storeHistoricalSearchResult, getLastSearchedProduct, getLastSearchedProductBundles } from "@/lib/historical-search-db";
 import amazonSearchService, { AmazonProduct, UnifiedProduct } from "@/lib/amazon-search";
 import OpenAI from 'openai';
 import { ProductSearchResult, SearchStep } from "@/components/product-search-ui";
@@ -72,7 +72,7 @@ ${allProducts.map((p, i) =>
   `${i + 1}. Title: "${p.title}"
  • Price: ${p.price || 'N/A'}
  • Rating: ${p.rating || 'N/A'} (${p.reviews || 0} reviews)
- • Source: ${p.source === 'amazon' ? 'Amazon' : p.source === 'google_shopping' ? 'Google Shopping' : 'Local Store'}
+ • Source: ${p.source === 'amazon' ? 'Amazon' : p.source === 'google_shopping' ? 'Google Shopping' : 'Other Store'}
  • Recommend Score: ${p.evaluation.score}/100
  • Recommend Reasons: ${p.evaluation.reasons.join(', ')}`
 ).join('\n\n')}
@@ -120,11 +120,11 @@ Select the product number (or -1 if none are appropriate):`;
       // Determine the current query based on iteration
       if (refreshFromIteration === 0) {
         // Restart from beginning - regenerate user intent
-        const lastSearchedProduct = await getLastSearchedProduct(token.id as string);
+        const lastSearchedProductBundles = await getLastSearchedProductBundles(token.id as string);
         
         try {
           console.log(`🕒 Re-analyzing user intent from original query...`);
-          const historicalQueries = await searchSimilarHistoricalQueries(originalQuery, token.id as string, 10);
+          const historicalQueries = await searchSimilarHistoricalQueries(originalQuery, token.id as string, 30);
           
           if (historicalQueries.documents[0] && historicalQueries.documents[0].length > 0) {
             // Sort historical queries by timestamp (most recent first)
@@ -140,32 +140,35 @@ Select the product number (or -1 if none are appropriate):`;
             // Use LLM to regenerate intent
             const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
             
-            const intentPrompt = `You are analyzing a user's search intent based on their historical product queries and their last searched product.
+            const intentPrompt = `Rewrite search query using user profile and conversational context.
 
 Current query: "${originalQuery}"
 
-Historical similar queries from this user (ordered by recency, most recent first):
-${queriesWithMetadata.map((item, i) => {
-  const timeAgo = item.timestamp ? new Date(item.timestamp).toLocaleDateString() : 'unknown date';
-  return `${i + 1}. "${item.query}" (${timeAgo})`;
-}).join('\n')}
+USER PROFILE (frequent patterns >5 times):
+${(() => {
+  const queryFreq: { [key: string]: number } = {};
+  queriesWithMetadata.forEach(item => {
+    const query = item.query.toLowerCase();
+    queryFreq[query] = (queryFreq[query] || 0) + 1;
+  });
+  
+  const frequentPatterns = Object.entries(queryFreq)
+    .filter(([, count]) => count >= 5)
+    .sort((a, b) => b[1] - a[1]);
+    
+  return frequentPatterns.length > 0 
+    ? frequentPatterns.map(([query, count]) => `• "${query}" (${count}x)`).join('\n')
+    : 'No frequent patterns found.';
+})()}
 
-${lastSearchedProduct ? `
-Last searched product (most recent product search):
-- Query: "${lastSearchedProduct.originalQuery}"
-- Selected Product: "${lastSearchedProduct.finalProduct.title}"
-- Price: ${lastSearchedProduct.finalProduct.price}
-- Source: ${lastSearchedProduct.finalProduct.source}
-- Rating: ${lastSearchedProduct.finalProduct.rating || 'N/A'} (${lastSearchedProduct.finalProduct.reviews || 0} reviews)
-- Search Date: ${lastSearchedProduct.createdAt.toLocaleDateString()}
-- Recommend Score: ${lastSearchedProduct.finalProduct.evaluation.score}/100
-` : 'No previous product searches found.'}
+CONVERSATIONAL CONTEXT (recent bundles):
+${lastSearchedProductBundles.length > 0 ? 
+lastSearchedProductBundles.map((search, index) => 
+  `${index + 1}. "${search.originalQuery}" → ${search.finalProducts.length} products`
+).join('\n')
+: 'No recent searches.'}
 
-Based on these historical queries and the last searched product, try to understand the user's profile, preferences, and context.
-
-IMPORTANT: When inferring user characteristics, prioritize MORE RECENT data.
-
-Try your best to translate the abstract and ambiguous user's intent into more specific search query, but do not change the core intent.
+Use profile for stable preferences, context for conversation flow. Keep core intent unchanged.
 
 Return ONLY the rewritten query, no explanation.`;
 
@@ -221,7 +224,6 @@ Return ONLY the rewritten query, no explanation.`;
         keywords: currentQuery,
         amazonResults: amazonCount,
         googleShoppingResults: googleShoppingCount,
-        localResults: 0, // Simplified for refresh
         stepType: refreshFromIteration === 0 ? 'search' : 'refinement'
       });
 
@@ -254,7 +256,7 @@ Return ONLY the rewritten query, no explanation.`;
         await storeHistoricalSearchResult(
           {
             originalQuery,
-            finalProduct: {
+            finalProducts: [{
               title: bestProduct.title,
               description: bestProduct.description,
               price: bestProduct.price,
@@ -272,7 +274,7 @@ Return ONLY the rewritten query, no explanation.`;
               seller: bestProduct.seller,
               delivery: bestProduct.delivery,
               evaluation: bestProduct.evaluation
-            },
+            }],
             searchSteps,
             searchSummary
           },
@@ -410,7 +412,7 @@ export async function POST(req: Request) {
     forcedTool = 'list_my_visions';
   } else if (userMessage.includes('list my products') || userMessage.includes('show my products') || userMessage.includes('my products')) {
     forcedTool = 'list_my_products';
-  } else if (userMessage.includes('create product') || userMessage.includes('create a product') || userMessage.includes('new product')) {
+  } else if (userMessage.includes('create product') || userMessage.includes('create a product') || userMessage.includes('new product') || userMessage.includes('add product') || userMessage.includes('add a product')) {
     forcedTool = 'create_product_form';
   } else if (userMessage.includes('manage my shops') || userMessage.includes('manage shops') || userMessage.includes('my shops')) {
     forcedTool = 'manage_my_shops';
@@ -459,9 +461,9 @@ TOOL USAGE RULES:
    - If they provide ANY description/content (even brief), IMMEDIATELY use create_vision_direct - DO NOT generate any text
    - If they ask to create a vision with NO description at all, IMMEDIATELY use create_vision_form - DO NOT generate any text
 
-2. When the user asks to create a PRODUCT:
+2. When the user asks to create or add a PRODUCT:
    - If they provide ANY description/content (even brief), IMMEDIATELY use create_product_direct - DO NOT generate any text  
-   - If they ask to create a product with NO description at all, IMMEDIATELY use create_product_form - DO NOT generate any text
+   - If they ask to add or create a product with NO description at all, IMMEDIATELY use create_product_form - DO NOT generate any text
 
 3. When the user asks to list/show their visions, IMMEDIATELY use list_my_visions - DO NOT generate any text
 
@@ -473,11 +475,11 @@ TOOL USAGE RULES:
 
 7. When the user asks to manage their shops, IMMEDIATELY use manage_my_shops - DO NOT generate any text
 
-8. When the user searches for products, IMMEDIATELY use intelligent_product_search with their current input. 
+8. When the user searches for products, IMMEDIATELY use intelligent_product_search with their original query without any change. 
 
 DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query. 
 
-🚨 REMEMBER: For ANY product search (explicit or default), create clear queries based on the user's current input.
+🚨 Pay Attention: For ANY product search (explicit or default), literally keep the user's current input, do not change or removeany words in the query!!
 
 🛑🛑🛑 FINAL WARNING: NO TEXT GENERATION EVER WITH TOOLS! 🛑🛑🛑
 If you generate ANY text when calling a tool, you will cause a system error.
@@ -562,7 +564,7 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
   try {
     console.log(`🤖 API: Calling streamText...`);
     result = streamText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-4.1'),
     system: enhancedSystem,
       messages: processedMessages,
       // Force intelligent_product_search tool for product searches to prevent verbose text
@@ -1827,7 +1829,6 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                     keywords: `⚠️ SEARCH BLOCKED: ${query}`,
                     amazonResults: 0,
                     googleShoppingResults: 0,
-                    localResults: 0,
                     refinementReason: `🚫 Another search is already in progress (running for ${searchDuration}s). Please wait for it to complete or try again in a few moments.`,
                     stepType: 'intent' as const
                   }],
@@ -1885,13 +1886,17 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
               let rewrittenQuery = query;
             let suggestedKeywords: string[] = [];
               const searchSteps: SearchStep[] = [];
+              let historyTime = 0;
+              let intentTime = 0;
               
-              // Get last searched product for context
-              const lastSearchedProduct = await getLastSearchedProduct(token.id as string);
+              // Get last searched product bundles for context
+              const historyStart = Date.now();
+              const lastSearchedProductBundles = await getLastSearchedProductBundles(token.id as string);
               
               try {
                 console.log(`🕒 Searching for similar historical queries...`);
-                const historicalQueries = await searchSimilarHistoricalQueries(query, token.id as string, 10);
+                const historicalQueries = await searchSimilarHistoricalQueries(query, token.id as string, 30);
+                historyTime = Date.now() - historyStart;
               
               console.log(`📚 BACKEND: Historical queries search result:`, {
                 hasDocuments: !!historicalQueries.documents[0],
@@ -1921,9 +1926,13 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                 const comparativeTerms = ['more expensive', 'cheaper', 'more costly', 'less expensive', 'pricier', 'budget', 'premium', 'better', 'higher quality', 'lower quality', 'upgraded', 'downgrade', 'similar but', 'like this but', 'alternative', 'compare', 'versus'];
                 const isComparativeQuery = comparativeTerms.some(term => query.toLowerCase().includes(term));
                 
-                if (isComparativeQuery && lastSearchedProduct) {
+                if (isComparativeQuery && lastSearchedProductBundles.length > 0) {
                   console.log(`🔄 COMPARATIVE QUERY DETECTED: "${query}"`);
-                  console.log(`📊 Reference product: "${lastSearchedProduct.finalProduct.title}" ($${lastSearchedProduct.finalProduct.price})`);
+                  const latestBundle = lastSearchedProductBundles[0];
+                  console.log(`📊 Reference bundle: "${latestBundle.originalQuery}" with ${latestBundle.finalProducts.length} products`);
+                  latestBundle.finalProducts.forEach((product, index) => {
+                    console.log(`   ${index + 1}. "${product.title}" ($${product.price})`);
+                  });
                 } else {
                   console.log(`🔍 Standard query processing: "${query}"`);
                 }
@@ -1931,110 +1940,87 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                 // Use LLM to reason about user intent and rewrite query
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                 
-                const intentPrompt = `You are analyzing a user's search intent based on their historical product queries and their last searched product.
+                const intentPrompt = `Analyze user's search intent using profile and conversational context.
 
 Current query: "${query}"
 
-Historical similar queries from this user (ordered by recency, most recent first):
-${queriesWithMetadata.map((item, i) => {
-  const timeAgo = item.timestamp ? new Date(item.timestamp).toLocaleDateString() : 'unknown date';
-  return `${i + 1}. "${item.query}" (${timeAgo})`;
-}).join('\n')}
+USER PROFILE (frequent patterns only):
+${(() => {
+  // Count query frequencies
+  const queryFreq: { [key: string]: number } = {};
+  queriesWithMetadata.forEach(item => {
+    const query = item.query.toLowerCase();
+    queryFreq[query] = (queryFreq[query] || 0) + 1;
+  });
+  
+  // Filter for patterns >5 times
+  const frequentPatterns = Object.entries(queryFreq)
+    .filter(([, count]) => count >= 5)
+    .sort((a, b) => b[1] - a[1]);
+    
+  if (frequentPatterns.length === 0) {
+    return 'No frequent patterns (>5 times) found.';
+  }
+  
+  return frequentPatterns.map(([query, count]) => `• "${query}" (${count}x)`).join('\n');
+})()}
 
-${lastSearchedProduct ? `
-Last searched product (most recent product search):
-- Query: "${lastSearchedProduct.originalQuery}"
-- Selected Product: "${lastSearchedProduct.finalProduct.title}"
-- Price: ${lastSearchedProduct.finalProduct.price}
-- Source: ${lastSearchedProduct.finalProduct.source}
-- Rating: ${lastSearchedProduct.finalProduct.rating || 'N/A'} (${lastSearchedProduct.finalProduct.reviews || 0} reviews)
-- Search Date: ${lastSearchedProduct.createdAt.toLocaleDateString()}
-- Recommend Score: ${lastSearchedProduct.finalProduct.evaluation.score}/100
-- Category: ${lastSearchedProduct.finalProduct.title.split(' ').slice(0, 2).join(' ')}
-` : 'No previous product searches found.'}
+CONVERSATIONAL CONTEXT (recent searches):
+${lastSearchedProductBundles.length > 0 ? 
+lastSearchedProductBundles.map((search, index) => `
+${index + 1}. "${search.originalQuery}" → ${search.finalProducts.length} products (${search.createdAt.toLocaleDateString()})
+   Key items: ${search.finalProducts.slice(0, 2).map(p => `"${p.title}" ($${p.price})`).join(', ')}${search.finalProducts.length > 2 ? ` +${search.finalProducts.length - 2} more` : ''}
+`).join('')
+: 'No recent searches.'}
 
-🔥 CRITICAL: COMPARATIVE QUERY DETECTION 🔥
-If the current query contains comparative language (like "more expensive", "cheaper", "better", "higher quality", "lower price", "more premium", "budget version", "upgraded", "similar but", etc.), you MUST:
+COMPARATIVE QUERY RULES:
+${lastSearchedProductBundles.length > 0 && (() => {
+  const latestBundle = lastSearchedProductBundles[0];
+  const bundlePrices = latestBundle.finalProducts.map(p => parseFloat(p.price.replace(/[$,]/g, '')) || 0);
+  const avgPrice = bundlePrices.reduce((sum, price) => sum + price, 0) / bundlePrices.length;
+  const totalPrice = bundlePrices.reduce((sum, price) => sum + price, 0);
+  
+  return `If query contains "more expensive/cheaper/better":
+- "More expensive" → above $${Math.ceil(avgPrice * 1.25)} (avg) or $${Math.ceil(totalPrice * 1.25)} (total)
+- "Cheaper" → under $${Math.floor(avgPrice * 0.75)} (avg) or $${Math.floor(totalPrice * 0.75)} (total)
+- Reference: Last bundle $${totalPrice.toFixed(2)} total`;
+})() || 'No price reference available.'}
 
-1. **PRICE COMPARISONS**: When user asks for "more expensive", "cheaper", "higher/lower price":
-   - Include EXACT price reference: "more expensive than $${lastSearchedProduct?.finalProduct.price || 'N/A'}" or "cheaper than $${lastSearchedProduct?.finalProduct.price || 'N/A'}"
-   - For "more expensive": specify range "above $${lastSearchedProduct ? (() => {
-     const currentPrice = parseFloat(lastSearchedProduct.finalProduct.price.replace(/[$,]/g, '')) || 0;
-     return Math.ceil(currentPrice * 1.25);
-   })() : 'N/A'}"
-   - For "cheaper": specify range "under $${lastSearchedProduct ? (() => {
-     const currentPrice = parseFloat(lastSearchedProduct.finalProduct.price.replace(/[$,]/g, '')) || 0;
-     return Math.floor(currentPrice * 0.75);
-   })() : 'N/A'}"
-   - For "much more expensive": use 1.5x multiplier, for "slightly more": use 1.1x multiplier
-   - For "much cheaper": use 0.5x multiplier, for "slightly cheaper": use 0.9x multiplier
-
-2. **QUALITY COMPARISONS**: When user asks for "better", "higher quality", "more premium":
-   - Include current product category and upgrade context
-   - Reference current rating: "better than ${lastSearchedProduct?.finalProduct.rating || 'N/A'} star rating"
-   - Mention specific improvements over current product
-
-3. **FEATURE COMPARISONS**: When user mentions "similar but", "with better", "without":
-   - Keep the same category: "${lastSearchedProduct?.finalProduct.title.split(' ').slice(0, 3).join(' ') || 'N/A'}"
-   - Include specific feature modifications
-
-Based on these historical queries and the last searched product, try to understand the user's profile, who the user is, what is the user preference, sex, age, hobbies, etc, ignore those one time queries.
-
-IMPORTANT: When inferring user characteristics, prioritize MORE RECENT data:
-1. The last searched product should be given the highest weight as it represents the most recent user behavior
-2. Recent queries should override older patterns if there are conflicts
-3. Consider the price range, product category, and features of the last searched product
-
-For instance, if the user's last searched product was a luxury item, even if they historically searched for budget products, consider their current intent might be for higher-end products.
-
-Try you best to translate the abstract and ambiguous user's intent into more accurate search query, but do not change the core intent.
+TASK:
+1. Use PROFILE for stable user characteristics (demographics, preferences)
+2. Use CONTEXT for conversational flow and comparison references
+3. Generate 8-15 relevant keywords
 
 Guidelines:
-- Keep the core intent of the current query, do not fabricate any keywords, translation should be reasonable and based on the user's characteristics, behavior patterns and hobbies
-- The historical queries and last searched product are only for you to infer the user's characteristics, behavior patterns and hobbies
-- You can only extract user characteristics, behavior patterns and hobbies which are probably not changing over time (those about who the user is), and ignore those that can change over time
-- When there are conflicting patterns, prioritize the last searched product and recent queries (those with newer dates)
-- Do not guess or add any unneccesary keywords to the current query
-- Use natural language, don't just add keywords
-- **MOST IMPORTANT**: For comparative queries, ALWAYS include precise context from the previous search
+- Always keep the original query. You can only append more personalized information when necessary.
+- Do not remove any words in the original query!!
+- Prioritize recent context over old patterns
+- For comparisons, include precise price/quality references
 
-IMPORTANT: Respond in JSON format with TWO fields:
-1. "rewritten_query": The improved search query
-2. "suggested_keywords": Array of EXACTLY 8-15 short keyword phrases (2-6 words each), about the categories, features, price ranges and etc, that the user might want to add to refine their search. These should be related to the user's profile and search history. MINIMUM 8 keywords required!
 
-Example responses:
+Pay attention!! : When adding personized info, don't guess and distort anything!! You need solid reasoning to support your interpretation of the user's historical preferences and profile.
 
-Standard query:
+Respond in JSON:
 {
-  "rewritten_query": "high-quality bluetooth headphones for working from home", 
-  "suggested_keywords": ["noise cancelling", "under $100", "wireless charging", "long battery life", "comfortable padding", "over-ear", "bluetooth 5.0", "quick pairing", "premium brand", "sweat resistant"]
+  "rewritten_query": "improved query",
+  "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
-Comparative query - "more expensive one" (when last product was $80 headphones):
-{
-  "rewritten_query": "premium bluetooth headphones more expensive than $80 for working from home",
-  "suggested_keywords": ["above $100", "luxury brand", "premium materials", "noise cancelling", "high-end features", "professional grade", "wireless charging", "long battery life", "audiophile quality", "flagship model"]
-}
+`;
 
-Comparative query - "cheaper option" (when last product was $150 smart watch):
-{
-  "rewritten_query": "budget smart watch cheaper than $150 price range with fitness tracking",
-  "suggested_keywords": ["under $100", "budget friendly", "basic features", "fitness tracking", "heart rate monitor", "water resistant", "long battery life", "affordable brand", "good value", "entry level"]
-}
-
-Return ONLY valid JSON, no explanation.`;
-
+                const intentStart = Date.now();
                 const intentResponse = await openaiClient.chat.completions.create({
-                  model: "gpt-4o",
+                  model: "gpt-4.1",
                   messages: [{ role: "user", content: intentPrompt }],
                   temperature: 0.4,
-                  max_tokens: 300
+                  max_tokens: 600
                 });
+                intentTime = Date.now() - intentStart;
 
                 const responseContent = intentResponse.choices[0]?.message?.content?.trim();
                 
                 if (responseContent) {
-                  console.log(`🔍 BACKEND: Raw intent response:`, responseContent);
+                  console.log(`🔍 BACKEND: Raw intent response (${intentTime}ms):`, responseContent);
                   try {
                     // Strip markdown code blocks if present
                     let cleanJson = responseContent.trim();
@@ -2052,7 +2038,9 @@ Return ONLY valid JSON, no explanation.`;
                         console.log(`🔄 COMPARATIVE REWRITE SUCCESS:`);
                         console.log(`   Original: "${query}"`);
                         console.log(`   Enhanced: "${rewrittenQuery}"`);
-                        console.log(`   Reference: $${lastSearchedProduct?.finalProduct.price || 'N/A'} ${lastSearchedProduct?.finalProduct.title || 'N/A'}`);
+                        const latestBundle = lastSearchedProductBundles.length > 0 ? lastSearchedProductBundles[0] : null;
+                        const firstProduct = latestBundle?.finalProducts?.[0];
+                        console.log(`   Reference: $${firstProduct?.price || 'N/A'} ${firstProduct?.title || 'N/A'} (from ${latestBundle?.finalProducts.length || 0} product bundle)`);
                       } else {
                         console.log(`🧠 Intent-based rewritten query: "${rewrittenQuery}"`);
                       }
@@ -2070,7 +2058,7 @@ Return ONLY valid JSON, no explanation.`;
                       searchSteps.push({
                         keywords: rewrittenQuery,
                         amazonResults: 0,
-                        localResults: 0,
+                        googleShoppingResults: 0,
                         refinementReason: `Intent-based rewrite from ${historicalQueries.documents[0].length} historical queries`,
                         stepType: 'intent'
                       });
@@ -2119,28 +2107,32 @@ Return ONLY valid JSON, no explanation.`;
                 try {
                   const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                   
-                  const fallbackPrompt = `You are generating helpful keyword suggestions for a product search query.
+                  const fallbackPrompt = `Analyze user's search intent for new user with no historical data.
 
 Current query: "${query}"
 
-Since there's no historical data available, generate relevant keyword suggestions that would help refine this search query. Consider common refinement categories like:
-- Price ranges (under $X, budget-friendly, premium, etc.)
-- Quality indicators (high-quality, durable, reliable, etc.)
-- Features (wireless, portable, compact, waterproof, etc.)
-- Use cases (for work, for home, for travel, for gifts, etc.)
-- Brand preferences (popular brands, bestseller, top-rated, etc.)
+USER PROFILE (new user):
+No historical patterns available - generating suggestions based on common user preferences and market trends.
 
-IMPORTANT: Respond in JSON format with TWO fields:
-1. "rewritten_query": Keep the original query unchanged (no rewriting without historical context)
-2. "suggested_keywords": Array of EXACTLY 8-15 short keyword phrases (2-6 words each), about the categories, features, price ranges and etc, that the user might want to add to refine their search. These should be related to the user's profile and search history. MINIMUM 8 keywords required!
+CONVERSATIONAL CONTEXT:
+No previous searches - this is a fresh search session.
 
-Example response:
+
+TASK:
+1. Keep original query unchanged (no rewriting without user history)
+
+
+Guidelines:
+- Don't fabricate specific user preferences without data
+
+
+Respond in JSON:
 {
   "rewritten_query": "${query}",
-  "suggested_keywords": ["under $50", "high quality", "wireless", "portable", "top rated", "gift wrapping", "fast shipping", "bestseller", "premium", "waterproof"]
+  "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
-Return ONLY valid JSON, no explanation.`;
+MINIMUM 8 keywords required, MAXIMUM 15 keywords allowed.`;
 
                   const fallbackResponse = await openaiClient.chat.completions.create({
                     model: "gpt-4o",
@@ -2217,13 +2209,7 @@ Return ONLY valid JSON, no explanation.`;
             // 🚀 RECURSIVE SEARCH SYSTEM - CLEAN IMPLEMENTATION 
             // =============================================================================
             
-            // Result containers
-            let bestProduct: (any & { evaluation: any; source: 'amazon' | 'local' | 'google_shopping' }) | null = null;
-            let allProducts: Array<any & { evaluation: any; source: 'amazon' | 'local' | 'google_shopping' }> = [];
-            let allSelectedProductsForResult: Array<any & { evaluation: any; source: 'amazon' | 'local' | 'google_shopping' }> = [];
-            
-            // Global search steps collector (depth-first order)
-            const globalSearchSteps: SearchStep[] = [];
+
 
             // =============================================================================
             // 🧠 AI MODELS FOR RECURSIVE SEARCH
@@ -2231,103 +2217,238 @@ Return ONLY valid JSON, no explanation.`;
 
             // Price Analyzer Model: Determines price range for each query/subquery
             const priceAnalyzerModel = async (
-              query: string,
-              parentPriceRange?: { min?: number; max?: number },
-              level: number = 1,
-              userConstraints?: { min?: number; max?: number },
-              currentTopProducts: any[] = []
-            ): Promise<{ min?: number; max?: number }> => {
+              query: string
+            ): Promise<{ min?: number; max?: number } | undefined> => {
               try {
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                
-                const isInitialQuery = level === 1;
-                const constraintsText = userConstraints ? 
-                  `\n\nUSER PRICE BOUNDS: The user has set a price range of $${userConstraints.min || 'any'} - $${userConstraints.max || 'any'}. You can choose any range within these bounds.` : '';
-                
-                const currentTopProductsText = currentTopProducts.length > 0 ? 
-                  `\n\nCURRENT LEVEL TOP PRODUCTS (for price reference):
-${currentTopProducts.slice(0, 3).map((p, i) => 
-  `${i+1}. "${p.title}" - $${p.price || p.extracted_price || 'N/A'}`
-).join('\n')}` : '';
 
-                let promptText: string;
-                if (isInitialQuery) {
-                  promptText = `Analyze this product search query and determine an appropriate price range:
+                const prompt = `You are a price analysis expert. Extract the EXACT price range specified in this query.
 
-Query: "${query}"${constraintsText}${currentTopProductsText}
+Query: "${query}"
 
-Instructions:
-1. If the query mentions specific price terms like "cheap", "budget", "affordable", "expensive", "luxury", "high-end", "premium", extract the implied price range
-2. If the query mentions specific dollar amounts, use those
-3. If no price information is mentioned, set a range that makes sense for the product category
-4. Choose the most appropriate price range for finding relevant products
-${userConstraints ? `5. Stay within the user's bounds of $${userConstraints.min || 'any'} - $${userConstraints.max || 'any'}, but feel free to use a narrower range if it makes sense for the query.` : ''}
+Your task: Extract any explicit price ranges or price constraints mentioned in the query.
+
+Guidelines:
+1. If query mentions specific prices ("under $50", "around $100", "$20-40", "budget under 200"), extract those EXACTLY
+2. If NO specific price is mentioned, return null
+3. Don't estimate or guess prices - only extract what's explicitly stated
+
+Return ONLY valid JSON:
+- If price range found: {"min": number, "max": number}
+- If only upper bound: {"min": 0, "max": number}  
+- If only lower bound: {"min": number, "max": null}
+- If NO price mentioned: null
 
 Examples:
-- "cheap headphones" → {"min": 5, "max": 50}
-- "luxury watch" → {"min": 500, "max": 5000}
-- "budget laptop under $800" → {"min": 200, "max": 800}
-- "expensive gaming chair" → {"min": 300, "max": 1500}
-- "wireless mouse" (no price hint) → {"min": 15, "max": 150}
+- "wireless headphones under $50" → {"min": 0, "max": 50}
+- "professional microphone around $200" → {"min": 150, "max": 250}
+- "budget camping gear under 100" → {"min": 0, "max": 100}
+- "expensive laptop over $1000" → {"min": 1000, "max": null}
+- "beach day essentials" → null`;
 
-CRITICAL: Return ONLY a valid JSON object with min and max numbers, no other text:
-{"min": 10, "max": 200}`;
-                } else {
-                  // Subquery price analysis
-                  const parentText = parentPriceRange ? 
-                    `Parent Price Range: $${parentPriceRange.min || 'unlimited'} - $${parentPriceRange.max || 'unlimited'}` : 
-                    'No parent price range';
-                  
-                  promptText = `Analyze this product subquery and determine an appropriate price range:
-
-Subquery: "${query}"
-${parentText}
-Search Level: ${level}/3${constraintsText}${currentTopProductsText}
-
-Instructions:
-1. Analyze the subquery for price indicators (budget, premium, luxury, cheap, expensive)
-2. Consider the product category implied by the subquery
-3. Stay within or slightly adjust the parent price range if provided
-4. Be more specific than the parent range when possible
-
-Examples:
-- "budget wireless earbuds" (parent: $20-200) → {"min": 20, "max": 80}
-- "premium noise cancelling headphones" (parent: $50-300) → {"min": 150, "max": 300}
-- "swimming pool chlorine tablets" (parent: $10-100) → {"min": 15, "max": 60}
-
-CRITICAL: Return ONLY a valid JSON object with min and max numbers:
-{"min": 25, "max": 150}`;
-                }
-
-                                    const response = await openaiClient.chat.completions.create({
-                      model: "gpt-4o",
-                      messages: [{ role: "user", content: promptText }],
-                      temperature: 0.4,
-                      max_tokens: 100
-                    });
+                const response = await openaiClient.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [{ role: "user", content: prompt }],
+                  temperature: 0.1,
+                  max_tokens: 100
+                });
 
                 const content = response.choices[0]?.message?.content?.trim();
-                if (content) {
-                  let cleanJson = content.trim();
-                  if (cleanJson.startsWith('```json')) {
-                    cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                  } else if (cleanJson.startsWith('```')) {
-                    cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                
+                try {
+                  if (content === 'null' || content === 'undefined') {
+                    console.log(`💰 Price Analyzer: No explicit price range found in "${query}"`);
+                    return undefined;
                   }
                   
-                  const priceRange = JSON.parse(cleanJson);
-                  if (priceRange && typeof priceRange.min === 'number' && typeof priceRange.max === 'number') {
-                    console.log(`💰 Price Analyzer Model: "${query}" → $${priceRange.min}-$${priceRange.max}`);
-                    return priceRange;
-                  }
+                  const cleanContent = content?.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '') || '';
+                  const result = JSON.parse(cleanContent);
+                  
+                  console.log(`💰 Price Analyzer: "${query}" → ${result ? `$${result.min || 0}-$${result.max || 'unlimited'}` : 'No price specified'}`);
+                  return result;
+                  
+                } catch (parseError) {
+                  console.error('💰 Price Analyzer JSON parse error:', parseError);
+                  console.log('📝 Raw response:', content);
+                  return undefined;
                 }
-                
-                // Fallback: use parent range or defaults
-                return parentPriceRange || { min: 10, max: 200 };
               } catch (error) {
-                console.error('🚨 Price Analyzer Model error:', error);
-                return parentPriceRange || { min: 10, max: 200 };
+                console.error('💰 Price Analyzer error:', error);
+                return undefined;
               }
+            };
+
+            // Gemini API Integration: Get product recommendations with retry and improved error handling
+            const getGeminiProductRecommendations = async (query: string): Promise<Array<{product_description: string, necessity_score: number}>> => {
+              const MAX_RETRIES = 2;
+              
+              // Helper function to fix common JSON issues
+              const fixJsonString = (str: string): string => {
+                try {
+                  // Remove markdown formatting
+                  let fixed = str.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
+                  
+                  // Try to fix unterminated strings by finding the last complete object
+                  if (fixed.includes('"product_description"')) {
+                    // Find the last complete product object
+                    const matches = fixed.match(/\{"product_description"[^}]*\}/g);
+                    if (matches && matches.length > 0) {
+                      fixed = '[' + matches.join(',') + ']';
+                    }
+                  }
+                  
+                  // Ensure it starts and ends with array brackets
+                  if (!fixed.startsWith('[')) fixed = '[' + fixed;
+                  if (!fixed.endsWith(']')) fixed = fixed + ']';
+                  
+                  return fixed;
+                } catch {
+                  return str;
+                }
+              };
+
+              for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                try {
+                  console.log(`🤖 Gemini API: Getting product recommendations for "${query}" (attempt ${attempt}/${MAX_RETRIES})`);
+                  
+                  const geminiPrompt = `Query: "${query}"
+
+TASK: Based on my need: ${query}, 
+
+Ignoring the price, what should i prepare and purchase? 
+Help me to make a plan which best fits to my need. 
+A plan is a list of 1- 26 products serving different and non-overlap functionalities which I need to purchase at a time for my query. 
+Pay attention: output a json list containing product descriptions and necessity score between 0 - 1: {"product_description":"actual description...", "necessity_score": 0.5}. 
+Necessity score measures how important the product is in the plan. 
+For only one product in the plan, the necessity score should be 1. 
+The product description does not need to be in too much detail or too specific. 
+Don't overthink, if the user ask for some category of product, just output the product description of the category.
+If the user mention some task, activity or event,  output a comprehensive shopping plan for the task, activity or event.
+
+Pay attention: Merely output a json string, without any other text !!
+
+
+
+OUTPUTFORMAT EXAMPLE:
+[
+  {"product_description": "Travel backpack for carrying essentials", "necessity_score": 0.9},
+  {"product_description": "Water bottle to stay hydrated", "necessity_score": 0.8}
+]
+
+
+JSON Array:`;
+
+                  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      contents: [{
+                        parts: [{
+                          text: geminiPrompt
+                        }]
+                      }],
+                      generationConfig: {
+                        temperature: 0.3, // Lower temperature for more consistent JSON
+                        maxOutputTokens: 800,
+                        topP: 0.8,
+                        topK: 10
+                      }
+                    })
+                  });
+
+                  if (!response.ok) {
+                    throw new Error(`Gemini API request failed: ${response.status} ${response.statusText}`);
+                  }
+
+                  const data = await response.json();
+                  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                  
+                  if (!content) {
+                    console.warn(`⚠️ No content returned from Gemini API on attempt ${attempt}`);
+                    if (attempt === MAX_RETRIES) {
+                      console.log('🔍 Final attempt - using fallback');
+                      return [{ product_description: query, necessity_score: 1.0 }];
+                    }
+                    continue; // Try next attempt
+                  }
+
+                  console.log(`🤖 Gemini Raw Response (attempt ${attempt}): ${content.substring(0, 200)}...`);
+
+                  // Try to parse JSON with error recovery
+                  try {
+                    let cleanContent = content.trim();
+                    
+                    // Try parsing as-is first
+                    let products;
+                    try {
+                      products = JSON.parse(cleanContent);
+                    } catch {
+                      // If that fails, try to fix common issues
+                      console.log(`🔧 Attempting to fix JSON on attempt ${attempt}`);
+                      cleanContent = fixJsonString(cleanContent);
+                      products = JSON.parse(cleanContent);
+                    }
+                    
+                    // Validate the response format
+                    if (!Array.isArray(products)) {
+                      throw new Error('Response is not an array');
+                    }
+                    
+                    // Validate and clean each product
+                    const validatedProducts = products
+                      .filter(p => p && typeof p === 'object')
+                      .map(p => ({
+                        product_description: String(p.product_description || '').trim(),
+                        necessity_score: Math.max(0, Math.min(1, Number(p.necessity_score) || 0.5))
+                      }))
+                      .filter(p => p.product_description.length > 0)
+            
+
+                    if (validatedProducts.length === 0) {
+                      throw new Error('No valid products found in response');
+                    }
+
+                    console.log(`✅ Gemini API: Successfully parsed ${validatedProducts.length} products on attempt ${attempt}`);
+                    validatedProducts.forEach((p, i) => 
+                      console.log(`  ${i+1}. "${p.product_description}" (necessity: ${p.necessity_score})`)
+                    );
+
+                    return validatedProducts;
+                    
+                  } catch (parseError) {
+                    console.error(`🚨 JSON parse error on attempt ${attempt}:`, parseError);
+                    console.log(`📝 Content that failed to parse:`, content);
+                    
+                    if (attempt === MAX_RETRIES) {
+                      console.log('🚨 All attempts failed, using fallback');
+                      return [{ 
+                        product_description: `Product for: ${query}`, 
+                        necessity_score: 1.0 
+                      }];
+                    }
+                    // Continue to next attempt
+                  }
+                  
+                } catch (error) {
+                  console.error(`🚨 Gemini API error on attempt ${attempt}:`, error);
+                  
+                  if (attempt === MAX_RETRIES) {
+                    console.log('🚨 All attempts exhausted, using fallback');
+                    return [{
+                      product_description: `Product for: ${query}`,
+                      necessity_score: 1.0
+                    }];
+                  }
+                  
+                  // Wait a bit before retry
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+              }
+              
+              // This should never be reached, but just in case
+              return [{ product_description: query, necessity_score: 1.0 }];
             };
 
             // Utility function to validate subquery distinctness
@@ -2532,84 +2653,131 @@ CRITICAL: Return ONLY a JSON array of 1-4 strings, no other text:
               }
             };
 
+            // Helper function to select the best fallback product
+            // Helper function to generate concise titles
+            const generateConciseTitle = (originalTitle: string): string => {
+              // Take first 6 words and clean up common marketing terms
+              const words = originalTitle.split(' ');
+              let conciseWords = words.slice(0, 6);
+              
+              // Remove common marketing fluff words if we have enough words
+              const fluffWords = ['for', 'with', 'the', 'and', 'or', 'in', 'of', 'to', 'a', 'an'];
+              if (conciseWords.length > 3) {
+                conciseWords = conciseWords.filter((word, index) => 
+                  index < 2 || !fluffWords.includes(word.toLowerCase())
+                );
+              }
+              
+              return conciseWords.join(' ');
+            };
+
+            const selectBestFallbackProduct = (recommendedProducts: any[], allProducts: any[]) => {
+              // Priority 1: Best recommended product
+              if (recommendedProducts && recommendedProducts.length > 0) {
+                return recommendedProducts[0];
+              }
+              
+              // Priority 2: Best product by evaluation score
+              const evaluatedProducts = allProducts
+                .filter(p => p.evaluation?.score !== undefined)
+                .sort((a, b) => b.evaluation.score - a.evaluation.score);
+              
+              if (evaluatedProducts.length > 0) {
+                return evaluatedProducts[0];
+              }
+              
+              // Priority 3: Product with highest rating
+              const ratedProducts = allProducts
+                .filter(p => p.rating !== undefined && p.rating !== null)
+                .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+              
+              if (ratedProducts.length > 0) {
+                return ratedProducts[0];
+              }
+              
+              // Priority 4: Any product (guaranteed fallback)
+              return allProducts[0];
+            };
+
             // Product Selection Model: Determines if current products are good enough
             const productSelectionModel = async (
               query: string,
               products: any[],
               level: number
             ): Promise<{ selectedProduct: any | null; shouldRefine: boolean }> => {
+              console.log(`🎯 Product Selection Model: Analyzing ${products.length} products for "${query}"`);
+              
               if (products.length === 0) {
-                return { selectedProduct: null, shouldRefine: true };
+                console.log(`❌ Product Selection Model: No products found`);
+                return { selectedProduct: null, shouldRefine: false };
               }
 
               try {
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                 
-                const topProducts = products
+                // Filter for recommended products and sort by evaluation score
+                const recommendedProducts = products
                   .filter(p => p.evaluation?.isRecommended)
                   .sort((a, b) => b.evaluation.score - a.evaluation.score)
-                  .slice(0, 10);
+                  .slice(0, 10); // Take top 10 for analysis
 
-                if (topProducts.length === 0) {
-                  console.log(`🎯 Product Selection Model: No recommended products at level ${level}, should refine`);
-                  return { selectedProduct: null, shouldRefine: level < 3 };
+                if (recommendedProducts.length === 0) {
+                  // If no recommended products, use fallback logic
+                  const bestProduct = selectBestFallbackProduct([], products);
+                  const conciseTitle = generateConciseTitle(bestProduct.title);
+                  const productWithConciseTitle = {
+                    ...bestProduct,
+                    originalTitle: bestProduct.title,
+                    title: conciseTitle,
+                    conciseTitle: conciseTitle
+                  };
+                  console.log(`⚠️ Product Selection Model: No recommended products, selecting best available "${bestProduct.title}" (Score: ${bestProduct.evaluation?.score || 'N/A'})`);
+                  console.log(`📝 Auto-generated Concise Title: "${conciseTitle}"`);
+                  return { selectedProduct: productWithConciseTitle, shouldRefine: false };
                 }
 
-                    const prompt = `You are a product selection expert. Analyze the query and available products to decide if they're good enough or if we need to refine the search further.
+                const prompt = `You are a product selection expert. Analyze the query and select the BEST product from the recommended options.
 
-STEP 1 - QUERY ANALYSIS:
-Query: "${query}"
-Search Level: ${level}/3
+QUERY: "${query}"
 
-First, determine if this query is BROAD or SPECIFIC:
-
-A query should be considered BROAD if it:
-- Could encompass multiple different product categories (e.g., "beach day essentials" covers blankets, sunscreen, games, food storage, etc.)
-- Uses vague descriptors without specific product focus (e.g., "nice things for the garden") 
-- Asks for collections/sets of items rather than a specific product
-- Would benefit from being broken down into subcategories for better user experience
-
-A query should be considered SPECIFIC if it:
-- By common sense, it is specific enough and no need to split into subcategories
-- Clearly refers to one specific product type (e.g., "wireless bluetooth headphones")
-- Has clear product specifications or features mentioned
-- Would likely result in very similar products regardless of refinement
-
-Examples:
-- BROAD: "kitchen essentials", "camping gear", "workout equipment", "baby items", "travel accessories"
-- SPECIFIC: "wireless mouse", "running shoes", "coffee maker", "baby stroller", "laptop bag"
-
-STEP 2 - PRODUCT EVALUATION:
-Available Products: ${topProducts.length} recommended products
-
-Products to analyze:
-${topProducts.map((p, i) => 
+RECOMMENDED PRODUCTS:
+${recommendedProducts.map((p, i) => 
   `${i+1}. "${p.title}"
      • Price: $${p.extracted_price || 'N/A'}
      • Rating: ${p.rating || 'N/A'}★ (${p.reviews || 0} reviews)
      • Quality Score: ${p.evaluation.score}/100
-     • Source: ${p.source}`
+     • Source: ${p.source}
+     • Description: ${p.snippet || 'No description'}`
 ).join('\n\n')}
 
-STEP 3 - DECISION LOGIC:
+YOUR TASK:
+1. Select the single BEST product that most closely matches the user's query
+2. Create a CONCISE title (under 10 words) that captures the essence of the product
 
-For BROAD queries:
-- ✅ REFINE the search to break into specific subcategories 
-- ❌ Do NOT select any product unless it's absolutely exceptional (score ≥90 AND rating ≥4.8 AND perfectly matches the entire query scope)
-- 🎯 Goal: Divide-and-conquer approach provides users with better organized, comprehensive results
+Consider:
+- Relevance to the query
+- Quality score and rating
+- Price reasonableness
+- User reviews and popularity
 
-For SPECIFIC queries:
-- ✅ If any product has quality score ≥70 AND rating ≥4.0, SELECT the best one
-- 🔄 If level < 3 and no good products found, REFINE for better results  
-- 🏁 If level = 3 (max depth), SELECT the best available product regardless of quality
-
-Return JSON with:
+Return ONLY a JSON object with:
 {
-  "query_type": "BROAD" or "SPECIFIC",
-  "reasoning": "Brief explanation of your decision including query analysis",
-  "action": "select" or "refine",
-  "productIndex": 1 (if select, 1-based index, null if refine)
-}`;
+  "productIndex": 1,
+  "conciseTitle": "Short Product Name",
+  "reasoning": "Brief explanation of why this product is the best choice"
+}
+
+CONCISE TITLE GUIDELINES:
+- Maximum 10 words
+- Clear and descriptive
+- Include key features/brand if important
+- Remove marketing fluff and unnecessary details
+
+Example transformations:
+- "Band-Aid Travel Ready Portable Emergency First Aid Kit for Minor Wound Care..." → "Travel First Aid Kit"
+- "Picnic Basket Set for 4 Persons with Large Insulated Cooler..." → "4-Person Picnic Basket Set"
+
+Choose the product index (1-${recommendedProducts.length}) of the best product.`;
 
                 const response = await openaiClient.chat.completions.create({
                   model: "gpt-4o",
@@ -2620,69 +2788,63 @@ Return JSON with:
 
                 const content = response.choices[0]?.message?.content?.trim();
                 if (content) {
-                  let cleanJson = content.trim();
-                  if (cleanJson.startsWith('```json')) {
-                    cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                  } else if (cleanJson.startsWith('```')) {
-                    cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
-                  }
-                  
-                  const decision = JSON.parse(cleanJson);
-                  const queryType = decision.query_type || 'UNKNOWN';
-                  
-                  console.log(`🤖 Product Selection Model: Query classified as ${queryType}`);
-                  console.log(`🤖 Decision: ${decision.action} - ${decision.reasoning || 'No reasoning provided'}`);
-                  
-                  if (decision.action === 'select' && decision.productIndex && topProducts[decision.productIndex - 1]) {
-                    const selectedProduct = topProducts[decision.productIndex - 1];
-                    console.log(`✅ Product Selection Model: Selected "${selectedProduct.title}" (Score: ${selectedProduct.evaluation.score})`);
-                    return { selectedProduct, shouldRefine: false };
-                  } else if (decision.action === 'refine') {
-                    console.log(`🔄 Product Selection Model: Should refine search at level ${level}`);
-                    return { selectedProduct: null, shouldRefine: level < 3 };
-                  }
-                }
-                
-                // Fallback: selection logic based on level
-                const bestProduct = topProducts[0];
-                console.log(`⚠️ Product Selection Model: JSON parsing failed, using fallback logic`);
-                
-                // Conservative fallback: assume broad at level 1, specific at deeper levels
-                const assumeBroad = level === 1;
-                
-                if (assumeBroad) {
-                  // For broad queries, be much more selective
-                  const requiredScore = level === 1 ? 90 : level === 2 ? 85 : 75;
-                  const requiredRating = level === 1 ? 4.8 : level === 2 ? 4.5 : 4.0;
-                  
-                  if (bestProduct.evaluation.score >= requiredScore && (bestProduct.rating || 0) >= requiredRating) {
-                    console.log(`✅ Product Selection Model (fallback): Assumed broad but EXCEPTIONAL product "${bestProduct.title}" (Score: ${bestProduct.evaluation.score}, Rating: ${bestProduct.rating})`);
-                    return { selectedProduct: bestProduct, shouldRefine: false };
-                  } else {
-                    console.log(`🔄 Product Selection Model (fallback): Assumed broad query "${query}" should refine (Level ${level}, Score: ${bestProduct.evaluation.score}/${requiredScore})`);
-                    return { selectedProduct: null, shouldRefine: level < 3 };
-                  }
-                } else {
-                  // For specific queries, use standard logic
-                  if (bestProduct.evaluation.score >= 70 && (bestProduct.rating || 0) >= 4.0) {
-                    console.log(`✅ Product Selection Model (fallback): Assumed specific query, selected "${bestProduct.title}" (Score: ${bestProduct.evaluation.score})`);
-                    return { selectedProduct: bestProduct, shouldRefine: false };
-                  } else {
-                    console.log(`🔄 Product Selection Model (fallback): Low quality products for assumed specific query (best: ${bestProduct.evaluation.score}), should refine`);
-                    return { selectedProduct: null, shouldRefine: level < 3 };
+                  try {
+                    let cleanJson = content.trim();
+                    if (cleanJson.startsWith('```json')) {
+                      cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                    } else if (cleanJson.startsWith('```')) {
+                      cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                    }
+                    
+                    const decision = JSON.parse(cleanJson);
+                    
+                    if (decision.productIndex && decision.productIndex >= 1 && decision.productIndex <= recommendedProducts.length) {
+                      const selectedProduct = {
+                        ...recommendedProducts[decision.productIndex - 1],
+                        // Store both original and concise titles
+                        originalTitle: recommendedProducts[decision.productIndex - 1].title,
+                        title: decision.conciseTitle || recommendedProducts[decision.productIndex - 1].title,
+                        conciseTitle: decision.conciseTitle
+                      };
+                      console.log(`✅ Product Selection Model: Selected "${selectedProduct.originalTitle}" (Score: ${selectedProduct.evaluation.score})`);
+                      console.log(`📝 Concise Title: "${selectedProduct.title}" - ${decision.reasoning || 'LLM selection'}`);
+                      return { selectedProduct, shouldRefine: false };
+                    } else {
+                      console.log(`⚠️ Product Selection Model: Invalid product index ${decision.productIndex}, falling back to best product`);
+                    }
+                  } catch (parseError) {
+                    console.log(`⚠️ Product Selection Model: JSON parsing failed (${parseError instanceof Error ? parseError.message : 'Unknown error'}), falling back to best product`);
                   }
                 }
+                
+                // Smart fallback: always select the best available product
+                const fallbackProduct = selectBestFallbackProduct(recommendedProducts, products);
+                const fallbackConciseTitle = generateConciseTitle(fallbackProduct.title);
+                const productWithFallbackTitle = {
+                  ...fallbackProduct,
+                  originalTitle: fallbackProduct.title,
+                  title: fallbackConciseTitle,
+                  conciseTitle: fallbackConciseTitle
+                };
+                console.log(`⚠️ Product Selection Model: Using fallback selection "${fallbackProduct.title}" (Score: ${fallbackProduct.evaluation?.score || 'N/A'})`);
+                console.log(`📝 Auto-generated Concise Title: "${fallbackConciseTitle}"`);
+                return { selectedProduct: productWithFallbackTitle, shouldRefine: false };
+
               } catch (error) {
                 console.error('🚨 Product Selection Model error:', error);
-                // At level 3, always select best available (even for broad queries)
-                if (level >= 3 && products.length > 0) {
-                  const bestProduct = products
-                    .filter(p => p.evaluation?.isRecommended)
-                    .sort((a, b) => b.evaluation.score - a.evaluation.score)[0] || products[0];
-                  console.log(`✅ Product Selection Model (error fallback): Max level reached, selecting best available "${bestProduct.title}"`);
-                  return { selectedProduct: bestProduct, shouldRefine: false };
-                }
-                return { selectedProduct: null, shouldRefine: level < 3 };
+                
+                // Error fallback: use the same robust selection logic (use [] for recommendedProducts since we're in error state)
+                const errorFallbackProduct = selectBestFallbackProduct([], products);
+                const errorConciseTitle = generateConciseTitle(errorFallbackProduct.title);
+                const productWithErrorTitle = {
+                  ...errorFallbackProduct,
+                  originalTitle: errorFallbackProduct.title,
+                  title: errorConciseTitle,
+                  conciseTitle: errorConciseTitle
+                };
+                console.log(`✅ Product Selection Model (error fallback): Selected "${errorFallbackProduct.title}" (Score: ${errorFallbackProduct.evaluation?.score || 'N/A'})`);
+                console.log(`📝 Auto-generated Concise Title: "${errorConciseTitle}"`);
+                return { selectedProduct: productWithErrorTitle, shouldRefine: false };
               }
             };
 
@@ -2696,260 +2858,283 @@ Return JSON with:
             // =============================================================================
 
             const queryInterpreter = async (
-              query: string,
-              priceRange: { min?: number; max?: number },
-              level: number,
-              searchPath: string = ""
-            ): Promise<{ products: any[]; bestProduct: any | null; searchSteps: SearchStep[] }> => {
-              console.log(`🌟 Query Interpreter Level ${level}: "${query}" ($${priceRange.min || 'unlimited'}-$${priceRange.max || 'unlimited'})`);
-              console.log(`🗂️ Search Path: ${searchPath || 'ROOT'}`);
-              
-              const currentSteps: SearchStep[] = [];
-              let levelProducts: any[] = [];
-              let currentLevelTopProducts: any[] = []; // Track current level's top products for context
+              query: string
+            ): Promise<{ products: any[]; searchSteps: SearchStep[]; recommendedProducts: any[] }> => {
+              console.log(`🌟 Gemini-based Query Interpreter: "${query}"`);
+              const startTime = Date.now();
               
               // =============================================================================
-              // Step 1: Search Amazon, Google Shopping, and Local
+              // Step 1: Extract price range from query
               // =============================================================================
-              let amazonCount = 0;
-              let googleShoppingCount = 0;
-              let localCount = 0;
+              const step1Start = Date.now();
+              const priceRange = await priceAnalyzerModel(query);
+              const step1Time = Date.now() - step1Start;
+              console.log(`💰 Price Range: ${priceRange ? `$${priceRange.min || 0}-$${priceRange.max || 'unlimited'}` : 'No price specified'} (${step1Time}ms)`);
               
-              try {
-                // Amazon + Google Shopping search
-                const cleanQuery = query.replace(/^["']|["']$/g, '');
-                const combinedProducts = await amazonSearchService.searchAllProducts({
-                  query: cleanQuery,
-                  maxResults: 20,
-                  sortBy: 'featured',
-                  includeAmazon: true,
-                  includeGoogleShopping: true,
-                  priceMin: priceRange.min,
-                  priceMax: priceRange.max
-                });
+              // =============================================================================
+              // Step 2: Get Gemini product recommendations
+              // =============================================================================
+              const step2Start = Date.now();
+              const geminiRecommendations = await getGeminiProductRecommendations(query);
+              const step2Time = Date.now() - step2Start;
+              console.log(`🤖 Gemini returned ${geminiRecommendations.length} product recommendations (${step2Time}ms)`);
+              
+              // =============================================================================
+              // Step 3: Search for each product description
+              // =============================================================================
+              const productMap = new Map<string, any>(); // Map product description to best product
+              const searchSteps: SearchStep[] = [];
+              const allProducts: any[] = []; // Master collection of all products
+              
+              let totalSearchTime = 0;
+              let totalSelectionTime = 0;
+              
+              // =============================================================================
+              // 🚀 TRUE PARALLEL EXECUTION: Search ALL products simultaneously
+              // =============================================================================
+              console.log(`🚀 Starting parallel search for ${geminiRecommendations.length} products simultaneously...`);
+              const parallelSearchStart = Date.now();
+              
+              // Create search function for a single product
+              const searchSingleProduct = async (recommendation: any, index: number, priceRange?: { min?: number; max?: number }) => {
+                const productDescription = recommendation.product_description;
+                const necessityScore = recommendation.necessity_score;
+                const productStartTime = Date.now();
                 
-                amazonCount = combinedProducts.filter(p => p.source === 'amazon').length;
-                googleShoppingCount = combinedProducts.filter(p => p.source === 'google_shopping').length;
-                
-                console.log(`🛒 Level ${level}: Amazon: ${amazonCount}, Google Shopping: ${googleShoppingCount}`);
-                
-                // Local search
-                const { findSimilarProductsForVision } = await import("@/lib/vector-db");
-                const vectorResults = await findSimilarProductsForVision(
-                  cleanQuery,
-                  token.id as string,
-                  10
-                );
-
-                let localProducts: any[] = [];
-                if (vectorResults.ids[0]?.length > 0) {
-                  const client = await clientPromise;
-                  const db = client.db("visionverse");
-                  const productCollection = db.collection<ProductDocument>("products");
-                  const productIds = vectorResults.ids[0].map(id => new ObjectId(id));
-                  const foundProducts = await productCollection
-                    .find({ _id: { $in: productIds } })
-                    .toArray();
-
-                  localProducts = foundProducts.map(p => ({
-                    asin: p._id?.toString() || '',
-                    title: p.productDescription,
-                    link: p.url,
-                    position: 0,
-                    rating: 4.0,
-                    reviews: 1,
-                    source: 'local'
-                  }));
-                }
-                localCount = localProducts.length;
-                console.log(`🏪 Level ${level}: Local: ${localCount} products`);
-                
-                // Combine and evaluate products
-                const allCurrentProducts = [
-                  ...combinedProducts.map((p: any) => ({ ...p, source: p.source })),
-                  ...localProducts.map((p: any) => ({ ...p, source: 'local' as const }))
-                ];
-
-                const evaluatedProducts = allCurrentProducts.map(product => ({
-                  ...product,
-                  evaluation: amazonSearchService.evaluateProductQuality(product)
-                }));
-
-                levelProducts = evaluatedProducts.filter(p => p.evaluation?.isRecommended).map(product => ({
-                  ...product,
-                  sourceQuery: query,
-                  sourcePath: searchPath || 'ROOT',
-                  sourceLevel: level
-                }));
-                
-                console.log(`📦 Level ${level}: Direct search for "${query}" returned ${levelProducts.length} products:`);
-                levelProducts.slice(0, 3).forEach((product, idx) => {
-                  console.log(`   ${idx + 1}. "${product.title}" - $${product.price || product.extracted_price} (Score: ${product.evaluation?.score})`);
-                });
-                if (levelProducts.length > 3) {
-                  console.log(`   ... and ${levelProducts.length - 3} more products`);
+                console.log(`🔍 [${index+1}/${geminiRecommendations.length}] Starting parallel search for: "${productDescription}" (necessity: ${necessityScore})`);
+                if (priceRange) {
+                  console.log(`💰 [${index+1}] Applying price range: $${priceRange.min || 0} - $${priceRange.max || 'unlimited'}`);
                 }
                 
-                // =============================================================================
-                // Track current level's top products for context in refinement models
-                // =============================================================================
-                currentLevelTopProducts = levelProducts
-                  .sort((a, b) => b.evaluation.score - a.evaluation.score)
-                  .slice(0, 5); // Keep top 5 for context
-                
-                console.log(`🎯 Level ${level}: Current top products (${currentLevelTopProducts.length}):`, 
-                  currentLevelTopProducts.map(p => `"${p.title}" ($${p.price || p.extracted_price})`).join(', '));
-                
-                // Record this search step with depth-first tracking
-                const searchStep = {
-                  keywords: query,
-                  amazonResults: amazonCount,
-                  googleShoppingResults: googleShoppingCount,
-                  localResults: localCount,
-                  refinementReason: level > 1 ? `Level ${level} divide-and-conquer refinement` : undefined,
-                  stepType: level > 1 ? 'refinement' as const : 'search' as const,
-                  priceRange: priceRange.min !== undefined || priceRange.max !== undefined ? priceRange : undefined,
-                  level: level, // Add explicit level tracking
-                  searchPath: searchPath || 'ROOT' // Add search path for DFS visualization
-                };
-                
-                currentSteps.push(searchStep);
-                console.log(`📍 DFS: Added search step at Level ${level} - Path: ${searchPath || 'ROOT'} - Query: "${query}"`);
-
-              } catch (error) {
-                console.error(`🚨 Level ${level} search error:`, error);
-              }
-
-              // =============================================================================
-              // Step 2: Call Product Selection Model
-              // =============================================================================
-              const selectionResult = await productSelectionModel(query, levelProducts, level);
-              
-              if (selectionResult.selectedProduct) {
-                // Found a good product, add it to global collection
-                const taggedSelectedProduct = {
-                  ...selectionResult.selectedProduct,
-                  sourceQuery: query,
-                  sourcePath: searchPath || 'ROOT',
-                  sourceLevel: level
-                };
-                globalBestProducts.push(taggedSelectedProduct);
-                console.log(`✅ Level ${level}: Selected product "${selectionResult.selectedProduct.title}" - added to global collection`);
-                console.log(`🎯 Level ${level}: Backtracking with selected product from current level top products`);
-                return {
-                  products: levelProducts,
-                  bestProduct: selectionResult.selectedProduct,
-                  searchSteps: currentSteps
-                };
-              }
-              
-              // =============================================================================
-              // Step 3: If at max level (3), select best available
-              // =============================================================================
-              if (level >= 3) {
-                console.log(`🏁 Level ${level}: Max depth reached, selecting best available product`);
-                const bestAvailable = levelProducts.length > 0 
-                  ? levelProducts.sort((a, b) => b.evaluation.score - a.evaluation.score)[0]
-                  : null;
-                console.log(`✅ Product Selection Model (fallback): Selected "${bestAvailable?.title || 'none'}"`);
-                
-                // Add fallback product to global collection if found
-                if (bestAvailable) {
-                  const taggedFallbackProduct = {
-                    ...bestAvailable,
-                    sourceQuery: query,
-                    sourcePath: searchPath || 'ROOT',
-                    sourceLevel: level
+                try {
+                  const cleanQuery = productDescription.replace(/^["']|["']$/g, '');
+                  
+                  // Define search functions for parallel execution within this product
+                  const amazonSearchFn = async () => {
+                    return await amazonSearchService.searchAmazonProducts({
+                      query: cleanQuery,
+                      maxResults: 20,
+                      sortBy: 'featured',
+                      priceMin: priceRange?.min,
+                      priceMax: priceRange?.max
+                    });
                   };
-                  globalBestProducts.push(taggedFallbackProduct);
-                  console.log(`🎯 Level ${level}: Fallback product added to global collection`);
-                }
-                console.log(`🎯 Level ${level}: Backtracking from max depth with current level top products: ${currentLevelTopProducts.length}`);
+
+                  const googleShoppingSearchFn = async () => {
+                    return await amazonSearchService.searchGoogleShoppingProductsFast({
+                      query: cleanQuery,
+                      maxResults: 20,
+                      priceMin: priceRange?.min,
+                      priceMax: priceRange?.max
+                    });
+                  };
+
+                  const localSearchFn = async () => {
+                    try {
+                      const { searchLocalProducts, fetchLocalProductsFromMongo } = await import('@/lib/vector-db');
+                      
+                      // Convert price range to cents for ChromaDB filtering
+                      const priceMinCents = priceRange?.min ? Math.round(priceRange.min * 100) : undefined;
+                      const priceMaxCents = priceRange?.max ? Math.round(priceRange.max * 100) : undefined;
+                      
+                      const searchResults = await searchLocalProducts(
+                        cleanQuery,
+                        priceMinCents,
+                        priceMaxCents,
+                        10 // Max 10 local products
+                      );
+                      
+                      if (searchResults.ids.length > 0) {
+                        const localProducts = await fetchLocalProductsFromMongo(searchResults.ids);
+                        console.log(`🏠 Retrieved ${localProducts.length} local products`);
+                        return localProducts;
+                      }
+                      
+                      return [];
+                    } catch (error) {
+                      console.error("❌ Error in local search:", error);
+                      return [];
+                    }
+                  };
+
+                  // Execute all searches in parallel for this product
+                  const apiSearchStart = Date.now();
+                  const [amazonProducts, googleShoppingProducts, localProducts] = await Promise.all([
+                    amazonSearchFn(),
+                    googleShoppingSearchFn(),
+                    localSearchFn()
+                  ]);
+                  const apiSearchTime = Date.now() - apiSearchStart;
+
+                  const amazonCount = amazonProducts.length;
+                  const googleShoppingCount = googleShoppingProducts.length;
+                  const localCount = localProducts.length;
                   
-                return {
-                  products: levelProducts,
-                  bestProduct: bestAvailable,
-                  searchSteps: currentSteps
-                };
-              }
-              
-              // =============================================================================
-              // Step 4: If should refine, call Query Refinement Model
-              // =============================================================================
-              if (selectionResult.shouldRefine) {
-                console.log(`🔄 Level ${level}: Refining search with subqueries`);
-                console.log(`🎯 Level ${level}: Enforcing DISTINCT & COMPLEMENTARY branches - no overlapping categories!`);
-                const subqueries = await queryRefinementModel(query, levelProducts, level, currentLevelTopProducts);
-                
-                let allSubProducts: any[] = [...levelProducts];
-                let bestSubProduct: any | null = null;
-                let allSubSteps: SearchStep[] = [...currentSteps];
-                
-                // =============================================================================
-                // Step 5: For each subquery, get price range and recursively call Query Interpreter
-                // =============================================================================
-                for (let i = 0; i < subqueries.length; i++) {
-                  const subquery = subqueries[i];
-                  const subPath = searchPath ? `${searchPath}.${i+1}` : `${i+1}`;
-                  console.log(`🌿 Level ${level}: Processing subquery ${i+1}/${subqueries.length}: "${subquery}"`);
+                  console.log(`📊 Product counts - Amazon: ${amazonCount}, Google: ${googleShoppingCount}, Local: ${localCount}`);
                   
-                  // Get price range for this subquery
-                  const subPriceRange = await priceAnalyzerModel(subquery, priceRange, level + 1, undefined, currentLevelTopProducts);
-                  
-                  // Recursive call - best products will be automatically added to globalBestProducts during recursion
-                  const subResult = await queryInterpreter(subquery, subPriceRange, level + 1, subPath);
-                  
-                  // Collect results with source tracking
-                  const taggedProducts = subResult.products.map(product => ({
+                  // Combine and evaluate products
+                  const evaluateStart = Date.now();
+                  const allCurrentProducts = [
+                    ...amazonProducts,
+                    ...googleShoppingProducts,
+                    ...localProducts
+                  ];
+
+                  const evaluatedProducts = allCurrentProducts.map(product => ({
                     ...product,
-                    sourceQuery: subquery,
-                    sourcePath: subPath,
-                    sourceLevel: level + 1
+                    evaluation: amazonSearchService.evaluateProductQuality(product)
                   }));
+
+                  const recommendedProducts = evaluatedProducts.filter(p => p.evaluation?.isRecommended);
+                  const evaluateTime = Date.now() - evaluateStart;
                   
-                  allSubProducts.push(...taggedProducts);
-                  allSubSteps.push(...subResult.searchSteps);
+                  console.log(`📦 [${index+1}] "${productDescription}": Found ${recommendedProducts.length} recommended products from ${allCurrentProducts.length} total (APIs: ${apiSearchTime}ms, Eval: ${evaluateTime}ms)`);
                   
-                  console.log(`📦 Level ${level}: Subquery "${subquery}" returned ${subResult.products.length} products:`);
-                  subResult.products.slice(0, 3).forEach((product, idx) => {
-                    console.log(`   ${idx + 1}. "${product.title}" - $${product.price || product.extracted_price} (Score: ${product.evaluation?.score})`);
-                  });
-                  if (subResult.products.length > 3) {
-                    console.log(`   ... and ${subResult.products.length - 3} more products`);
+                  // Create search step
+                  const searchStep = {
+                    keywords: productDescription,
+                    amazonResults: amazonCount,
+                    googleShoppingResults: googleShoppingCount,
+                    localResults: localCount,
+                    stepType: 'search' as const,
+                    level: 1,
+                    searchPath: `${index + 1}`
+                  };
+                  
+                  // Product selection
+                  let selectedProduct = null;
+                  let selectionTime = 0;
+                  
+                  if (recommendedProducts.length > 0) {
+                    const selectionStart = Date.now();
+                    const selectionResult = await productSelectionModel(productDescription, recommendedProducts, 1);
+                    selectionTime = Date.now() - selectionStart;
+                    
+                    if (selectionResult.selectedProduct) {
+                      selectedProduct = {
+                        ...selectionResult.selectedProduct,
+                        necessity_score: necessityScore,
+                        product_description: productDescription
+                      };
+                      const displayPrice = selectedProduct.price || selectedProduct.extracted_price;
+                      console.log(`✅ [${index+1}] Selected: "${selectedProduct.title}" - ${displayPrice ? `$${displayPrice}` : 'Price unavailable'} (${selectionTime}ms)`);
+                    } else {
+                      console.log(`❌ [${index+1}] No suitable product selected for "${productDescription}"`);
+                    }
+                  } else {
+                    console.log(`❌ [${index+1}] No recommended products found for "${productDescription}"`);
                   }
                   
-                  // Keep track of the first best product for this level's return value
-                  if (subResult.bestProduct && !bestSubProduct) {
-                    bestSubProduct = subResult.bestProduct;
-                  }
+                  const productTime = Date.now() - productStartTime;
+                  console.log(`⏱️ [${index+1}] Total time: ${productTime}ms`);
+                  
+                  return {
+                    productDescription,
+                    selectedProduct,
+                    searchStep,
+                    evaluatedProducts,
+                    searchTime: apiSearchTime + evaluateTime,
+                    selectionTime,
+                    success: true
+                  };
+                  
+                } catch (error) {
+                  console.error(`🚨 [${index+1}] Search error for "${productDescription}":`, error);
+                  return {
+                    productDescription,
+                    selectedProduct: null,
+                    searchStep: null,
+                    evaluatedProducts: [],
+                    searchTime: 0,
+                    selectionTime: 0,
+                    success: false,
+                    error
+                  };
                 }
-                
-                // =============================================================================
-                // Backtracking: Return aggregated results from all subqueries
-                // Each level maintained its own currentLevelTopProducts for context
-                // =============================================================================
-                console.log(`🔙 Level ${level}: Backtracking with ${allSubProducts.length} total products from ${subqueries.length} subqueries`);
-                console.log(`🎯 Level ${level}: Final current level top products maintained: ${currentLevelTopProducts.length}`);
-                console.log(`🏆 Level ${level}: Global best products collection now contains ${globalBestProducts.length} products`);
-                console.log(`📊 DFS: Level ${level} returning ${allSubSteps.length} search steps in depth-first order:`);
-                allSubSteps.forEach((step, idx) => {
-                  console.log(`   ${idx + 1}. Level ${step.level} - Path: ${step.searchPath} - "${step.keywords}"`);
-                });
-                
-                return {
-                  products: allSubProducts,
-                  bestProduct: bestSubProduct,
-                  searchSteps: allSubSteps
-                };
+              };
+
+              // Execute ALL product searches in parallel
+              const allProductSearches = geminiRecommendations.map((recommendation, index) => 
+                searchSingleProduct(recommendation, index, priceRange)
+              );
+              
+              const searchResults = await Promise.all(allProductSearches);
+              const parallelSearchTime = Date.now() - parallelSearchStart;
+              
+              // Process results and update data structures
+              for (const result of searchResults) {
+                if (result.success) {
+                  // Add to master collections
+                  if (result.selectedProduct) {
+                    productMap.set(result.productDescription, result.selectedProduct);
+                  }
+                  if (result.searchStep) {
+                    searchSteps.push(result.searchStep);
+                  }
+                  allProducts.push(...result.evaluatedProducts);
+                  
+                  // Update timing totals
+                  totalSearchTime += result.searchTime;
+                  totalSelectionTime += result.selectionTime;
+                }
               }
               
-              // Fallback: return current results
-              console.log(`🔙 Level ${level}: Backtracking with fallback - no refinement needed`);
-              console.log(`🎯 Level ${level}: Final current level top products: ${currentLevelTopProducts.length}`);
+              console.log(`🚀 PARALLEL EXECUTION COMPLETE: ${geminiRecommendations.length} products searched simultaneously in ${parallelSearchTime}ms`);
+              console.log(`⏱️ TIMING SUMMARY: Parallel total: ${parallelSearchTime}ms, Search: ${totalSearchTime}ms, Selection: ${totalSelectionTime}ms`);
+              
+              // =============================================================================
+              // Step 5: Sort by necessity score and apply price filtering
+              // =============================================================================
+              const allSelectedProducts = Array.from(productMap.values());
+              console.log(`🎯 Selected ${allSelectedProducts.length} products from ${geminiRecommendations.length} searches`);
+              
+              // Sort by necessity score (highest first)
+              allSelectedProducts.sort((a, b) => b.necessity_score - a.necessity_score);
+              
+              let finalProducts: any[] = [];
+              let totalPrice = 0;
+              
+              if (priceRange && priceRange.max !== null && priceRange.max !== undefined) {
+                // Apply price filtering
+                console.log(`💰 Applying price filter: max $${priceRange.max}`);
+                
+                for (const product of allSelectedProducts) {
+                  // Handle price parsing - remove $ signs and other non-numeric characters
+                  const hasOriginalPrice = product.price || product.extracted_price;
+                  const rawPrice = hasOriginalPrice || '0';
+                  const cleanPrice = typeof rawPrice === 'string' ? rawPrice.replace(/[$,]/g, '') : rawPrice;
+                  const productPrice = parseFloat(cleanPrice) || 0;
+                  
+                  const priceStatus = hasOriginalPrice ? `$${productPrice}` : 'Price unavailable (treated as $0)';
+                  console.log(`🔍 Price parsing for "${product.title}": raw="${rawPrice}" clean="${cleanPrice}" parsed=${productPrice} (${priceStatus})`);
+                  
+                  if (!isNaN(productPrice) && totalPrice + productPrice <= priceRange.max) {
+                    finalProducts.push(product);
+                    totalPrice += productPrice;
+                    const priceDisplay = hasOriginalPrice ? `$${productPrice}` : 'Price unavailable (added as $0)';
+                    console.log(`✅ Added "${product.title}" (${priceDisplay}) - Total: $${totalPrice.toFixed(2)}`);
+                  } else {
+                    const wouldExceed = totalPrice + productPrice;
+                    console.log(`❌ Skipped "${product.title}" ($${productPrice}) - Would exceed budget ($${wouldExceed.toFixed(2)} > $${priceRange.max})`);
+                  }
+                }
+              } else {
+                // No price limit, include all products
+                finalProducts = allSelectedProducts;
+                totalPrice = finalProducts.reduce((sum, p) => {
+                  const rawPrice = p.price || p.extracted_price || '0';
+                  const cleanPrice = typeof rawPrice === 'string' ? rawPrice.replace(/[$,]/g, '') : rawPrice;
+                  return sum + (parseFloat(cleanPrice) || 0);
+                }, 0);
+                console.log(`💰 No price limit - including all ${finalProducts.length} products - Total: $${totalPrice.toFixed(2)}`);
+              }
+              
+              console.log(`🏆 Final selection: ${finalProducts.length} products, Total price: $${totalPrice.toFixed(2)}`);
+              
               return {
-                products: levelProducts,
-                bestProduct: null,
-                searchSteps: currentSteps
+                products: allSelectedProducts, // All found products for reference
+                searchSteps: searchSteps,
+                recommendedProducts: finalProducts // Final filtered products to display
               };
             };
 
@@ -2957,239 +3142,71 @@ Return JSON with:
             // 🚀 START RECURSIVE SEARCH
             // =============================================================================
 
-            // Determine initial price range
-            let initialPriceRange: { min?: number; max?: number };
+            // Execute Gemini-based search
+            console.log(`🌟 Starting Gemini-based product search for: "${rewrittenQuery}"`);
+            console.log(`⏱️ INITIALIZATION TIMING: History: ${historyTime}ms, Intent: ${intentTime}ms`);
+            const searchResult = await queryInterpreter(rewrittenQuery);
             
-            if (refreshRequest && refreshRequest.type === 'price_range_search') {
-              // Use price range from refresh request
-              initialPriceRange = {
-                min: refreshRequest.priceMin,
-                max: refreshRequest.priceMax
-              };
-              console.log(`💰 Using refresh request price range: $${initialPriceRange.min} - $${initialPriceRange.max}`);
-            } else {
-              // Get price range from AI analysis
-              const userPriceConstraints = refreshRequest?.priceMin !== undefined || refreshRequest?.priceMax !== undefined 
-                ? { min: refreshRequest.priceMin, max: refreshRequest.priceMax }
-                : undefined;
-              
-              initialPriceRange = await priceAnalyzerModel(rewrittenQuery, undefined, 1, userPriceConstraints, []);
-              console.log(`💰 AI-determined initial price range: $${initialPriceRange.min} - $${initialPriceRange.max}`);
-            }
-
-            // Start recursive search with the rewritten query
-            console.log(`🚀 Starting recursive search with: "${rewrittenQuery}"`);
-            const searchResult = await queryInterpreter(
-              rewrittenQuery, 
-              initialPriceRange, 
-              1
-            );
+            // Extract results
+            const allProducts = searchResult.products;
+            const globalSearchSteps = searchResult.searchSteps;
+            const recommendedProducts = searchResult.recommendedProducts;
             
-            // Extract results from recursive search
-            allProducts = searchResult.products;
-            bestProduct = searchResult.bestProduct;
-            // Use the global best products collection instead of extracting from result
-            const allBestProducts = globalBestProducts; // All best products collected during recursion
-            globalSearchSteps.push(...searchResult.searchSteps);
-
-            console.log(`🔍 DEBUG: Recursive search results:`);
-            console.log(`📊 DFS: Final search steps collected in depth-first order (${globalSearchSteps.length} total):`);
-            globalSearchSteps.forEach((step, idx) => {
-              console.log(`   🔍 Search ${idx + 1}: Level ${step.level} - Path: ${step.searchPath} - "${step.keywords}"`);
+            console.log(`🔍 DEBUG: Gemini search results:`);
+            console.log(`📊 DFS: Final search steps collected (${globalSearchSteps.length} total):`);
+            globalSearchSteps.forEach((step, i) => {
+              console.log(`   🔍 Search ${i + 1}: "${step.keywords}"`);
             });
-            console.log(`   - allProducts.length: ${allProducts.length}`);
-            console.log(`   - bestProduct: ${bestProduct ? bestProduct.title : 'null'}`);
-            console.log(`   - allBestProducts.length: ${allBestProducts.length}`);
-            console.log(`   - globalSearchSteps.length: ${globalSearchSteps.length}`);
             
-            if (allBestProducts.length > 0) {
-              console.log(`🏆 GLOBAL BEST PRODUCTS COLLECTION (${allBestProducts.length} total):`);
-              allBestProducts.forEach((prod, idx) => {
-                console.log(`   ${idx + 1}. Level ${prod.sourceLevel}: "${prod.title}" - From: "${prod.sourceQuery}" (Score: ${prod.evaluation?.score})`);
-              });
-            } else {
-              console.log(`⚠️ No best products were collected during recursive search`);
-            }
+            // Construct result variables for compatibility with existing result logic
+            const allBestProducts = recommendedProducts; // Final filtered products from Gemini search
+            const bestProduct = recommendedProducts.length > 0 ? recommendedProducts[0] : null;
+            const allSelectedProductsForResult = recommendedProducts;
             
-            if (allProducts.length > 0) {
-              console.log(`   - First 5 all products:`, allProducts.slice(0, 5).map(p => `"${p.title}" ($${p.price})`));
-            }
-
-            // =============================================================================
-            // PRODUCT-TO-INTERPRETER CORRESPONDENCE ANALYSIS
-            // =============================================================================
-            console.log(`🔗 PRODUCT-TO-INTERPRETER CORRESPONDENCE:`);
-            const productsByQuery = allProducts.reduce((acc: any, product: any) => {
-              const key = `${product.sourceQuery} (Level ${product.sourceLevel}, Path: ${product.sourcePath})`;
-              if (!acc[key]) {
-                acc[key] = [];
-              }
-              acc[key].push(product);
-              return acc;
-            }, {});
-
-            Object.entries(productsByQuery).forEach(([queryInfo, products]: [string, any]) => {
-              console.log(`🔍 "${queryInfo}" returned ${products.length} products:`);
-              products.slice(0, 3).forEach((product: any, idx: number) => {
-                console.log(`   ${idx + 1}. "${product.title}" - $${product.price || product.extracted_price} (Score: ${product.evaluation?.score})`);
-              });
-              if (products.length > 3) {
-                console.log(`   ... and ${products.length - 3} more products`);
-              }
-            });
-
-            // Filter for mat/blanket products specifically
-            const matProducts = allProducts.filter((product: any) => 
-              product.title.toLowerCase().includes('mat') || 
-              product.title.toLowerCase().includes('blanket') ||
-              product.title.toLowerCase().includes('beach') ||
-              product.title.toLowerCase().includes('picnic')
-            );
-
-            if (matProducts.length > 0) {
-              console.log(`🏖️ MAT/BLANKET PRODUCTS CORRESPONDENCE:`);
-              matProducts.forEach((product: any, idx: number) => {
-                console.log(`   ${idx + 1}. "${product.title}" - From: "${product.sourceQuery}" (Level ${product.sourceLevel}, Path: ${product.sourcePath})`);
-              });
-            }
-
-            // Use the global best products collection
-            if (allBestProducts.length > 0) {
-              console.log(`✅ Using ${allBestProducts.length} BEST PRODUCTS from global collection (selected by interpreters)`);
-              console.log(`🏆 Best products from global collection:`, allBestProducts.map(p => `"${p.title}" (score: ${p.evaluation?.score}, from: ${p.sourceQuery})`));
-              allSelectedProductsForResult = allBestProducts.map(product => ({
-                title: product.title,
-                price: product.price,
-                rating: product.rating,
-                reviews: product.reviews,
-                image: product.image,
-                thumbnail: product.thumbnail,
-                product_photos: product.product_photos,
-                images: product.images,
-                photo: product.photo,
-                img: product.img,
-                extracted_price: product.extracted_price,
-                extracted_original_price: product.extracted_original_price,
-                link: product.link,
-                source: product.source,
-                isPrime: product.isPrime,
-                is_prime: product.is_prime,
-                seller: product.seller,
-                asin: product.asin,
-                product_id: product.product_id,
-                evaluation: {
-                  score: product.evaluation.score,
-                  reasoning: product.evaluation.reasoning,
-                  reasons: product.evaluation.reasons
-                },
-                // Add source query tracking information
-                sourceQuery: product.sourceQuery,
-                sourcePath: product.sourcePath,
-                sourceLevel: product.sourceLevel
-              }));
-              console.log(`📦 Created allSelectedProductsForResult with ${allSelectedProductsForResult.length} BEST PRODUCTS from global collection`);
-            } else if (bestProduct && allProducts.length > 0) {
-              // Fallback: If no best products were collected, use the old logic
-              console.log(`⚠️ No best products collected, falling back to sorting ${allProducts.length} products by score`);
-              const sortedProducts = allProducts.sort((a, b) => b.evaluation.score - a.evaluation.score);
-              console.log(`📋 Sorted products (first 3):`, sortedProducts.slice(0, 3).map(p => `"${p.title}" (score: ${p.evaluation?.score || 'no score'})`));
-              allSelectedProductsForResult = sortedProducts.slice(0, 10).map(product => ({
-                title: product.title,
-                price: product.price,
-                rating: product.rating,
-                reviews: product.reviews,
-                image: product.image,
-                thumbnail: product.thumbnail,
-                product_photos: product.product_photos,
-                images: product.images,
-                photo: product.photo,
-                img: product.img,
-                extracted_price: product.extracted_price,
-                extracted_original_price: product.extracted_original_price,
-                link: product.link,
-                source: product.source,
-                isPrime: product.isPrime,
-                is_prime: product.is_prime,
-                seller: product.seller,
-                asin: product.asin,
-                product_id: product.product_id,
-                evaluation: {
-                  score: product.evaluation.score,
-                  reasoning: product.evaluation.reasoning,
-                  reasons: product.evaluation.reasons
-                },
-                // Add source query tracking information
-                sourceQuery: product.sourceQuery,
-                sourcePath: product.sourcePath,
-                sourceLevel: product.sourceLevel
-              }));
-              console.log(`📦 Created allSelectedProductsForResult with ${allSelectedProductsForResult.length} products (fallback)`);
-            }
-
-            // Create summary based on recursive search results
+            console.log(`📦 Created allSelectedProductsForResult with ${allSelectedProductsForResult.length} products from Gemini search`);
+            
+            // Create summary based on Gemini search results
             let searchSummary: string;
             if (allBestProducts.length > 0) {
-              searchSummary = `Found ${allBestProducts.length} best products from ${globalSearchSteps.length} recursive search${globalSearchSteps.length > 1 ? 'es' : ''}. Selected by interpreters across all levels.`;
-            } else if (bestProduct) {
-              searchSummary = `Found ${allProducts.length} products across ${globalSearchSteps.length} recursive search${globalSearchSteps.length > 1 ? 'es' : ''}. Recommended: ${bestProduct.title}`;
+              searchSummary = `Found ${allBestProducts.length} best products from ${globalSearchSteps.length} Gemini search${globalSearchSteps.length > 1 ? 'es' : ''}. Selected by necessity score and price filtering.`;
             } else if (allProducts.length > 0) {
-              searchSummary = `Found ${allProducts.length} products across ${globalSearchSteps.length} recursive search${globalSearchSteps.length > 1 ? 'es' : ''}, but none met the quality threshold.`;
+              searchSummary = `Found ${allProducts.length} products across ${globalSearchSteps.length} Gemini search${globalSearchSteps.length > 1 ? 'es' : ''}, but none met the price constraints.`;
             } else {
-              searchSummary = `No products were found after ${globalSearchSteps.length} recursive search${globalSearchSteps.length > 1 ? 'es' : ''}.`;
+              searchSummary = `No products were found after ${globalSearchSteps.length} Gemini search${globalSearchSteps.length > 1 ? 'es' : ''}.`;
             }
-
+            
             console.log(`🔍 DEBUG: Final result construction:`);
             console.log(`   - allBestProducts.length: ${allBestProducts.length}`);
             console.log(`   - allSelectedProductsForResult.length: ${allSelectedProductsForResult.length}`);
             console.log(`   - bestProduct exists: ${!!bestProduct}`);
-            console.log(`   - Using: ${allSelectedProductsForResult.length > 0 ? `${allSelectedProductsForResult.length} BEST PRODUCTS from global collection` : (bestProduct ? 'single best product' : 'no products')}`);
+            console.log(`   - Using: ${allSelectedProductsForResult.length > 0 ? `${allSelectedProductsForResult.length} products from Gemini search` : 'no products'}`);
 
             const result: ProductSearchResult = {
-              originalQuery: query,
+              originalQuery: rewrittenQuery,
               searchSteps: globalSearchSteps,
               recommendedProduct: bestProduct || undefined,
-              recommendedProducts: allSelectedProductsForResult.length > 0 ? allSelectedProductsForResult : (bestProduct ? [bestProduct] : []),
+              recommendedProducts: allSelectedProductsForResult,
               searchSummary,
               sessionId: `session_${Date.now()}`,
               allAccumulatedProducts: allProducts,
-              suggestedKeywords: suggestedKeywords || []
+              suggestedKeywords: suggestedKeywords
             };
-
+            
             console.log(`🎯 FINAL: recommendedProducts array length: ${result.recommendedProducts?.length || 0}`);
             if (result.recommendedProducts && result.recommendedProducts.length > 0) {
-              console.log(`🏆 FINAL: Displaying ${result.recommendedProducts.length} best products to user:`);
+              console.log(`🏆 FINAL: Displaying ${result.recommendedProducts.length} products to user:`);
               result.recommendedProducts.forEach((p: any, idx: number) => {
-                console.log(`   ${idx + 1}. Level ${p.sourceLevel}: "${p.title}" (from: ${p.sourceQuery || 'unknown'})`);
+                console.log(`  ${idx+1}. Level ${p.sourceLevel || 'unknown'}: "${p.title}" (from: ${p.product_description || p.sourceQuery || 'unknown'})`);
               });
             }
-            
-            console.log(`🏷️ BACKEND: Final result contains suggested keywords:`, result.suggestedKeywords);
 
-            // Store the search result if a product was found
-            if (bestProduct) {
+            // Store historical search result
+            if (token?.id) {
               try {
                 await storeHistoricalSearchResult(
                   {
-                    originalQuery: query,
-                    finalProduct: {
-                      title: bestProduct.title,
-                      description: bestProduct.description,
-                      price: bestProduct.price,
-                      extracted_price: bestProduct.extracted_price,
-                      original_price: bestProduct.original_price,
-                      extracted_original_price: bestProduct.extracted_original_price,
-                      rating: bestProduct.rating,
-                      reviews: bestProduct.reviews,
-                      link: bestProduct.link,
-                      thumbnail: bestProduct.thumbnail,
-                      source: bestProduct.source,
-                      asin: bestProduct.asin,
-                      product_id: bestProduct.product_id,
-                      is_prime: bestProduct.is_prime,
-                      seller: bestProduct.seller,
-                      delivery: bestProduct.delivery,
-                      evaluation: bestProduct.evaluation
-                    },
+                    originalQuery: rewrittenQuery,
+                    finalProducts: result.recommendedProducts || [],
                     searchSteps: globalSearchSteps,
                     searchSummary
                   },
@@ -3197,23 +3214,22 @@ Return JSON with:
                   token.name || '',
                   token.email || ''
                 );
+                console.log(`💾 Historical search result stored for user: ${token.id}`);
               } catch (error) {
                 console.error('⚠️ Failed to store historical search result:', error);
-                // Don't throw error here to avoid breaking the search response
               }
             }
 
-                            // Clean up search registration and cancel timeout
-                const searchRecord = activeSearches.get(token.id as string);
-                const searchDuration = searchRecord ? Math.round((Date.now() - searchRecord.timestamp) / 1000) : 0;
-                activeSearches.delete(token.id as string);
-                if (searchTimeout) {
-                  clearTimeout(searchTimeout);
-                }
-            console.log(`🧹 Backend: Completed search ${searchId} for user ${token.id} in ${searchDuration}s, removed from active searches`);
-            
-            if (searchDuration > 30) {
-              console.log(`⚠️ Backend: Search took ${searchDuration}s (longer than maxDuration=30s) - this may cause frontend timeout issues`);
+            // Clean up search registration
+            if (token?.id) {
+              const searchRecord = activeSearches.get(token.id as string);
+              const searchDuration = searchRecord ? Math.round((Date.now() - searchRecord.timestamp) / 1000) : 0;
+              activeSearches.delete(token.id as string);
+              console.log(`🧹 Backend: Completed search for user ${token.id} in ${searchDuration}s, removed from active searches`);
+              
+              if (searchDuration > 30) {
+                console.log(`⚠️ Backend: Search took ${searchDuration}s (longer than maxDuration=30s) - this may cause frontend timeout issues`);
+              }
             }
 
             return {
@@ -3222,27 +3238,17 @@ Return JSON with:
               ui: {
                 type: "product_search",
                 title: "Product Search Results",
-                description: `Found ${allProducts.length} products for "${query}"`
+                description: `Found ${allProducts.length} products for "${rewrittenQuery}"`
               }
             };
-                        } catch (error) {
-                // Clean up search registration on error (timeout will clean itself up)
-                const searchRecord = activeSearches.get(token.id as string);
-                if (searchRecord) {
-                  const searchDuration = Math.round((Date.now() - searchRecord.timestamp) / 1000);
-                  console.log(`🧹 Backend: Search failed for user ${token.id} after ${searchDuration}s, removed from active searches`);
-                }
-                activeSearches.delete(token.id as string);
-                if (searchTimeout) {
-                  clearTimeout(searchTimeout);
-                }
+          } catch (error) {
+            console.error('🚨 Intelligent Product Search error:', error);
             
-            console.error("Error in intelligent product search:", error);
             return {
               type: "error",
               ui: {
                 type: "error",
-                title: "Product Search Failed",
+                title: "Product Search Failed", 
                 description: error instanceof Error ? error.message : 'Unknown error occurred'
               }
             };

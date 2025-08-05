@@ -74,8 +74,8 @@ const ThreadWelcome: FC = () => {
     <ThreadPrimitive.Empty>
       <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
         <div className="flex w-full flex-grow flex-col items-center justify-center">
-          <p className="mt-4 font-medium max-w-2xl text-center text-2xl">Welcome to VisionVerse!</p>
-          <p className="mt-2 max-w-2xl text-center">The first platform in the world where you can trade your vision, idea, complaint or dream about a product or service.</p>
+          <p className="mt-4 font-bold max-w-2xl text-center text-4xl">Welcome to ChoiceMade.ai!</p>
+                      <p className="mt-2 text-center text-gray-600 max-w-2xl text-2xl">Skip the list,<br />no pondering, no comparison, no hassle,<br />we just make the choice for you.</p>
         </div>
         <ThreadWelcomeSuggestions />
       </div>

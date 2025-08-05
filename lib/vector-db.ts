@@ -142,12 +142,14 @@ export async function storeVisionEmbedding(
  * @param productId - Unique ID for the product (should match MongoDB ObjectId)
  * @param description - Product description text
  * @param userId - User ID for isolation
+ * @param price - Product price in cents (optional, for filtering)
  * @returns Promise<string> - The vector ID (same as productId for easy deletion)
  */
 export async function storeProductEmbedding(
   productId: string,
   description: string,
-  userId: string
+  userId: string,
+  price?: number
 ): Promise<string> {
   try {
     const collection = await getProductCollection();
@@ -163,7 +165,9 @@ export async function storeProductEmbedding(
       metadatas: [{
         userId,
         createdAt: new Date().toISOString(),
-        description: description.substring(0, 100) + (description.length > 100 ? "..." : "")
+        description: description.substring(0, 100) + (description.length > 100 ? "..." : ""),
+        price: price || 0, // Store price in cents, default to 0 if not provided
+        priceDisplay: price ? `$${(price / 100).toFixed(2)}` : "$0.00" // Human-readable price
       }]
     });
     
@@ -172,6 +176,137 @@ export async function storeProductEmbedding(
   } catch (error) {
     console.error("❌ Error storing product embedding:", error);
     throw error;
+  }
+}
+
+/**
+ * Search for similar local products across all users
+ * @param query - Search query text
+ * @param priceMin - Minimum price in cents (optional)
+ * @param priceMax - Maximum price in cents (optional)
+ * @param limit - Maximum number of results (default: 10)
+ * @returns Promise with similar local products
+ */
+export async function searchLocalProducts(
+  query: string,
+  priceMin?: number,
+  priceMax?: number,
+  limit: number = 10
+): Promise<{
+  ids: string[];
+  documents: string[];
+  metadatas: any[];
+  distances: number[];
+}> {
+  try {
+    console.log(`🏠 Searching local products for: "${query}"`);
+    
+    const collection = await getProductCollection();
+    
+    // Generate embedding for the query
+    const embedding = await generateEmbedding(query);
+    
+    // Build where condition for price filtering
+    let whereCondition: any = {};
+    if (priceMin !== undefined || priceMax !== undefined) {
+      if (priceMin !== undefined && priceMax !== undefined) {
+        whereCondition = {
+          "$and": [
+            { "price": { "$gte": priceMin } },
+            { "price": { "$lte": priceMax } }
+          ]
+        };
+      } else if (priceMin !== undefined) {
+        whereCondition = { "price": { "$gte": priceMin } };
+      } else if (priceMax !== undefined) {
+        whereCondition = { "price": { "$lte": priceMax } };
+      }
+      console.log(`💰 Filtering by price: ${priceMin ? `$${priceMin/100}` : 'any'} - ${priceMax ? `$${priceMax/100}` : 'any'}`);
+    }
+    
+    // Search for similar products
+    const results = await collection.query({
+      queryEmbeddings: [embedding],
+      nResults: limit,
+      where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined
+    });
+    
+    const foundCount = results.ids[0]?.length || 0;
+    console.log(`🏠 Found ${foundCount} local products`);
+    
+    return {
+      ids: results.ids[0] || [],
+      documents: results.documents[0] || [],
+      metadatas: results.metadatas[0] || [],
+      distances: results.distances[0] || []
+    };
+  } catch (error) {
+    console.error("❌ Error searching local products:", error);
+    return { ids: [], documents: [], metadatas: [], distances: [] };
+  }
+}
+
+/**
+ * Fetch complete product data from MongoDB based on product IDs
+ * @param productIds - Array of product IDs
+ * @returns Promise with complete product data
+ */
+export async function fetchLocalProductsFromMongo(productIds: string[]): Promise<any[]> {
+  try {
+    if (productIds.length === 0) return [];
+    
+    console.log(`📦 Fetching ${productIds.length} local products from MongoDB`);
+    
+    // Import MongoDB client
+    const { default: clientPromise } = await import('@/lib/mongodb');
+    const client = await clientPromise;
+    const db = client.db("visionverse");
+    const productCollection = db.collection("products");
+    
+    // Convert string IDs to ObjectId and fetch products
+    const { ObjectId } = await import('mongodb');
+    const objectIds = productIds.map(id => new ObjectId(id));
+    
+    const products = await productCollection.find({
+      _id: { $in: objectIds }
+    }).toArray();
+    
+    // Convert to unified product format
+    const unifiedProducts = products.map(product => ({
+      id: product._id.toString(),
+      title: product.productDescription,
+      description: product.productDescription,
+      price: product.price ? (product.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
+      currency: 'USD',
+      image: product.filePath !== '/no-file' ? `/api/files${product.filePath.replace('/data/', '/')}` : null,
+      rating: 5.0, // Default rating for local products
+      reviews: 1, // Default review count
+      source: 'local',
+      product_link: product.url || '#',
+      availability: 'In Stock',
+      seller: product.userName || 'Local Seller',
+      is_sponsored: false,
+      is_prime: false,
+      
+      // Include original MongoDB data for reference
+      _originalData: {
+        userId: product.userId,
+        userName: product.userName,
+        userEmail: product.userEmail,
+        filePath: product.filePath,
+        url: product.url,
+        price: product.price,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt
+      }
+    }));
+    
+    console.log(`✅ Converted ${unifiedProducts.length} local products to unified format`);
+    return unifiedProducts;
+    
+  } catch (error) {
+    console.error("❌ Error fetching local products from MongoDB:", error);
+    return [];
   }
 }
 

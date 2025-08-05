@@ -6,7 +6,7 @@ export interface HistoricalSearchResult {
   userName: string;
   userEmail: string;
   originalQuery: string;
-  finalProduct: {
+  finalProducts: Array<{
     title: string;
     description?: string;
     price: string;
@@ -28,12 +28,15 @@ export interface HistoricalSearchResult {
       reasons: string[];
       isRecommended: boolean;
     };
-  };
+    product_description?: string; // Added to track which Gemini recommendation this product came from
+    necessity_score?: number; // Added to track Gemini necessity score
+  }>;
   searchSteps: Array<{
     keywords: string;
     amazonResults: number;
     googleShoppingResults?: number;
-    localResults: number;
+    localResults?: number;
+    sheinResults?: number;
     refinementReason?: string;
     stepType?: 'intent' | 'search' | 'refinement';
     priceRange?: {
@@ -52,7 +55,7 @@ export interface HistoricalSearchDocument extends Omit<HistoricalSearchResult, '
 
 export interface StoreHistoricalSearchRequest {
   originalQuery: string;
-  finalProduct: HistoricalSearchResult['finalProduct'];
+  finalProducts: HistoricalSearchResult['finalProducts'];
   searchSteps: HistoricalSearchResult['searchSteps'];
   searchSummary: string;
 } 

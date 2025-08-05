@@ -1,16 +1,20 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-02T02:39:17.644Z
-📊 Total messages: 16
-👤 User messages: 6
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-05T02:41:13.489Z
+📊 Total messages: 28
+👤 User messages: 10
 
 📝 USER MESSAGE HISTORY:
-  [1/6] [{"type":"text","text":"i want to have picnic in the park"}]
-  [2/6] [{"type":"text","text":"i want to go the the beach and stay for 1 day, what should i prepare?"}]
-  [3/6] [{"type":"text","text":"i want to go the the beach and stay for 1 day, what should i bring"}]
-  [4/6] [{"type":"text","text":"i want to go to beach and stay for the whole day"}]
-  [5/6] [{"type":"text","text":"i want to go to beach and stay for the whole day"}]
-  [6/6] [{"type":"text","text":"i want to hang out with my girlfriend in the park, which should  we prepare"}]
+  [1/10] [{"type":"text","text":"I want to go to india"}]
+  [2/10] [{"type":"text","text":"i want to hang out with my girlfriend at the sea beach"}]
+  [3/10] [{"type":"text","text":"i want to buy a chocolate"}]
+  [4/10] [{"type":"text","text":"i want to study in the library for a whole day"}]
+  [5/10] [{"type":"text","text":"i want a chocolate"}]
+  [6/10] [{"type":"text","text":"i want a chocloate"}]
+  [7/10] [{"type":"text","text":"i want a chocolate"}]
+  [8/10] [{"type":"text","text":"i want a chocolate"}]
+  [9/10] [{"type":"text","text":"i want a unbrella"}]
+  [10/10] [{"type":"text","text":"i want some snacks"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want to hang out with my girlfriend in the park, which should  we prepare"}]
+  [{"type":"text","text":"i want some snacks"}]
 
 ================================================================================

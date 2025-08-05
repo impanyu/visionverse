@@ -28,7 +28,7 @@ export default function SignIn() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl brand-title">Welcome to VisionVerse</CardTitle>
+                      <CardTitle className="text-2xl brand-title">Welcome to ChoiceMade.ai!</CardTitle>
           <CardDescription>
             Sign in to your account to continue
           </CardDescription>

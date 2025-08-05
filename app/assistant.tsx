@@ -117,7 +117,7 @@ export default function AssistantPage() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-[400px]">
           <CardHeader className="text-center">
-            <CardTitle className="brand-title">Welcome to VisionVerse</CardTitle>
+                                  <CardTitle className="brand-title">Welcome to ChoiceMade.ai!</CardTitle>
             <CardDescription>
               Please sign in to continue
             </CardDescription>
@@ -166,7 +166,7 @@ export default function AssistantPage() {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                     <BreadcrumbLink href="/">
-                      <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">VisionVerse</span>
+                      <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block text-slate-500" />
