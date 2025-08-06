@@ -657,8 +657,8 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
           }
         }
       },
-      tools: {
-        ...frontendTools(tools),
+    tools: {
+      ...frontendTools(tools),
       create_vision_direct: {
         description: "Create a vision directly with the provided description. Use this when the user provides a description.",
         parameters: z.object({
