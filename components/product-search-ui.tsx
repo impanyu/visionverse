@@ -12,6 +12,7 @@ export interface SearchStep {
   amazonResults: number;
   googleShoppingResults?: number;
   localResults?: number;
+  googleMapsResults?: number;
   refinementReason?: string;
   stepType?: 'intent' | 'search' | 'refinement';
   priceRange?: {
@@ -1164,12 +1165,12 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
             <div className="mt-3 space-y-3">
               <div className="flex items-center gap-2 text-blue-600">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                <span className="text-sm font-medium">Searching for the most suitable product...</span>
+                <span className="text-sm font-medium">Searching for the most suitable products and services...</span>
               </div>
               
               {/* Search Sources Progress */}
               <div className="ml-6 space-y-1">
-                <p className="text-xs text-gray-600">🏠 Searching local products</p>
+                <p className="text-xs text-gray-600">🏠 Searching local products and services</p>
                 <p className="text-xs text-gray-600">🔍 Searching Amazon marketplace</p>
                 <p className="text-xs text-gray-600">🛒 Searching Google Shopping</p>
                 <p className="text-xs text-gray-600">🏪 Searching eBay marketplace</p>
@@ -1177,6 +1178,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                 <p className="text-xs text-gray-600">🎨 Searching Etsy</p>
                 <p className="text-xs text-gray-600">👗 Searching Shein</p>
                 <p className="text-xs text-gray-600">🛍️ Searching Temu</p>
+                <p className="text-xs text-gray-600">🗺️ Searching Google Maps services</p>
                 <p className="text-xs text-gray-600">💬 Reading customer comments</p>
                 <p className="text-xs text-gray-600">🤖 Evaluating product quality</p>
               </div>
@@ -1270,10 +1272,12 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                       💡 {step.refinementReason}
                     </p>
                   )}
-                  {(step.amazonResults > 0 || step.googleShoppingResults && step.googleShoppingResults > 0) && (
-                    <div className={`flex gap-4 text-sm ${colors.textTertiary}`}>
-                      <span>🛒 Amazon: {step.amazonResults} results</span>
-                      {step.googleShoppingResults !== undefined && <span>🛍️ Google Shopping: {step.googleShoppingResults} results</span>}
+                  {(step.amazonResults > 0 || step.googleShoppingResults && step.googleShoppingResults > 0 || step.googleMapsResults && step.googleMapsResults > 0 || step.localResults && step.localResults > 0) && (
+                    <div className={`flex gap-4 text-sm ${colors.textTertiary} flex-wrap`}>
+                      {step.amazonResults > 0 && <span>🛒 Amazon: {step.amazonResults} results</span>}
+                      {step.googleShoppingResults !== undefined && step.googleShoppingResults > 0 && <span>🛍️ Google Shopping: {step.googleShoppingResults} results</span>}
+                      {step.googleMapsResults !== undefined && step.googleMapsResults > 0 && <span>🗺️ Google Maps: {step.googleMapsResults} results</span>}
+                      {step.localResults !== undefined && step.localResults > 0 && <span>🏠 Local: {step.localResults} results</span>}
                     </div>
                   )}
                   {step.priceRange && (
@@ -1291,53 +1295,67 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
 
 
               
-              {/* Recommended Products - All Products in One Container */}
+              {/* Separate Products and Services */}
         {(result.recommendedProducts && result.recommendedProducts.length > 0) ? (
           (() => {
-            console.log('✅ RENDERING BUNDLE with', result.recommendedProducts.length, 'products');
+            console.log('✅ RENDERING BUNDLE with', result.recommendedProducts.length, 'items');
+            
+            // Separate products and services
+            const products = result.recommendedProducts.filter(item => 
+              item.type === 'product' || item.source === 'amazon' || item.source === 'google_shopping'
+            );
+            const services = result.recommendedProducts.filter(item => 
+              item.type === 'service'
+            );
+            
+            console.log('📦 Products:', products.length, 'Services:', services.length);
+            
             return (
-            <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 shadow-xl">
-              <CardContent className="p-6">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h3 className="text-xl font-semibold text-blue-800 mb-2">
-                      Recommended Products Bundle
-                    </h3>
-                    <div className="flex items-center gap-4">
-                      <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                        {result.recommendedProducts.filter((_, index) => !removedProductIndices.has(index)).length} products
-                      </span>
-                      <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
-                        <span className="text-sm font-medium">Bundle Total: </span>
-                        <span className="text-lg font-bold">
-                          ${(() => {
-                            const total = result.recommendedProducts
-                              .filter((_, index) => !removedProductIndices.has(index))
-                              .reduce((sum: number, product: any) => {
-                                const price = parseFloat(product.price?.toString().replace('$', '') || '0');
-                                return sum + (isNaN(price) ? 0 : price);
-                              }, 0);
-                            return total.toFixed(2);
-                          })()}
-                        </span>
+              <div className="space-y-6">
+                {/* Products Section */}
+                {products.length > 0 && (
+                  <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 shadow-xl">
+                    <CardContent className="p-6">
+                      {/* Header */}
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                            Recommended Products Bundle
+                          </h3>
+                          <div className="flex items-center gap-4">
+                            <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                              {products.filter((_, index) => !removedProductIndices.has(index)).length} products
+                            </span>
+                            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
+                              <span className="text-sm font-medium">Bundle Total: </span>
+                              <span className="text-lg font-bold">
+                                ${(() => {
+                                  const total = products
+                                    .filter((_, index) => !removedProductIndices.has(index))
+                                    .reduce((sum: number, product: any) => {
+                                      const price = parseFloat(product.price?.toString().replace('$', '') || '0');
+                                      return sum + (isNaN(price) ? 0 : price);
+                                    }, 0);
+                                  return total.toFixed(2);
+                                })()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200">
+                            <div className="text-xs font-medium">Curated Selection</div>
+                            <div className="text-sm">✨ Bundle Deal</div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200">
-                      <div className="text-xs font-medium">Curated Selection</div>
-                      <div className="text-sm">✨ Bundle Deal</div>
-                    </div>
-                  </div>
-                </div>
               
-              {/* Products Grid */}
-              <div className="space-y-4">
-                {(() => {
-                  const visibleProducts = result.recommendedProducts
-                    .map((product: any, index: number) => ({ product, originalIndex: index }))
-                    .filter(({ originalIndex }) => !removedProductIndices.has(originalIndex));
+                      {/* Products Grid */}
+                      <div className="space-y-4">
+                        {(() => {
+                          const visibleProducts = products
+                            .map((product: any, index: number) => ({ product, originalIndex: index }))
+                            .filter(({ originalIndex }) => !removedProductIndices.has(originalIndex));
                   
                   if (visibleProducts.length === 0) {
                     return (
@@ -1523,9 +1541,172 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                   </div>
               ));
                 })()}
-            </div>
-            </CardContent>
-          </Card>
+                      </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {/* Services Section */}
+                  {services.length > 0 && (
+                    <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-50 via-violet-50 to-indigo-50 shadow-xl">
+                      <CardContent className="p-6">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <h3 className="text-xl font-semibold text-purple-800 mb-2">
+                              Recommended Services
+                            </h3>
+                            <div className="flex items-center gap-4">
+                              <span className="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
+                                {services.length} services
+                              </span>
+                              <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg border border-green-200">
+                                <span className="text-sm font-medium">Services Total: </span>
+                                <span className="text-lg font-bold">
+                                  ${(() => {
+                                    const total = services.reduce((sum: number, service: any) => {
+                                      const price = parseFloat(service.price?.toString().replace('$', '') || '0');
+                                      return sum + (isNaN(price) ? 0 : price);
+                                    }, 0);
+                                    return total.toFixed(2);
+                                  })()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 px-3 py-2 rounded-lg border border-violet-200">
+                              <div className="text-xs font-medium">Local Providers</div>
+                              <div className="text-sm">🏢 Services</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Services Grid */}
+                        <div className="space-y-4">
+                          {services.map((service: any, index: number) => (
+                            <div key={`service-${refreshKey}-${index}-${service?.title?.slice(0,10) || 'no-service'}`} 
+                                 className="border border-purple-200 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                              
+                              {/* Service Header */}
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="flex items-center gap-3">
+                                  <span className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded-full min-w-[32px] text-center">
+                                    {index + 1}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="text-lg font-bold text-green-600">
+                                    {service.price ? (typeof service.price === 'string' ? (service.price.startsWith('$') ? service.price : `$${service.price}`) : `$${(service.price / 100).toFixed(2)}`) : '$0.00'}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Service Details */}
+                              <div className="space-y-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 mr-4">
+                                    <h4 className="font-medium text-gray-900 mb-3 line-clamp-2 text-lg">
+                                      {service.title || service.serviceDescription || 'Local Service'}
+                                    </h4>
+                                    
+                                    {/* Source Badge */}
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <span className="bg-purple-100 text-purple-800 border border-purple-200 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {service.website ? '🗺️ Google Maps' : '🏢 Local Service'}
+                                      </span>
+                                      {service.rating && (
+                                        <div className="flex items-center gap-1">
+                                          <div className="flex">
+                                            {Array.from({ length: 5 }, (_, i) => (
+                                              <Star key={i} className={`h-3 w-3 ${i < Math.floor(service.rating) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'}`} />
+                                            ))}
+                                          </div>
+                                          <span className="text-sm text-gray-600">
+                                            {service.rating}★ {service.reviews && `(${service.reviews} reviews)`}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Service Description */}
+                                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                                      {service.description || service.serviceDescription || 'Professional local service provider'}
+                                    </p>
+                                    
+                                    {/* Service Info */}
+                                    <div className="text-sm text-gray-500 space-y-1">
+                                      {service.address && (
+                                        <div>
+                                          📍{' '}
+                                          <a 
+                                            href={`https://www.google.com/maps/search/${encodeURIComponent(service.address)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                          >
+                                            {service.address}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {service.phone && (
+                                        <div>📞 {service.phone}</div>
+                                      )}
+                                      {service.open_state && (
+                                        <div className={`font-medium ${service.open_state.toLowerCase().includes('open') ? 'text-green-600' : 'text-red-600'}`}>
+                                          🕒 {service.open_state}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Service Image */}
+                                  <div className="flex-shrink-0">
+                                    {(service.image || service.thumbnail) ? (
+                                      <img 
+                                        src={service.image || service.thumbnail} 
+                                        alt={service.title || 'Service'}
+                                        className="w-24 h-24 object-cover rounded-lg border"
+                                      />
+                                    ) : (
+                                      <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-violet-200 rounded-lg flex items-center justify-center">
+                                        <span className="text-2xl">🏢</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Action Button */}
+                                <div className="flex">
+                                  <Button
+                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 w-full justify-center"
+                                    onClick={() => {
+                                      // Handle different URL field names for Google Maps vs Local services
+                                      const serviceUrl = service.website || service.url || service.product_link;
+                                      if (serviceUrl && serviceUrl !== '#') {
+                                        window.open(serviceUrl, '_blank');
+                                      } else {
+                                        // If no direct URL, try to open Google Maps with place info
+                                        if (service.title && service.address) {
+                                          const searchQuery = encodeURIComponent(`${service.title} ${service.address}`);
+                                          window.open(`https://www.google.com/maps/search/${searchQuery}`, '_blank');
+                                        }
+                                      }
+                                    }}
+                                    disabled={!service.website && !service.url && !service.product_link && (!service.title || !service.address)}
+                                  >
+                                    <span>Contact Provider</span>
+                                    <ExternalLink className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
             );
           })()
         ) : result.recommendedProduct && (
@@ -1717,10 +1898,10 @@ export const ProductSearchToolUI = makeAssistantToolUI<
         <div className="flex flex-col items-center justify-center p-12 space-y-4">
                         <div className="flex items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="text-lg font-medium text-gray-700">Searching for the most suitable product</span>
+                <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
               </div>
           <div className="text-center space-y-2">
-            <p className="text-gray-600">🏠 Searching local products</p>
+            <p className="text-gray-600">🏠 Searching local products and services</p>
             <p className="text-gray-600">🔍 Searching Amazon marketplace</p>
             <p className="text-gray-600">🛒 Searching Google Shopping</p>
             <p className="text-gray-600">🏪 Searching eBay marketplace</p>
@@ -1728,6 +1909,7 @@ export const ProductSearchToolUI = makeAssistantToolUI<
             <p className="text-gray-600">🎨 Searching Etsy</p>
             <p className="text-gray-600">👗 Searching Shein</p>
             <p className="text-gray-600">🛍️ Searching Temu</p>
+            <p className="text-gray-600">🗺️ Searching Google Maps services</p>
             <p className="text-gray-600">💬 Reading customer comments</p>
             <p className="text-gray-600">🤖 Evaluating product quality</p>
           </div>

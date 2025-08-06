@@ -15,6 +15,8 @@ const chroma = new ChromaClient({
 const COLLECTION_NAME = "vision_descriptions";
 // Collection name for product descriptions
 const PRODUCT_COLLECTION_NAME = "product_descriptions";
+// Collection name for service descriptions
+const SERVICE_COLLECTION_NAME = "service_descriptions";
 // Collection name for historical product queries
 const HISTORICAL_QUERIES_COLLECTION_NAME = "historical_product_queries";
 
@@ -75,6 +77,25 @@ async function getProductCollection(): Promise<Collection> {
     // Create collection if it doesn't exist
     return await chroma.createCollection({
       name: PRODUCT_COLLECTION_NAME,
+      embeddingFunction: manualEmbedder,
+    });
+  }
+}
+
+/**
+ * Get or create the services collection
+ */
+async function getServiceCollection(): Promise<Collection> {
+  try {
+    // Try to get existing collection
+    return await chroma.getCollection({
+      name: SERVICE_COLLECTION_NAME,
+      embeddingFunction: manualEmbedder,
+    });
+  } catch (error) {
+    // Create collection if it doesn't exist
+    return await chroma.createCollection({
+      name: SERVICE_COLLECTION_NAME,
       embeddingFunction: manualEmbedder,
     });
   }
@@ -728,5 +749,200 @@ export async function searchSimilarHistoricalQueries(
   } catch (error) {
     console.error("❌ Error searching historical queries:", error);
     throw error;
+  }
+}
+
+// ============================================================================
+// SERVICE EMBEDDING FUNCTIONS
+// ============================================================================
+
+/**
+ * Store a service description embedding in the vector database
+ * @param serviceId - Unique ID for the service (should match MongoDB ObjectId)
+ * @param description - Service description text
+ * @param userId - User ID for isolation
+ * @param price - Service price in cents (optional, for filtering)
+ * @returns Promise<string> - The vector ID (same as serviceId for easy deletion)
+ */
+export async function storeServiceEmbedding(
+  serviceId: string,
+  description: string,
+  userId: string,
+  price?: number
+): Promise<string> {
+  try {
+    const collection = await getServiceCollection();
+    
+    // Generate embedding using OpenAI
+    const embedding = await generateEmbedding(description);
+    
+    // Store in Chroma with metadata
+    await collection.add({
+      ids: [serviceId],
+      embeddings: [embedding],
+      documents: [description],
+      metadatas: [{
+        userId,
+        createdAt: new Date().toISOString(),
+        description: description.substring(0, 100) + (description.length > 100 ? "..." : ""),
+        price: price || 0, // Store price in cents, default to 0 if not provided
+        priceDisplay: price ? `$${(price / 100).toFixed(2)}` : "$0.00" // Human-readable price
+      }]
+    });
+    
+    console.log(`✅ Stored embedding for service ${serviceId}`);
+    return serviceId;
+  } catch (error) {
+    console.error("❌ Error storing service embedding:", error);
+    throw error;
+  }
+}
+
+/**
+ * Search for similar local services across all users
+ * @param query - Search query text
+ * @param priceMin - Minimum price in cents (optional)
+ * @param priceMax - Maximum price in cents (optional)
+ * @param limit - Maximum number of results (default: 10)
+ * @returns Promise with similar local services
+ */
+export async function searchLocalServices(
+  query: string,
+  priceMin?: number,
+  priceMax?: number,
+  limit: number = 10
+): Promise<{
+  ids: string[];
+  documents: string[];
+  metadatas: any[];
+  distances: number[];
+}> {
+  try {
+    console.log(`🏠 Searching local services for: "${query}"`);
+    
+    const collection = await getServiceCollection();
+    
+    // Generate embedding for the query
+    const embedding = await generateEmbedding(query);
+    
+    // Build where condition for price filtering
+    let whereCondition: any = {};
+    if (priceMin !== undefined || priceMax !== undefined) {
+      if (priceMin !== undefined && priceMax !== undefined) {
+        whereCondition = {
+          "$and": [
+            { "price": { "$gte": priceMin } },
+            { "price": { "$lte": priceMax } }
+          ]
+        };
+      } else if (priceMin !== undefined) {
+        whereCondition = { "price": { "$gte": priceMin } };
+      } else if (priceMax !== undefined) {
+        whereCondition = { "price": { "$lte": priceMax } };
+      }
+      console.log(`💰 Filtering by price: ${priceMin ? `$${priceMin/100}` : 'any'} - ${priceMax ? `$${priceMax/100}` : 'any'}`);
+    }
+    
+    // Search for similar services
+    const results = await collection.query({
+      queryEmbeddings: [embedding],
+      nResults: limit,
+      where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined
+    });
+    
+    const foundCount = results.ids[0]?.length || 0;
+    console.log(`🏠 Found ${foundCount} local services`);
+    
+    return {
+      ids: results.ids[0] || [],
+      documents: results.documents[0] || [],
+      metadatas: results.metadatas[0] || [],
+      distances: results.distances[0] || []
+    };
+  } catch (error) {
+    console.error("❌ Error searching local services:", error);
+    return { ids: [], documents: [], metadatas: [], distances: [] };
+  }
+}
+
+/**
+ * Fetch complete service data from MongoDB based on service IDs
+ * @param serviceIds - Array of service IDs
+ * @returns Promise with complete service data
+ */
+export async function fetchLocalServicesFromMongo(serviceIds: string[]): Promise<any[]> {
+  try {
+    if (serviceIds.length === 0) return [];
+    
+    console.log(`📦 Fetching ${serviceIds.length} local services from MongoDB`);
+    
+    // Import MongoDB client
+    const { default: clientPromise } = await import('@/lib/mongodb');
+    const client = await clientPromise;
+    const db = client.db("visionverse");
+    const serviceCollection = db.collection("services");
+    
+    // Convert string IDs to ObjectId and fetch services
+    const { ObjectId } = await import('mongodb');
+    const objectIds = serviceIds.map(id => new ObjectId(id));
+    
+    const services = await serviceCollection.find({
+      _id: { $in: objectIds }
+    }).toArray();
+    
+    // Convert to unified service format
+    const unifiedServices = services.map(service => ({
+      id: service._id.toString(),
+      title: service.serviceDescription,
+      description: service.serviceDescription,
+      price: service.price ? (service.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
+      currency: 'USD',
+      image: service.filePath !== '/no-file' ? `/api/files${service.filePath.replace('/data/', '/')}` : null,
+      rating: 5.0, // Default rating for local services
+      reviews: 1, // Default review count
+      source: 'local',
+      product_link: service.url || '#',
+      availability: 'Available',
+      seller: service.userName || 'Local Provider',
+      is_sponsored: false,
+      is_prime: false,
+      
+      // Include original MongoDB data for reference
+      _originalData: {
+        userId: service.userId,
+        userName: service.userName,
+        userEmail: service.userEmail,
+        filePath: service.filePath,
+        url: service.url,
+        price: service.price,
+        createdAt: service.createdAt,
+        updatedAt: service.updatedAt
+      }
+    }));
+    
+    console.log(`📦 Successfully fetched ${unifiedServices.length} local services`);
+    return unifiedServices;
+  } catch (error) {
+    console.error("❌ Error fetching local services from MongoDB:", error);
+    return [];
+  }
+}
+
+/**
+ * Delete a service embedding from the vector database
+ * @param serviceId - Service ID to delete
+ * @returns Promise<boolean> - Success status
+ */
+export async function deleteServiceEmbedding(serviceId: string): Promise<boolean> {
+  try {
+    const collection = await getServiceCollection();
+    await collection.delete({
+      ids: [serviceId]
+    });
+    console.log(`✅ Deleted embedding for service ${serviceId}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error deleting service embedding:", error);
+    return false;
   }
 }

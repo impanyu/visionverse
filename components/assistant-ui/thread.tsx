@@ -6,6 +6,7 @@ import {
   ThreadPrimitive,
   useThread,
   useMessage,
+  useAssistantRuntime,
 } from "@assistant-ui/react";
 import type { FC } from "react";
 import {
@@ -14,16 +15,25 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CopyIcon,
+  MapPin,
   PencilIcon,
   RefreshCwIcon,
   SendHorizontalIcon,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { ToolFallback } from "./tool-fallback";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Thread: FC = () => {
   const { messages = [] } = useThread() || {};
@@ -44,11 +54,9 @@ export const Thread: FC = () => {
             AssistantMessage: AssistantMessage,
           }}
         />
-        <div className="fixed bottom-0 left-0 right-0 mt-3 flex w-full flex-col items-center justify-end bg-inherit pb-4 px-4 z-50">
-          <div className="w-full max-w-4xl mx-auto">
-            <PersistentSuggestions />
-            <Composer />
-          </div>
+        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 mt-3 flex flex-col items-center justify-end bg-inherit pb-4 px-4 z-50 w-full max-w-4xl">
+          <PersistentSuggestions />
+          <Composer />
         </div>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
@@ -74,8 +82,8 @@ const ThreadWelcome: FC = () => {
     <ThreadPrimitive.Empty>
       <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
         <div className="flex w-full flex-grow flex-col items-center justify-center">
-          <p className="mt-4 font-bold max-w-2xl text-center text-4xl">Welcome to ChoiceMade.ai!</p>
-                      <p className="mt-2 text-center text-gray-600 max-w-2xl text-2xl">Skip the list,<br />no pondering, no comparison, no hassle,<br />we just make the choice for you.</p>
+          <p className="mt-4 font-bold max-w-2xl text-center text-3xl">Welcome to ChoiceMade.ai!</p>
+                      <p className="mt-2 text-center text-gray-600 max-w-2xl text-lg">Skip the list,<br />no pondering, no comparison, no hassle,<br />we just make the choice for you.</p>
         </div>
         <ThreadWelcomeSuggestions />
       </div>
@@ -93,30 +101,134 @@ const PersistentSuggestions: FC = () => {
 
 const Composer: FC = () => {
   console.log('🎯 Composer: Component rendered at', new Date().toISOString());
+  const [searchOption, setSearchOption] = useState<'both' | 'product' | 'service'>('both');
+  const [gpsEnabled, setGpsEnabled] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const runtime = useAssistantRuntime();
+  
+  const searchOptionLabels = {
+    'both': 'Search for both',
+    'product': 'Product only', 
+    'service': 'Service only'
+  };
+
+  // Function to get user's GPS location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      console.error('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        setUserLocation(location);
+        console.log('📍 GPS Location obtained:', location);
+        // Store location globally for backend access
+        (window as any).__CHOICEMADE_USER_LOCATION = location;
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setGpsEnabled(false);
+      }
+    );
+  };
+
+  // Handle GPS toggle
+  const handleGpsToggle = () => {
+    if (!gpsEnabled) {
+      getCurrentLocation();
+      setGpsEnabled(true);
+    } else {
+      setGpsEnabled(false);
+      setUserLocation(null);
+      (window as any).__CHOICEMADE_USER_LOCATION = null;
+    }
+  };
   
   return (
     <ComposerPrimitive.Root 
       className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         console.log('🚀 Composer: Form submitted!', e);
-        console.log('🚀 Composer: This should trigger a new search');
+        console.log('🚀 Composer: Search option:', searchOption);
+        
+        // Store search option globally for backend to access
+        (window as any).__CHOICEMADE_SEARCH_OPTION = searchOption;
+        console.log('🔧 Composer: Stored search option globally:', searchOption);
       }}
     >
-      <ComposerPrimitive.Input
-        rows={1}
-        autoFocus
-        placeholder="Write a message..."
-        className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
-        onChange={(e) => {
-          console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            console.log('🎯 Composer: Enter key pressed - should submit form');
-          }
-        }}
-      />
-      <ComposerAction />
+      <div className="relative flex items-center w-full">
+        <ComposerPrimitive.Input
+          rows={1}
+          autoFocus
+          placeholder="Write a message..."
+          className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-3 pr-20 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+          onChange={(e) => {
+            console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              console.log('🎯 Composer: Enter key pressed - should submit form');
+            }
+          }}
+        />
+        
+        {/* Right-aligned controls inside input */}
+        <div className="absolute right-1 flex items-center gap-1">
+          {/* GPS Location Toggle */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleGpsToggle}
+            className={`px-1.5 py-1 h-7 text-xs transition-colors ${
+              gpsEnabled 
+                ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100' 
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+            }`}
+            title={gpsEnabled ? 'GPS enabled - Click to disable' : 'Click to enable GPS location'}
+          >
+            <MapPin className="w-3 h-3" />
+          </Button>
+          
+          {/* Search Option Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="px-1.5 py-1 h-7 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                <Settings className="w-3 h-3 mr-1" />
+                {searchOptionLabels[searchOption]}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem 
+                onClick={() => setSearchOption('both')}
+                className={searchOption === 'both' ? 'bg-accent' : ''}
+              >
+                Search for both
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setSearchOption('product')}
+                className={searchOption === 'product' ? 'bg-accent' : ''}
+              >
+                Product only
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setSearchOption('service')}
+                className={searchOption === 'service' ? 'bg-accent' : ''}
+              >
+                Service only
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Send/Cancel Button */}
+          <ComposerAction />
+        </div>
+      </div>
     </ComposerPrimitive.Root>
   );
 };
@@ -129,7 +241,7 @@ const ComposerAction: FC = () => {
           <TooltipIconButton
             tooltip="Send"
             variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            className="size-7 p-1.5 transition-opacity ease-in"
             onClick={() => {
               console.log('🚀 ComposerAction: Send button clicked!');
               console.log('🚀 ComposerAction: This should trigger message sending');
@@ -147,7 +259,7 @@ const ComposerAction: FC = () => {
               <TooltipIconButton
                 tooltip="Cancel"
                 variant="default"
-                className="my-2.5 size-8 p-2 transition-opacity ease-in"
+                className="size-7 p-1.5 transition-opacity ease-in"
                 onClick={() => {
                   console.log('🛑 ComposerAction: Cancel button clicked');
                 }}

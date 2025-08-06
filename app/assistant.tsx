@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Plus, Package } from "lucide-react";
+import { LogOut, User, Plus, Package, Briefcase } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useThread, useComposer, ThreadPrimitive } from "@assistant-ui/react";
 import { VisionCreationToolUI, VisionCreationDirectToolUI, ListMyVisionsToolUI, SearchMyVisionsToolUI, SearchAllVisionsToolUI, DeleteVisionWithListToolUI, VisionCreatedWithListToolUI, VisionDuplicateFoundToolUI, ShowVisionToolUI } from "@/components/vision-creation-tool-ui";
@@ -23,6 +23,13 @@ import {
   ProductDeletedWithListToolUI,
   ShowProductToolUI 
 } from "@/components/product-tool-ui";
+import { 
+  ServiceFormToolUI, 
+  ServiceCreatedWithListToolUI, 
+  ServicesListToolUI, 
+  ServiceDeletedWithListToolUI,
+  ShowServiceToolUI 
+} from "@/components/service-tool-ui";
 
 import { ProductSearchToolUI } from "@/components/product-search-ui";
 
@@ -78,12 +85,29 @@ export default function AssistantPage() {
   
   const runtime = useChatRuntime({
     api: "/api/chat",
+    // Add custom headers to include search option and user location
+    headers: () => {
+      const searchOption = (window as any).__CHOICEMADE_SEARCH_OPTION || 'both';
+      const userLocation = (window as any).__CHOICEMADE_USER_LOCATION;
+      
+      console.log('🔧 Runtime: Adding search option header:', searchOption);
+      console.log('🔧 Runtime: Adding user location header:', userLocation);
+      
+      const headers: any = {
+        'X-Search-Option': searchOption
+      };
+      
+      if (userLocation) {
+        headers['X-User-Location'] = JSON.stringify(userLocation);
+      }
+      
+      return headers;
+    }
   });
 
 
 
   const handleAddProduct = () => {
-    // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
     const hiddenButton = document.getElementById('hidden-add-product-suggestion');
     if (hiddenButton) {
       hiddenButton.click();
@@ -91,8 +115,21 @@ export default function AssistantPage() {
   };
 
   const handleManageProducts = () => {
-    // We'll use a hidden ThreadPrimitive.Suggestion to trigger the message
     const hiddenButton = document.getElementById('hidden-manage-products-suggestion');
+    if (hiddenButton) {
+      hiddenButton.click();
+    }
+  };
+
+  const handleAddService = () => {
+    const hiddenButton = document.getElementById('hidden-add-service-suggestion');
+    if (hiddenButton) {
+      hiddenButton.click();
+    }
+  };
+
+  const handleManageServices = () => {
+    const hiddenButton = document.getElementById('hidden-manage-services-suggestion');
     if (hiddenButton) {
       hiddenButton.click();
     }
@@ -133,7 +170,6 @@ export default function AssistantPage() {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <VisionCreationToolUI />
-      <ProductFormToolUI />
       <VisionCreationDirectToolUI />
       <ListMyVisionsToolUI />
       <SearchMyVisionsToolUI />
@@ -147,6 +183,11 @@ export default function AssistantPage() {
       <ProductsListToolUI />
       <ProductDeletedWithListToolUI />
       <ShowProductToolUI />
+      <ServiceFormToolUI />
+      <ServiceCreatedWithListToolUI />
+      <ServicesListToolUI />
+      <ServiceDeletedWithListToolUI />
+      <ShowServiceToolUI />
 
       <ProductSearchToolUI />
       <SidebarProvider defaultOpen={false}>
@@ -190,13 +231,41 @@ export default function AssistantPage() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleAddProduct}>
+                  <DropdownMenuItem onClick={(e) => {
+                    console.log('🎯 DropdownMenuItem clicked for add product');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddProduct();
+                  }}>
                     <Plus className="mr-2 h-4 w-4" />
                     <span>add a product</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleManageProducts}>
+                  <DropdownMenuItem onClick={(e) => {
+                    console.log('🎯 DropdownMenuItem clicked for manage products');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleManageProducts();
+                  }}>
                     <Package className="mr-2 h-4 w-4" />
                     <span>manage my products</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    console.log('🎯 DropdownMenuItem clicked for add service');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddService();
+                  }}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    <span>add a service</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    console.log('🎯 DropdownMenuItem clicked for manage services');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleManageServices();
+                  }}>
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    <span>manage my services</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
@@ -228,6 +297,24 @@ export default function AssistantPage() {
       <ThreadPrimitive.Suggestion
         id="hidden-manage-products-suggestion"
         prompt="manage my products"
+        method="replace"
+        autoSend={true}
+        style={{ display: 'none' }}
+      />
+      
+      {/* Hidden suggestion button for add service */}
+      <ThreadPrimitive.Suggestion
+        id="hidden-add-service-suggestion"
+        prompt="add a service"
+        method="replace"
+        autoSend={true}
+        style={{ display: 'none' }}
+      />
+      
+      {/* Hidden suggestion button for manage services */}
+      <ThreadPrimitive.Suggestion
+        id="hidden-manage-services-suggestion"
+        prompt="manage my services"
         method="replace"
         autoSend={true}
         style={{ display: 'none' }}

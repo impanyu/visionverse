@@ -12,9 +12,23 @@ import OpenAI from 'openai';
 import { ProductSearchResult, SearchStep } from "@/components/product-search-ui";
 import { ObjectId } from "mongodb";
 import { ProductDocument, Product } from "@/types/product";
+import { ServiceDocument, Service } from "@/types/service";
 
 // Removed edge runtime since MongoDB requires Node.js modules
 export const maxDuration = 30;
+
+// Function to calculate distance between two coordinates in miles
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in miles
+}
 
 // In-memory store to track active searches by user ID
 const activeSearches = new Map<string, { timestamp: number; searchId: string }>();
@@ -366,18 +380,41 @@ export async function POST(req: Request) {
     console.error('Failed to write conversation debug file:', error);
   }
   
+  // Extract search option from request headers
+  const searchOption = req.headers.get('X-Search-Option') || 'both';
+  console.log(`🎯 API: Search option from headers: ${searchOption}`);
+  
+  // Extract user location from request headers
+  const userLocationHeader = req.headers.get('X-User-Location');
+  let userLocation: {lat: number, lng: number} | null = null;
+  if (userLocationHeader) {
+    try {
+      userLocation = JSON.parse(userLocationHeader);
+      console.log(`📍 API: User location from headers:`, userLocation);
+    } catch (error) {
+      console.warn('⚠️ API: Failed to parse user location header:', error);
+    }
+  }
+  
   // Handle both string and array content types
   let userMessage = '';
+  let originalUserMessage = '';
+  
   if (lastMessage?.content) {
     if (typeof lastMessage.content === 'string') {
+      originalUserMessage = lastMessage.content;
       userMessage = lastMessage.content.toLowerCase();
+      console.log(`🔍 API: String message content: "${lastMessage.content}"`);
     } else if (Array.isArray(lastMessage.content)) {
       // Extract text from content parts array
-      userMessage = lastMessage.content
+      const extractedText = lastMessage.content
         .filter((part: any) => part.type === 'text')
         .map((part: any) => part.text)
-        .join(' ')
-        .toLowerCase();
+        .join(' ');
+      
+      originalUserMessage = extractedText;
+      userMessage = extractedText.toLowerCase();
+      console.log(`🔍 API: Array message content: "${extractedText}"`);
     }
   }
   
@@ -414,6 +451,14 @@ export async function POST(req: Request) {
     forcedTool = 'list_my_products';
   } else if (userMessage.includes('create product') || userMessage.includes('create a product') || userMessage.includes('new product') || userMessage.includes('add product') || userMessage.includes('add a product')) {
     forcedTool = 'create_product_form';
+  } else if (userMessage.includes('list my services') || userMessage.includes('show my services') || userMessage.includes('my services') || userMessage.includes('manage my services')) {
+    forcedTool = 'list_my_services';
+  } else if (userMessage.includes('create service') || userMessage.includes('create a service') || userMessage.includes('new service') || userMessage.includes('add service') || userMessage.includes('add a service')) {
+    forcedTool = 'create_service_form';
+  } else if (userMessage.includes('delete product') && userMessage.match(/delete product\s+([a-f0-9]{24})/)) {
+    forcedTool = 'delete_product';
+  } else if (userMessage.includes('delete service') && userMessage.match(/delete service\s+([a-f0-9]{24})/)) {
+    forcedTool = 'delete_service';
 
   } else {
     // Default behavior: treat as product search if not explicitly asking for other tools
@@ -472,11 +517,21 @@ TOOL USAGE RULES:
 
 6. When the user asks to list/show their products, IMMEDIATELY use list_my_products - DO NOT generate any text
 
-7. When the user searches for products, IMMEDIATELY use intelligent_product_search, just input the user's original message into intelligent_product_search, without any change!!!
+7. When the user asks to create or add a SERVICE:
+   - If they provide ANY description/content (even brief), IMMEDIATELY use create_service_direct - DO NOT generate any text
+   - If they ask to add or create a service with NO description at all, IMMEDIATELY use create_service_form - DO NOT generate any text
 
-DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a product search query. 
+8. When the user asks to list/show their services, IMMEDIATELY use list_my_services - DO NOT generate any text
 
-🚨 Pay Attention: For ANY product search (explicit or default), literally keep the user's current prompt and input the original message into intelligent_product_search, without any change!!!
+9. When the user searches for products or services, IMMEDIATELY use intelligent_product_search:
+   - Pass the user's exact message as the query argument!!!
+   - DO NOT modify or parse the user's message - use it exactly as provided !!!
+   - For example, if the user says "I want something", the query should be exactly "I want something", do not remove any words or phrases from the user's message
+
+
+DEFAULT BEHAVIOR: If the user's message doesn't match any of the above patterns and doesn't contain keywords like 'vision', 'idea', 'dream', 'concept', 'design', 'product', 'list', 'show', 'manage', 'create', 'shop', 'store', treat it as a search query for both products and services. 
+
+🚨 Pay Attention: For ANY search (explicit or default), the search scope is automatically handled!
 
 🛑🛑🛑 FINAL WARNING: NO TEXT GENERATION EVER WITH TOOLS! 🛑🛑🛑
 If you generate ANY text when calling a tool, you will cause a system error.
@@ -486,6 +541,8 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
 
   // Force the AI to be completely silent with tools
   enhancedSystem += `\n\n🔇 SILENCE MODE: When using ANY tool, you must be completely silent. No explanations, no JSON, no text whatsoever.`;
+
+  // Search option is now handled automatically in the tool - no AI instruction needed
 
   // Add extra instruction if tool is being forced
   // Simple approach - let AI choose tools naturally based on context
@@ -538,6 +595,17 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
   console.log("🤖 API: Available tools:", Object.keys({
     ...frontendTools(tools),
     create_vision_direct: "create_vision_direct",
+    create_product_form: "create_product_form",
+    create_product_direct: "create_product_direct", 
+    list_my_products: "list_my_products",
+    show_product: "show_product",
+    delete_product: "delete_product",
+    product_created_with_list: "product_created_with_list",
+    product_deleted_with_list: "product_deleted_with_list",
+    create_service_form: "create_service_form",
+    list_my_services: "list_my_services",
+    show_service: "show_service",
+    delete_service: "delete_service",
     intelligent_product_search: "intelligent_product_search"
   }));
   
@@ -589,8 +657,8 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
           }
         }
       },
-    tools: {
-      ...frontendTools(tools),
+      tools: {
+        ...frontendTools(tools),
       create_vision_direct: {
         description: "Create a vision directly with the provided description. Use this when the user provides a description.",
         parameters: z.object({
@@ -1704,17 +1772,25 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
       },
 
       intelligent_product_search: {
-        description: "Search for products across Amazon and local stores with intelligent keyword refinement and quality evaluation.",
+        description: "Search for products and/or services across Amazon, local stores, and local services with intelligent keyword refinement and quality evaluation.",
         parameters: z.object({
-          query: z.string().describe("A clear, complete search query based on the user's current input for finding relevant products"),
+          query: z.string().describe("A clear, complete search query based on the user's current input for finding relevant products and/or services"),
         }),
         execute: async ({ query }) => {
+          // Read search option from request headers
+          const search_option = req.headers.get('X-Search-Option') || 'both';
+          
+          // Set search flags based on search_option
+          const search_product = search_option === 'product' || search_option === 'both';
+          const search_service = search_option === 'service' || search_option === 'both';
+          
           // Declare searchTimeout outside try-catch for proper scope
           let searchTimeout: NodeJS.Timeout | null = null;
           
           try {
             console.log(`🎯 Backend: TOOL CALLED - intelligent_product_search`);
-            console.log(`🔍 Backend: Starting intelligent product search for: "${query}"`);
+            console.log(`🔍 Backend: Starting intelligent search for: "${query}"`);
+            console.log(`🔍 Backend: Search option: ${search_option}, search_product: ${search_product}, search_service: ${search_service}`);
             console.log(`🔍 Backend: refreshRequest:`, refreshRequest);
             console.log(`🔍 Backend: User ID: ${token.id}`);
             
@@ -2210,33 +2286,54 @@ Examples:
                 try {
                   console.log(`🤖 Gemini API: Getting product recommendations for "${query}" (attempt ${attempt}/${MAX_RETRIES})`);
                   
-                  const geminiPrompt = `Query: "${query}"
+                  const geminiPrompt = `
 
-You will help the user to make a plan for the query. 
+TASK: Based on user's goal: ${query}, 
 
-TASK: Based on my need: ${query}, 
+Ignoring the price, you will help the user to make a plan for the goal. 
+A plan is a list of 1-26 necessary products and/or services serving different and non-overlapping functionalities which work together to best achieve the user's goal.
 
-Ignoring the price, what should i prepare and purchase? 
-Help me to make a plan which best fits to my need. 
-A plan is a list of 1- 26 products serving different and non-overlap functionalities which I need to purchase at a time for my query. 
-Pay attention: output a json list containing product descriptions and necessity score between 0 - 1: {"product_description":"actual description...", "necessity_score": 0.5}. 
-Pay attention: the play should only contain products, don't include any service or other things.
-Necessity score measures how important the product is in the plan. 
-For only one product in the plan, the necessity score should be 1. 
-The product description does not need to be in too much detail or too specific. 
-Don't overthink, if the user ask for some category of product, just output the product description of the category.
-If the user mention some task, activity or event,  output a comprehensive shopping plan for the task, activity or event.
+SEARCH SCOPE:
+- Include products: ${search_product}
+- Include services: ${search_service}
 
-Pay attention: Merely output a json string, without any other text !!
+${search_product && search_service ? 'You can include both products and services in your plan.' : 
+  search_product ? 'CRITICAL: Only include products in your plan. All items must have "type": "product". Even if the query mentions services (like hotels, restaurants), interpret it as related products (like travel items, dining accessories, etc.).' : 
+  'CRITICAL: Only include services in your plan. All items must have "type": "service". Focus on how to fulfill the user\'s goal.'}
+
+Pay attention: output a json list containing descriptions and necessity score between 0 - 1: {"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service"}. 
+Necessity score measures how important the item is in the plan. 
+For only one item in the plan, the necessity score should be 1. 
+The description should be clear but not overly specific. 
+Don't overthink, if the user asks for some category of product, just output the product description of the category.
 
 
+Pay attention: Output ONLY a json string, without any other text !!
 
-OUTPUTFORMAT EXAMPLE:
-[
-  {"product_description": "Travel backpack for carrying essentials", "necessity_score": 0.9},
-  {"product_description": "Water bottle to stay hydrated", "necessity_score": 0.8}
+EXAMPLES:
+
+For query: "I want to travel to New York" (products and services):
+[ 
+  {"description": "Travel backpack for carrying essentials", "necessity_score": 0.9, "type": "product"},
+  {"description": "Water bottle to stay hydrated", "necessity_score": 0.8, "type": "product"},
+  {"description": "Hotel in New York", "necessity_score": 1.0, "type": "service"}
 ]
 
+For query: "I want to find an Italian restaurant" (products and services):
+[ 
+  {"description": "Italian restaurant", "necessity_score": 1, "type": "service"}
+]
+
+For query: "I need chocolate" (products only):
+[ 
+  {"description": "High-quality dark chocolate", "necessity_score": 1, "type": "product"}
+]
+
+For query: "I want to find a hotel" (products only):
+[ 
+  {"description": "Travel guidebook for finding accommodations", "necessity_score": 0.8, "type": "product"},
+  {"description": "Travel luggage for hotel stays", "necessity_score": 0.9, "type": "product"}
+]
 
 JSON Array:`;
 
@@ -2271,7 +2368,7 @@ JSON Array:`;
                     console.warn(`⚠️ No content returned from Gemini API on attempt ${attempt}`);
                     if (attempt === MAX_RETRIES) {
                       console.log('🔍 Final attempt - using fallback');
-                      return [{ product_description: query, necessity_score: 1.0 }];
+                      return [{ product_description: query, necessity_score: 1.0 }]; // Keep backward compatibility
                     }
                     continue; // Try next attempt
                   }
@@ -2298,26 +2395,34 @@ JSON Array:`;
                       throw new Error('Response is not an array');
                     }
                     
-                    // Validate and clean each product
-                    const validatedProducts = products
-                      .filter(p => p && typeof p === 'object')
-                      .map(p => ({
-                        product_description: String(p.product_description || '').trim(),
-                        necessity_score: Math.max(0, Math.min(1, Number(p.necessity_score) || 0.5))
-                      }))
-                      .filter(p => p.product_description.length > 0)
-            
+                    // Validate and clean each item (product or service)
+                    const validatedItems = products
+                      .filter(item => item && typeof item === 'object')
+                      .map(item => {
+                        const description = String(item.description || item.product_description || '').trim();
+                        const necessity_score = Math.max(0, Math.min(1, Number(item.necessity_score) || 0.5));
+                        const type = String(item.type || 'product').toLowerCase();
+                        
+                        // Return object with both old and new format for compatibility
+                        return {
+                          product_description: description, // Old format for backward compatibility
+                          description: description, // New format
+                          necessity_score: necessity_score,
+                          type: type
+                        };
+                      })
+                      .filter(item => item.description.length > 0)
 
-                    if (validatedProducts.length === 0) {
-                      throw new Error('No valid products found in response');
+                    if (validatedItems.length === 0) {
+                      throw new Error('No valid items found in response');
                     }
 
-                    console.log(`✅ Gemini API: Successfully parsed ${validatedProducts.length} products on attempt ${attempt}`);
-                    validatedProducts.forEach((p, i) => 
-                      console.log(`  ${i+1}. "${p.product_description}" (necessity: ${p.necessity_score})`)
+                    console.log(`✅ Gemini API: Successfully parsed ${validatedItems.length} items on attempt ${attempt}`);
+                    validatedItems.forEach((item, i) => 
+                      console.log(`  ${i+1}. "${item.description}" (necessity: ${item.necessity_score}, type: ${item.type})`)
                     );
 
-                    return validatedProducts;
+                    return validatedItems;
                     
                   } catch (parseError) {
                     console.error(`🚨 JSON parse error on attempt ${attempt}:`, parseError);
@@ -2327,8 +2432,8 @@ JSON Array:`;
                       console.log('🚨 All attempts failed, using fallback');
                       return [{ 
                         product_description: `Product for: ${query}`, 
-                        necessity_score: 1.0 
-                      }];
+                        necessity_score: 1.0
+                      }]; // Keep backward compatibility
                     }
                     // Continue to next attempt
                   }
@@ -2653,7 +2758,7 @@ ${recommendedProducts.map((p, i) =>
 ).join('\n\n')}
 
 YOUR TASK:
-1. Select the single BEST product that most closely matches the user's query
+1. Select the single BEST product that best matches the user's query 
 2. Create a CONCISE title (under 10 words) that captures the essence of the product
 
 Consider:
@@ -2750,6 +2855,135 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
               }
             };
 
+            // Service Selection Model: Determines the best service from recommended options
+            const serviceSelectionModel = async (
+              query: string,
+              services: any[],
+              level: number
+            ): Promise<{ selectedService: any | null; shouldRefine: boolean }> => {
+              console.log(`🏢 Service Selection Model: Analyzing ${services.length} services for "${query}"`);
+              
+              if (services.length === 0) {
+                console.log(`❌ Service Selection Model: No services found`);
+                return { selectedService: null, shouldRefine: false };
+              }
+
+              try {
+                const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                
+                // Filter for recommended services and sort by evaluation score
+                const recommendedServices = services
+                  .filter(s => s.evaluation?.isRecommended)
+                  .sort((a, b) => b.evaluation.score - a.evaluation.score)
+                  .slice(0, 10); // Take top 10 for analysis
+
+                if (recommendedServices.length === 0) {
+                  // If no recommended services, select the first available
+                  const firstService = services[0];
+                  console.log(`⚠️ Service Selection Model: No recommended services, selecting first available "${firstService.title || firstService.serviceDescription}"`);
+                  return { selectedService: firstService, shouldRefine: false };
+                }
+
+                const prompt = `You are a service selection expert. Analyze the query and select the BEST service from the recommended options.
+
+QUERY: "${query}"
+
+RECOMMENDED SERVICES:
+${recommendedServices.map((s, i) => 
+  `${i+1}. "${s.title || s.serviceDescription || 'Service Provider'}"
+     • Address: ${s.address || 'N/A'}
+     • Rating: ${s.rating || 'N/A'}★ (${s.reviews || 0} reviews)
+     • Quality Score: ${s.evaluation.score}/100
+     • Source: ${s.source || 'local'}
+     • Open Status: ${s.open_state || 'Unknown'}
+     • Contact: ${s.phone ? 'Phone available' : 'No phone'}, ${s.website ? 'Website available' : 'No website'}
+     • Type: ${s.type || 'Service'}`
+).join('\n\n')}
+
+YOUR TASK:
+1. Select the single BEST service that most closely matches the user's query and you think is the best way to fulfill the user's goal
+2. Create a CONCISE title (under 10 words) that captures the essence of the service
+
+Consider:
+- Relevance to the query
+- Quality score and rating
+- Availability (open status)
+- Contact information availability
+- Location convenience
+
+Return ONLY a JSON object with:
+{
+  "serviceIndex": 1,
+  "conciseTitle": "Short Service Name",
+  "reasoning": "Brief explanation of why this service is the best choice"
+}
+
+CONCISE TITLE GUIDELINES:
+- Maximum 10 words
+- Clear and descriptive
+- Include location if important (e.g., "LA", "Downtown")
+- Focus on the main service type
+- Remove marketing fluff and unnecessary details
+
+Example transformations:
+- "Professional House Cleaning Services in Los Angeles Area..." → "House Cleaning Service LA"
+- "24/7 Emergency Plumbing Repair and Installation Services..." → "24/7 Emergency Plumbing"
+
+Choose the service index (1-${recommendedServices.length}) of the best service.`;
+
+                const response = await openaiClient.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [{ role: "user", content: prompt }],
+                  temperature: 0.3,
+                  max_tokens: 200
+                });
+
+                const content = response.choices[0]?.message?.content?.trim();
+                if (content) {
+                  try {
+                    let cleanJson = content.trim();
+                    if (cleanJson.startsWith('```json')) {
+                      cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                    } else if (cleanJson.startsWith('```')) {
+                      cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                    }
+                    
+                    const decision = JSON.parse(cleanJson);
+                    
+                    if (decision.serviceIndex && decision.serviceIndex >= 1 && decision.serviceIndex <= recommendedServices.length) {
+                      const selectedService = {
+                        ...recommendedServices[decision.serviceIndex - 1],
+                        // Store both original and concise titles
+                        originalTitle: recommendedServices[decision.serviceIndex - 1].title || recommendedServices[decision.serviceIndex - 1].serviceDescription,
+                        title: decision.conciseTitle || recommendedServices[decision.serviceIndex - 1].title || recommendedServices[decision.serviceIndex - 1].serviceDescription,
+                        conciseTitle: decision.conciseTitle
+                      };
+                      console.log(`✅ Service Selection Model: Selected "${selectedService.originalTitle}" (Score: ${selectedService.evaluation.score})`);
+                      console.log(`📝 Concise Title: "${selectedService.title}" - ${decision.reasoning || 'LLM selection'}`);
+                      return { selectedService, shouldRefine: false };
+                    } else {
+                      console.log(`⚠️ Service Selection Model: Invalid service index ${decision.serviceIndex}, falling back to best service`);
+                    }
+                  } catch (parseError) {
+                    console.log(`⚠️ Service Selection Model: JSON parsing failed (${parseError instanceof Error ? parseError.message : 'Unknown error'}), falling back to best service`);
+                  }
+                }
+                
+                // Fallback: select the best service based on score
+                const fallbackService = recommendedServices[0] || services[0];
+                console.log(`⚠️ Service Selection Model: Using fallback selection "${fallbackService.title || fallbackService.serviceDescription}" (Score: ${fallbackService.evaluation?.score || 'N/A'})`);
+                return { selectedService: fallbackService, shouldRefine: false };
+
+              } catch (error) {
+                console.error('🚨 Service Selection Model error:', error);
+                
+                // Error fallback: use the first available service
+                const errorFallbackService = services[0];
+                console.log(`🚨 Service Selection Model: Error fallback, selecting first available service "${errorFallbackService.title || errorFallbackService.serviceDescription}"`);
+                return { selectedService: errorFallbackService, shouldRefine: false };
+              }
+            };
+
                         // =============================================================================
             // 🌟 GLOBAL BEST PRODUCTS COLLECTION
             // =============================================================================
@@ -2797,19 +3031,20 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
               console.log(`🚀 Starting parallel search for ${geminiRecommendations.length} products simultaneously...`);
               const parallelSearchStart = Date.now();
               
-              // Create search function for a single product
-              const searchSingleProduct = async (recommendation: any, index: number, priceRange?: { min?: number; max?: number }) => {
-                const productDescription = recommendation.product_description;
+              // Create search function for a single item (product or service)
+              const searchSingleItem = async (recommendation: any, index: number, priceRange?: { min?: number; max?: number }) => {
+                const description = recommendation.description || recommendation.product_description; // Support both new and old format
                 const necessityScore = recommendation.necessity_score;
-                const productStartTime = Date.now();
+                const itemType = recommendation.type || 'product'; // default to product for backward compatibility
+                const itemStartTime = Date.now();
                 
-                console.log(`🔍 [${index+1}/${geminiRecommendations.length}] Starting parallel search for: "${productDescription}" (necessity: ${necessityScore})`);
+                console.log(`🔍 [${index+1}/${geminiRecommendations.length}] Starting parallel search for ${itemType}: "${description}" (necessity: ${necessityScore})`);
                 if (priceRange) {
                   console.log(`💰 [${index+1}] Applying price range: $${priceRange.min || 0} - $${priceRange.max || 'unlimited'}`);
                 }
                 
                 try {
-                  const cleanQuery = productDescription.replace(/^["']|["']$/g, '');
+                  const cleanQuery = description.replace(/^["']|["']$/g, '');
                   
                   // Define search functions for parallel execution within this product
                   const amazonSearchFn = async () => {
@@ -2831,7 +3066,7 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
                     });
                   };
 
-                  const localSearchFn = async () => {
+                  const localProductSearchFn = async () => {
                     try {
                       const { searchLocalProducts, fetchLocalProductsFromMongo } = await import('@/lib/vector-db');
                       
@@ -2843,7 +3078,7 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
                         cleanQuery,
                         priceMinCents,
                         priceMaxCents,
-                        10 // Max 10 local products
+                        20 // Max 10 local products
                       );
                       
                       if (searchResults.ids.length > 0) {
@@ -2854,96 +3089,248 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
                       
                       return [];
                     } catch (error) {
-                      console.error("❌ Error in local search:", error);
+                      console.error("❌ Error in local product search:", error);
                       return [];
                     }
                   };
 
-                  // Execute all searches in parallel for this product
+                  const googleMapsServiceSearchFn = async () => {
+                    try {
+                      console.log(`🗺️ Searching Google Maps services for: "${cleanQuery}"`);
+                      
+                      // Import service search service
+                      const { serviceSearchService } = await import('@/lib/google-maps-search');
+                      
+                      // Search Google Maps services
+                      const location = userLocation 
+                        ? `@${userLocation.lat},${userLocation.lng}` 
+                        : 'Los Angeles, CA'; // Default location
+                      
+                      const googleMapsServices = await serviceSearchService.searchAllServices({
+                        query: cleanQuery,
+                        location: location,
+                        maxResults: 20,
+                        includeGoogleMaps: true,
+                        includeLocal: false,
+                        priceMin: priceRange?.min,
+                        priceMax: priceRange?.max,
+                        userLocation: userLocation,
+                        radiusMiles: 5 // 5-mile radius
+                      });
+                      
+                      console.log(`🗺️ Found ${googleMapsServices.length} Google Maps services`);
+                      return googleMapsServices;
+                    } catch (error) {
+                      console.error("❌ Error in Google Maps service search:", error);
+                      return [];
+                    }
+                  };
+
+                  const localServiceSearchFn = async () => {
+                    try {
+                      console.log(`🏠 Searching local services for: "${cleanQuery}"`);
+                      
+                      // Search local services
+                      const { searchLocalServices, fetchLocalServicesFromMongo } = await import('@/lib/vector-db');
+                      const priceMinCents = priceRange?.min ? Math.round(priceRange.min * 100) : undefined;
+                      const priceMaxCents = priceRange?.max ? Math.round(priceRange.max * 100) : undefined;
+                      
+                      const localSearchResults = await searchLocalServices(
+                        cleanQuery,
+                        priceMinCents,
+                        priceMaxCents,
+                        10 // Max 10 local services
+                      );
+                      
+                      let localServices: any[] = [];
+                      if (localSearchResults.ids.length > 0) {
+                        localServices = await fetchLocalServicesFromMongo(localSearchResults.ids);
+                        console.log(`🏢 Retrieved ${localServices.length} local services`);
+                        
+                        // Filter by location if user location is available
+                        if (userLocation) {
+                          localServices = localServices.filter(service => {
+                            if (!service.coordinates) return false; // Exclude services without coordinates
+                            
+                            const distance = calculateDistance(
+                              userLocation.lat, userLocation.lng,
+                              service.coordinates.lat, service.coordinates.lng
+                            );
+                            
+                            return distance <= 5; // 5-mile radius
+                          });
+                          console.log(`📍 Filtered to ${localServices.length} services within 5 miles`);
+                        }
+                      }
+                      
+                      return localServices;
+                    } catch (error) {
+                      console.error("❌ Error in local service search:", error);
+                      return [];
+                    }
+                  };
+
+                  // Execute searches in parallel based on item type
                   const apiSearchStart = Date.now();
-                  const [amazonProducts, googleShoppingProducts, localProducts] = await Promise.all([
-                    amazonSearchFn(),
-                    googleShoppingSearchFn(),
-                    localSearchFn()
-                  ]);
+                  let amazonProducts: any[] = [];
+                  let googleShoppingProducts: any[] = [];
+                  let localProducts: any[] = [];
+                  let googleMapsServices: any[] = [];
+                  let localServices: any[] = [];
+                  
+                  if (itemType === 'product') {
+                    // Search for products in Amazon, Google Shopping, and local products
+                    [amazonProducts, googleShoppingProducts, localProducts] = await Promise.all([
+                      amazonSearchFn(),
+                      googleShoppingSearchFn(),
+                      localProductSearchFn()
+                    ]);
+                  } else if (itemType === 'service') {
+                    // Search for services in Google Maps and local services in parallel
+                    [googleMapsServices, localServices] = await Promise.all([
+                      googleMapsServiceSearchFn(),
+                      localServiceSearchFn()
+                    ]);
+                  }
+                  
                   const apiSearchTime = Date.now() - apiSearchStart;
 
                   const amazonCount = amazonProducts.length;
                   const googleShoppingCount = googleShoppingProducts.length;
-                  const localCount = localProducts.length;
+                  const localProductCount = localProducts.length;
+                  const googleMapsServiceCount = googleMapsServices.length;
+                  const localServiceCount = localServices.length;
                   
-                  console.log(`📊 Product counts - Amazon: ${amazonCount}, Google: ${googleShoppingCount}, Local: ${localCount}`);
+                  if (itemType === 'product') {
+                    console.log(`📊 Product counts - Amazon: ${amazonCount}, Google: ${googleShoppingCount}, Local: ${localProductCount}`);
+                  } else {
+                    console.log(`📊 Service counts - Google Maps: ${googleMapsServiceCount}, Local: ${localServiceCount}`);
+                  }
                   
-                  // Combine and evaluate products
+                  // Combine and evaluate items (products or services)
                   const evaluateStart = Date.now();
-                  const allCurrentProducts = [
-                    ...amazonProducts,
-                    ...googleShoppingProducts,
-                    ...localProducts
-                  ];
+                  let allCurrentItems = [];
+                  let evaluatedItems = [];
+                  let recommendedItems = [];
+                  
+                  if (itemType === 'product') {
+                    allCurrentItems = [
+                      ...amazonProducts,
+                      ...googleShoppingProducts,
+                      ...localProducts
+                    ];
 
-                  const evaluatedProducts = allCurrentProducts.map(product => ({
-                    ...product,
-                    evaluation: amazonSearchService.evaluateProductQuality(product)
-                  }));
+                    evaluatedItems = allCurrentItems.map(product => ({
+                      ...product,
+                      evaluation: amazonSearchService.evaluateProductQuality(product)
+                    }));
 
-                  const recommendedProducts = evaluatedProducts.filter(p => p.evaluation?.isRecommended);
+                    recommendedItems = evaluatedItems.filter(p => p.evaluation?.isRecommended);
+                  } else if (itemType === 'service') {
+                    allCurrentItems = [
+                      ...googleMapsServices,
+                      ...localServices
+                    ];
+                    
+                    // Import service search service for evaluation
+                    const { serviceSearchService } = await import('@/lib/google-maps-search');
+                    
+                    // Evaluate each service using the service quality evaluation function
+                    evaluatedItems = allCurrentItems.map(service => ({
+                      ...service,
+                      evaluation: serviceSearchService.evaluateServiceQuality(service)
+                    }));
+                    
+                    // Filter only recommended services
+                    recommendedItems = evaluatedItems.filter(s => s.evaluation?.isRecommended);
+                  }
+                  
                   const evaluateTime = Date.now() - evaluateStart;
                   
-                  console.log(`📦 [${index+1}] "${productDescription}": Found ${recommendedProducts.length} recommended products from ${allCurrentProducts.length} total (APIs: ${apiSearchTime}ms, Eval: ${evaluateTime}ms)`);
+                  console.log(`📦 [${index+1}] "${description}": Found ${recommendedItems.length} recommended ${itemType}s from ${allCurrentItems.length} total (APIs: ${apiSearchTime}ms, Eval: ${evaluateTime}ms)`);
                   
                   // Create search step
                   const searchStep = {
-                    keywords: productDescription,
+                    keywords: description,
                     amazonResults: amazonCount,
                     googleShoppingResults: googleShoppingCount,
-                    localResults: localCount,
+                    localResults: itemType === 'product' ? localProductCount : localServiceCount,
+                    googleMapsResults: itemType === 'service' ? googleMapsServiceCount : undefined,
                     stepType: 'search' as const,
                     level: 1,
                     searchPath: `${index + 1}`
                   };
                   
-                  // Product selection
-                  let selectedProduct = null;
+                  // Item selection (product or service)
+                  let selectedItem = null;
                   let selectionTime = 0;
                   
-                  if (recommendedProducts.length > 0) {
+                  if (recommendedItems.length > 0) {
                     const selectionStart = Date.now();
-                    const selectionResult = await productSelectionModel(productDescription, recommendedProducts, 1);
-                    selectionTime = Date.now() - selectionStart;
                     
-                    if (selectionResult.selectedProduct) {
-                      selectedProduct = {
-                        ...selectionResult.selectedProduct,
-                        necessity_score: necessityScore,
-                        product_description: productDescription
-                      };
-                      const displayPrice = selectedProduct.price || selectedProduct.extracted_price;
-                      console.log(`✅ [${index+1}] Selected: "${selectedProduct.title}" - ${displayPrice ? `$${displayPrice}` : 'Price unavailable'} (${selectionTime}ms)`);
-                    } else {
-                      console.log(`❌ [${index+1}] No suitable product selected for "${productDescription}"`);
+                    if (itemType === 'product') {
+                      const selectionResult = await productSelectionModel(description, recommendedItems, 1);
+                      selectionTime = Date.now() - selectionStart;
+                      
+                      if (selectionResult.selectedProduct) {
+                        selectedItem = {
+                          ...selectionResult.selectedProduct,
+                          necessity_score: necessityScore,
+                          description: description,
+                          type: itemType
+                        };
+                        const displayPrice = selectedItem.price || selectedItem.extracted_price;
+                        console.log(`✅ [${index+1}] Selected: "${selectedItem.title}" - ${displayPrice ? `$${displayPrice}` : 'Price unavailable'} (${selectionTime}ms)`);
+                      } else {
+                        console.log(`❌ [${index+1}] No suitable product selected for "${description}"`);
+                      }
+                    } else if (itemType === 'service') {
+                      // Use the service selection model
+                      const selectionResult = await serviceSelectionModel(description, recommendedItems, 1);
+                      selectionTime = Date.now() - selectionStart;
+                      
+                      if (selectionResult.selectedService) {
+                        selectedItem = {
+                          ...selectionResult.selectedService,
+                          necessity_score: necessityScore,
+                          description: description,
+                          type: itemType
+                        };
+                        const displayPrice = selectedItem.price || 'Price unavailable';
+                        console.log(`✅ [${index+1}] Selected service: "${selectedItem.title || selectedItem.serviceDescription}" - ${displayPrice} (${selectionTime}ms)`);
+                      } else {
+                        console.log(`❌ [${index+1}] No suitable service selected for "${description}"`);
+                      }
                     }
                   } else {
-                    console.log(`❌ [${index+1}] No recommended products found for "${productDescription}"`);
+                    console.log(`❌ [${index+1}] No recommended ${itemType}s found for "${description}"`);
                   }
                   
-                  const productTime = Date.now() - productStartTime;
-                  console.log(`⏱️ [${index+1}] Total time: ${productTime}ms`);
+                  const itemTime = Date.now() - itemStartTime;
+                  console.log(`⏱️ [${index+1}] Total time: ${itemTime}ms`);
+                  
+                  // Ensure selectedItem has correct type field for UI separation
+                  if (selectedItem && itemType === 'service') {
+                    selectedItem.type = 'service';
+                  } else if (selectedItem && itemType === 'product') {
+                    selectedItem.type = 'product';
+                  }
                   
                   return {
-                    productDescription,
-                    selectedProduct,
+                    productDescription: description, // Keep old name for compatibility
+                    selectedProduct: selectedItem, // Keep old name for compatibility  
                     searchStep,
-                    evaluatedProducts,
+                    evaluatedProducts: evaluatedItems, // Keep old name for compatibility
                     searchTime: apiSearchTime + evaluateTime,
                     selectionTime,
-                    success: true
+                    success: true,
+                    itemType: itemType // Add item type for downstream processing
                   };
                   
                 } catch (error) {
-                  console.error(`🚨 [${index+1}] Search error for "${productDescription}":`, error);
+                  console.error(`🚨 [${index+1}] Search error for "${description}":`, error);
                   return {
-                    productDescription,
+                    productDescription: description,
                     selectedProduct: null,
                     searchStep: null,
                     evaluatedProducts: [],
@@ -2956,11 +3343,11 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
               };
 
               // Execute ALL product searches in parallel
-              const allProductSearches = geminiRecommendations.map((recommendation, index) => 
-                searchSingleProduct(recommendation, index, priceRange)
+              const allItemSearches = geminiRecommendations.map((recommendation, index) => 
+                searchSingleItem(recommendation, index, priceRange)
               );
               
-              const searchResults = await Promise.all(allProductSearches);
+              const searchResults = await Promise.all(allItemSearches);
               const parallelSearchTime = Date.now() - parallelSearchStart;
               
               // Process results and update data structures
@@ -3152,6 +3539,206 @@ Choose the product index (1-${recommendedProducts.length}) of the best product.`
                 type: "error",
                 title: "Product Search Failed", 
                 description: error instanceof Error ? error.message : 'Unknown error occurred'
+              }
+            };
+          }
+        },
+      },
+
+      create_service_form: {
+        description: "Display a service creation form for the user. CRITICAL: This tool handles all UI display - you must generate ZERO text when using this tool.",
+        parameters: z.object({}),
+        execute: async () => {
+          return {
+            type: "service_creation_ui",
+            message: "Service creation form",
+            ui_components: {
+              title: "Create New Service",
+              description: "Add a new service to your collection",
+              form_fields: [
+                {
+                  type: "textarea",
+                  name: "serviceDescription",
+                  label: "Service Description",
+                  placeholder: "Describe your service and optionally add a service URL for additional information.",
+                  required: true,
+                  rows: 4
+                },
+                {
+                  type: "text",
+                  name: "url",
+                  label: "Service URL (Optional)",
+                  placeholder: "https://example.com/service-page",
+                  required: false
+                },
+                {
+                  type: "number",
+                  name: "price",
+                  label: "Price (Optional)",
+                  placeholder: "0.00",
+                  required: false
+                },
+                {
+                  type: "file",
+                  name: "imageFile",
+                  label: "Supporting File (Optional)",
+                  accept: "image/*",
+                  required: false
+                }
+              ],
+              submit_button: {
+                text: "Create Service",
+                endpoint: "/api/create_service"
+              }
+            }
+          };
+        }
+      },
+
+      list_my_services: {
+        description: "List all services created by the current user. CRITICAL: This tool handles all UI display - you must generate ZERO text when using this tool.",
+        parameters: z.object({
+          limit: z.number().default(20).describe("Maximum number of services to return"),
+          skip: z.number().default(0).describe("Number of services to skip for pagination"),
+        }),
+        execute: async ({ limit, skip }) => {
+          try {
+            const client = await clientPromise;
+            const db = client.db("visionverse");
+            const collection = db.collection<any>("services");
+
+            // Get services for the current user  
+            const services = await collection
+              .find({ userId: token.id as string })
+              .sort({ createdAt: -1 })
+              .skip(skip)
+              .limit(limit)
+              .toArray();
+
+            const totalCount = await collection.countDocuments({ userId: token.id as string });
+            const hasMore = skip + limit < totalCount;
+
+            // Convert to plain objects with string IDs
+            const servicesWithStringIds = services.map(service => ({
+              ...service,
+              id: service._id?.toString() || "",
+              _id: undefined,
+            }));
+
+            return {
+              type: "list_my_services",
+              services: servicesWithStringIds,
+              pagination: {
+                total: totalCount,
+                skip,
+                limit,
+                hasMore
+              },
+              success: true,
+              suppressOutput: true,
+              ui: {
+                type: "services_list",
+                title: "My Services",
+                description: `You have ${totalCount} service${totalCount !== 1 ? 's' : ''}`,
+                services: servicesWithStringIds,
+                pagination: {
+                  total: totalCount,
+                  skip,
+                  limit,
+                  hasMore
+                }
+              }
+            };
+          } catch (error) {
+            console.error("Error listing services:", error);
+            return {
+              type: "list_my_services",
+              success: false,
+              suppressOutput: true,
+              ui: {
+                type: "services_list",
+                title: "Error",
+                description: "Failed to load services",
+                services: [],
+                pagination: {
+                  total: 0,
+                  skip: 0,
+                  limit,
+                  hasMore: false
+                }
+              }
+            };
+          }
+        }
+      },
+
+      delete_service: {
+        description: "Delete a service from both MongoDB and vector database. CRITICAL: This tool handles all UI updates - you must generate ZERO text when using this tool.",
+        parameters: z.object({
+          serviceId: z.string().describe("The ID of the service to delete"),
+        }),
+        execute: async ({ serviceId }) => {
+          try {
+            // Call the DELETE endpoint
+            const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/create_service?id=${serviceId}`, {
+              method: 'DELETE',
+              headers: {
+                'Cookie': req.headers.get('cookie') || '', // Forward auth cookies
+              },
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText);
+            }
+
+            const result = await response.json();
+
+            // After successful deletion, get the updated service list
+            const client = await clientPromise;
+            const db = client.db("visionverse");
+            const collection = db.collection<ServiceDocument>("services");
+
+            // Get updated services for the current user
+            const services = await collection
+              .find({ userId: token.id as string })
+              .sort({ createdAt: -1 })
+              .limit(20)
+              .toArray();
+
+            // Convert ObjectId to string for JSON response
+            const servicesWithStringIds = services.map(service => ({
+              ...service,
+              id: service._id?.toString() || "",
+              _id: undefined,
+            }));
+
+            return {
+              type: "service_deleted_with_list",
+              deletedId: serviceId,
+              success: true,
+              services: servicesWithStringIds,
+              suppressOutput: true,
+              ui: {
+                type: "service_deleted_with_list",
+                title: "Service Deleted Successfully",
+                description: `Service deleted successfully! Here are your remaining ${services.length} service(s):`,
+                deletedId: serviceId,
+                services: servicesWithStringIds
+              }
+            };
+          } catch (error) {
+            console.error('Error deleting service:', error);
+            return {
+              type: "service_deleted",
+              deletedId: serviceId,
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              suppressOutput: true,
+              ui: {
+                type: "error_card",
+                title: "Failed to Delete Service",
+                description: error instanceof Error ? error.message : 'Unknown error'
               }
             };
           }
