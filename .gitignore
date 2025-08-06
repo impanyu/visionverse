@@ -50,3 +50,4 @@ chroma/
 
 # Local database files
 /data/
+server.log
