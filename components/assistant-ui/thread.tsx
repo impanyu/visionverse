@@ -112,7 +112,7 @@ const Composer: FC = () => {
     'service': 'Service only'
   };
 
-  // Function to get user's GPS location
+  // Function to get user's GPS location - UPDATED v3.1
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       console.error('Geolocation is not supported by this browser.');
@@ -126,13 +126,34 @@ const Composer: FC = () => {
           lng: position.coords.longitude
         };
         setUserLocation(location);
-        console.log('📍 GPS Location obtained:', location);
+        console.log('📍 GPS Location obtained (v2):', location);
         // Store location globally for backend access
         (window as any).__CHOICEMADE_USER_LOCATION = location;
       },
       (error) => {
-        console.error('Error getting location:', error);
+        // FIXED ERROR HANDLING - v3
+        const errorDetails = {
+          code: error?.code || 'UNKNOWN',
+          message: error?.message || 'No message available',
+          errorType: error?.constructor?.name || 'GeolocationError'
+        };
+        
+        console.log('🚨 LOCATION ERROR CAUGHT (v3):', errorDetails);
         setGpsEnabled(false);
+        
+        // Show user-friendly error message based on error code
+        let userMessage = 'Unable to get location';
+        if (error?.code === 1) userMessage = 'Location access denied by user';
+        else if (error?.code === 2) userMessage = 'Location information unavailable';
+        else if (error?.code === 3) userMessage = 'Location request timed out';
+        else userMessage = 'Unknown location error';
+        
+        console.log('📍 USER-FRIENDLY MESSAGE (v3):', userMessage);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
       }
     );
   };
