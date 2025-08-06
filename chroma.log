@@ -1,19 +1,44 @@
 /Users/ypan12/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
   warnings.warn(
-INFO:     Started server process [17235]
+INFO:     Started server process [22720]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 Starting ChromaDB server...
 ChromaDB app imported successfully
 Starting server on 0.0.0.0:8000...
-INFO:     127.0.0.1:52001 - "GET /api/v1/heartbeat HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52633 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:52637 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52633 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52633 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/58e022a9-c89d-41ba-b6f5-ae235bb5efc3/query HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52633 - "GET /api/v2/pre-flight-checks HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52637 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/58e022a9-c89d-41ba-b6f5-ae235bb5efc3/add HTTP/1.1" 201 Created
-INFO:     127.0.0.1:52667 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:52669 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52667 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/121a36ce-3832-477a-be64-6fe6c8e8f787/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57562 - "GET /api/v1/heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57894 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57894 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57898 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57900 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57894 - "GET /api/v2/pre-flight-checks HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57898 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/add HTTP/1.1" 201 Created
+INFO:     127.0.0.1:57894 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57898 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57900 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57928 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57931 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57932 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57934 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57939 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57936 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57940 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/service_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57943 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57944 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57946 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57962 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57958 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57898 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57894 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57928 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57900 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57931 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57932 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57934 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57969 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57967 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57968 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57894 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/24a80e96-9f5f-4f41-a165-51a1a8765820/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57894 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/1888fe3f-8f5d-4117-9192-439be03b6784/query HTTP/1.1" 200 OK

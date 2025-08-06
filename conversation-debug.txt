@@ -1,11 +1,11 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-06T20:25:10.364Z
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-06T20:44:35.844Z
 📊 Total messages: 1
 👤 User messages: 1
 
 📝 USER MESSAGE HISTORY:
-  [1/1] [{"type":"text","text":"i want a chocolate"}]
+  [1/1] [{"type":"text","text":"i want to go to china"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want a chocolate"}]
+  [{"type":"text","text":"i want to go to china"}]
 
 ================================================================================
