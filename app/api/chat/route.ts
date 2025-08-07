@@ -2027,7 +2027,7 @@ ${lastSearchedProductBundles.length > 0 && (() => {
 })() || 'No price reference available.'}
 
 TASK:
-1. Summerize the user profile and only keep important profiles such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, etc., ignore the user's behaviors or activities or plans in the summary!!!
+1. Summerize the user profile and only keep important profiles such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, physical condition, income, financial status, psychological condition, etc., ignore the user's behaviors or activities or plans in the summary!!!
 2. After the original query, append the user profile
 3. Only use CONTEXT when it is helpful for comparison references
 4. Generate 8-15 relevant keywords
@@ -2451,7 +2451,7 @@ TASK: Based on user's goal: ${query},  in which the user's profile is in the par
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
 Make the plan as comprehensive and thorough as possible, but do not add in items that are not necessary to achieve the user's goal.
-When making the plan, you should fully consider the user's profile, such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, etc.
+When making the plan, you should fully consider the user's profile, such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, physical condition, income, financial status, psychological condition, etc.
 
 SEARCH SCOPE:
 - Include products: ${search_product}
@@ -2474,7 +2474,7 @@ For search_location field:
   The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
   You should reason about where the service should be located, to best achieve the user's goal. 
 
-Pay attention: ALWAYS specify user profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions!! Only include specific profile information in the description.
+Pay attention: ALWAYS specify user profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, physical condition, income, financial status, psychological condition, etc.) in descriptions!! Only include specific profile information in the description.
 
 
 Pay attention: Output ONLY a json string, without any other text !!

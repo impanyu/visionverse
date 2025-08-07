@@ -286,7 +286,7 @@ export async function summarizeUserProfile(userId: string): Promise<UserDocument
     const prompt = `You are an expert user profiler. Analyze the following list of user search queries and activities to create a comprehensive user profile summary.
 
 INSTRUCTIONS:
-1. Identify and ONLY extract key user characteristics: gender, age (if mentioned), interests, preferences, lifestyle, family status, marital status, occupation, income, education, location, friends, pets, social relationships, etc.
+1. Identify and ONLY extract key user characteristics: gender, age, lifestyle, family status, marital status, occupation, income, education, location, friends, pets, social relationships, health condition, height, weight, height, weight, physical condition, income, financial status, psychological condition, etc.
 2. ignore any user's activities or plans or behaviors in the summary!!!
 3. newer information should override older information
 4. summarize the user's profile which contains those key characteristics
