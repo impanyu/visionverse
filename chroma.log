@@ -1014,3 +1014,15 @@ INFO:     127.0.0.1:60069 - "POST /api/v2/tenants/default_tenant/databases/defau
 INFO:     127.0.0.1:60069 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/query HTTP/1.1" 200 OK
 INFO:     127.0.0.1:60069 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 200 OK
 INFO:     127.0.0.1:60069 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/24a80e96-9f5f-4f41-a165-51a1a8765820/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/add HTTP/1.1" 201 Created
+INFO:     127.0.0.1:60180 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/24a80e96-9f5f-4f41-a165-51a1a8765820/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/historical_product_queries HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/8d2cedad-50a4-435f-9ece-b1b32ec58099/add HTTP/1.1" 201 Created
+INFO:     127.0.0.1:60410 - "GET /api/v2/tenants/default_tenant/databases/default_database/collections/product_descriptions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60410 - "POST /api/v2/tenants/default_tenant/databases/default_database/collections/24a80e96-9f5f-4f41-a165-51a1a8765820/query HTTP/1.1" 200 OK
