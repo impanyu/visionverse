@@ -39,24 +39,28 @@ export async function POST(req: Request) {
       // Debug: Log all FormData entries
       console.log("📋 FormData entries:");
       for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: File(name="${value.name}", size=${value.size}, type="${value.type}")`);
+        // Check if value is a file-like object (has file properties)
+        if (value && typeof value === 'object' && 'name' in value && 'size' in value) {
+          console.log(`  ${key}: File(name="${(value as any).name}", size=${(value as any).size}, type="${(value as any).type || 'unknown'}")`);
         } else {
           console.log(`  ${key}: "${value}"`);
         }
       }
       
       productDescription = formData.get("productDescription") as string;
-      const file = formData.get("imageFile") as File;
+      const file = formData.get("imageFile");
       const urlStr = formData.get("url") as string;
       const priceStr = formData.get("price") as string;
       
+      // Check if file is a file-like object (works in both browser and Node.js)
+      const isFileObject = file && typeof file === 'object' && 'name' in file && 'size' in file;
+      
       console.log("🔍 File details:", {
         exists: !!file,
-        name: file?.name || 'N/A',
-        size: file?.size || 0,
-        type: file?.type || 'N/A',
-        isFileInstance: file instanceof File
+        name: isFileObject ? (file as any).name : 'N/A',
+        size: isFileObject ? (file as any).size : 0,
+        type: isFileObject ? (file as any).type || 'unknown' : 'N/A',
+        isFileObject: isFileObject
       });
       
       // URL is optional for product creation
@@ -71,7 +75,7 @@ export async function POST(req: Request) {
         }
       }
 
-      if (file && file.size > 0) {
+      if (isFileObject && (file as any).size > 0) {
         // Create user directory
         const userId = token.id as string;
         const userDataDir = path.join(process.cwd(), "data", userId);
@@ -83,14 +87,14 @@ export async function POST(req: Request) {
 
         // Generate unique filename with timestamp
         const timestamp = Date.now();
-        const originalName = file.name;
+        const originalName = (file as any).name;
         const extension = path.extname(originalName);
         const nameWithoutExt = path.basename(originalName, extension);
         const uniqueFileName = `${nameWithoutExt}_${timestamp}${extension}`;
         
         // Save file to disk
         const fileSavePath = path.join(userDataDir, uniqueFileName);
-        const bytes = await file.arrayBuffer();
+        const bytes = await (file as any).arrayBuffer();
         const buffer = Buffer.from(bytes);
         await writeFile(fileSavePath, buffer);
         

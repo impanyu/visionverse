@@ -1,15 +1,11 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-06T21:04:14.492Z
-📊 Total messages: 13
-👤 User messages: 5
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T00:18:57.955Z
+📊 Total messages: 1
+👤 User messages: 1
 
 📝 USER MESSAGE HISTORY:
-  [1/5] [{"type":"text","text":"i want to go to china"}]
-  [2/5] [{"type":"text","text":"i want to go to china"}]
-  [3/5] [{"type":"text","text":"i want to go to china"}]
-  [4/5] [{"type":"text","text":"i want to go to india"}]
-  [5/5] [{"type":"text","text":"i need to got to mars"}]
+  [1/1] create product directly: test
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i need to got to mars"}]
+  create product directly: test
 
 ================================================================================

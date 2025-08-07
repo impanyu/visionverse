@@ -28,7 +28,7 @@ export default function SignIn() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-                      <CardTitle className="text-2xl brand-title">Welcome to ChoiceMade.ai!</CardTitle>
+          <CardTitle className="text-2xl brand-title">Welcome to ChoiceMade.ai!</CardTitle>
           <CardDescription>
             Sign in to your account to continue
           </CardDescription>
@@ -38,7 +38,7 @@ export default function SignIn() {
             <div key={provider.name}>
               <Button
                 onClick={() => signIn(provider.id, { callbackUrl: "/" })}
-                className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 py-3 text-base font-medium shadow-sm hover:shadow-md"
                 variant="outline"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -63,6 +63,12 @@ export default function SignIn() {
               </Button>
             </div>
           ))}
+          
+          <div className="text-center pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500">
+              By signing in, you agree to our terms of service and privacy policy
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
