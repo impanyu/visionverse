@@ -2471,7 +2471,7 @@ Examples:
 
               for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
                 try {
-                  console.log(`🤖 Gemini API: Getting product recommendations for "${query}" (attempt ${attempt}/${MAX_RETRIES})`);
+                  console.log(`🤖 Gemini API: Getting product recommendations for "${query}" with web grounding (attempt ${attempt}/${MAX_RETRIES})`);
                   
                   const geminiPrompt = `
 
@@ -2553,6 +2553,14 @@ JSON Array:`;
                         parts: [{
                           text: geminiPrompt
                         }]
+                      }],
+                      tools: [{
+                        googleSearchRetrieval: {
+                          dynamicRetrievalConfig: {
+                            mode: "MODE_DYNAMIC",
+                            dynamicThreshold: 0.7
+                          }
+                        }
                       }],
                       generationConfig: {
                         temperature: 0.3, // Lower temperature for more consistent JSON
