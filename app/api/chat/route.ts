@@ -3184,8 +3184,9 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                         localServices = await fetchLocalServicesFromMongo(localSearchResults.ids);
                         console.log(`🏢 Retrieved ${localServices.length} local services`);
                         
-                        // Filter by location if user location is available
-                        if (userLocation) {
+                        // Apply location-based filtering similar to Google Maps logic
+                        if (suggestedLocation === 'user_location' && userLocation) {
+                          // Case 1: Suggested user location + user location available → 5-mile filtering
                           localServices = localServices.filter(service => {
                             if (!service.coordinates) return false; // Exclude services without coordinates
                             
@@ -3196,7 +3197,52 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                             
                             return distance <= 5; // 5-mile radius
                           });
-                          console.log(`📍 Filtered to ${localServices.length} services within 5 miles`);
+                          console.log(`📍 [Local Services] Filtered to ${localServices.length} services within 5 miles of user location`);
+                        } else if (suggestedLocation === 'user_location' && !userLocation) {
+                          // Case 2: Suggested user location + no user location → filter to LA area
+                          console.log(`📍 [Local Services] User location suggested but not available, filtering to Los Angeles area`);
+                          localServices = localServices.filter(service => {
+                            if (!service.address) return false; // Exclude services without address
+                            
+                            // Check if service address contains Los Angeles, LA, or California indicators
+                            const address = service.address.toLowerCase();
+                            return address.includes('los angeles') || 
+                                   address.includes('la,') || 
+                                   address.includes('california') || 
+                                   address.includes('ca,') ||
+                                   address.includes('ca ');
+                          });
+                          console.log(`📍 [Local Services] Filtered to ${localServices.length} services in Los Angeles area`);
+                        } else if (suggestedLocation && suggestedLocation !== 'user_location') {
+                          // Case 3: Other specific location suggested → filter to LA area as fallback
+                          console.log(`📍 [Local Services] Specific location "${suggestedLocation}" suggested, filtering to Los Angeles area as fallback`);
+                          localServices = localServices.filter(service => {
+                            if (!service.address) return false; // Exclude services without address
+                            
+                            // Check if service address contains Los Angeles, LA, or California indicators
+                            const address = service.address.toLowerCase();
+                            return address.includes('los angeles') || 
+                                   address.includes('la,') || 
+                                   address.includes('california') || 
+                                   address.includes('ca,') ||
+                                   address.includes('ca ');
+                          });
+                          console.log(`📍 [Local Services] Filtered to ${localServices.length} services in Los Angeles area`);
+                        } else {
+                          // Case 4: No location suggestion → filter to LA area as default
+                          console.log(`📍 [Local Services] No location suggestion, filtering to Los Angeles area as default`);
+                          localServices = localServices.filter(service => {
+                            if (!service.address) return false; // Exclude services without address
+                            
+                            // Check if service address contains Los Angeles, LA, or California indicators
+                            const address = service.address.toLowerCase();
+                            return address.includes('los angeles') || 
+                                   address.includes('la,') || 
+                                   address.includes('california') || 
+                                   address.includes('ca,') ||
+                                   address.includes('ca ');
+                          });
+                          console.log(`📍 [Local Services] Filtered to ${localServices.length} services in Los Angeles area`);
                         }
                       }
                       
