@@ -2508,7 +2508,7 @@ For search_location field:
 
 
 Pay attention: Output ONLY a json string, without any other text !!
-Pay attention: ALWAYS include user's profile in each description!!!!
+Pay attention: always include the user's profile (inside the parentheses of the query) in each description!!!!
 
 EXAMPLES:
 
