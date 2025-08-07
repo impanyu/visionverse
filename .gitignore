@@ -52,4 +52,5 @@ chroma/
 /data/
 server.log
 conversation-debug.txt
-conversation-debug.txt
+chroma.log
+
