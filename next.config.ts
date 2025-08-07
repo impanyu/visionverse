@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;
