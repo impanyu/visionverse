@@ -121,18 +121,22 @@ const GlobalSearchLoadingOverlay: FC = () => {
               /* Desktop styles */
               @media (min-width: 768px) {
                 .waiting-panel {
-                  padding: 24px;
-                  gap: 20px;
+                  padding: 32px;
+                  gap: 24px;
                 }
                 .spinner {
-                  width: 32px;
-                  height: 32px;
+                  width: 36px;
+                  height: 36px;
+                  border-width: 3px;
                 }
                 .main-text {
-                  font-size: 18px;
+                  font-size: 20px;
+                }
+                .search-item {
+                  font-size: 15px;
                 }
                 .search-items {
-                  gap: 8px;
+                  gap: 10px;
                 }
               }
             `}</style>
