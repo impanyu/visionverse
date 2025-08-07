@@ -1,15 +1,14 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T00:37:45.474Z
-📊 Total messages: 13
-👤 User messages: 5
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T00:46:10.323Z
+📊 Total messages: 10
+👤 User messages: 4
 
 📝 USER MESSAGE HISTORY:
-  [1/5] [{"type":"text","text":"i want to go to china"}]
-  [2/5] [{"type":"text","text":"add a product"}]
-  [3/5] [{"type":"text","text":"i want to go to china"}]
-  [4/5] [{"type":"text","text":"i need a chocolate"}]
-  [5/5] [{"type":"text","text":"i want a chocolate"}]
+  [1/4] [{"type":"text","text":"i want an apple"}]
+  [2/4] [{"type":"text","text":"i want a chocolate"}]
+  [3/4] [{"type":"text","text":"i want a chocolate"}]
+  [4/4] [{"type":"text","text":"i want to go to india"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want a chocolate"}]
+  [{"type":"text","text":"i want to go to india"}]
 
 ================================================================================
