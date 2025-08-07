@@ -22,7 +22,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
@@ -210,6 +210,12 @@ const Composer: FC = () => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const runtime = useAssistantRuntime();
   
+  // Initialize global search option on component mount
+  useEffect(() => {
+    (window as any).__CHOICEMADE_SEARCH_OPTION = searchOption;
+    console.log('🔧 Composer: Initialized global search option:', searchOption);
+  }, []);
+  
   const searchOptionLabels = {
     'both': 'Search for both',
     'product': 'Product only', 
@@ -375,19 +381,31 @@ const Composer: FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem 
-                onClick={() => setSearchOption('both')}
+                onClick={() => {
+                  setSearchOption('both');
+                  (window as any).__CHOICEMADE_SEARCH_OPTION = 'both';
+                  console.log('🔧 Composer: Updated search option to: both');
+                }}
                 className={searchOption === 'both' ? 'bg-accent' : ''}
               >
                 Search for both
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setSearchOption('product')}
+                onClick={() => {
+                  setSearchOption('product');
+                  (window as any).__CHOICEMADE_SEARCH_OPTION = 'product';
+                  console.log('🔧 Composer: Updated search option to: product');
+                }}
                 className={searchOption === 'product' ? 'bg-accent' : ''}
               >
                 Product only
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setSearchOption('service')}
+                onClick={() => {
+                  setSearchOption('service');
+                  (window as any).__CHOICEMADE_SEARCH_OPTION = 'service';
+                  console.log('🔧 Composer: Updated search option to: service');
+                }}
                 className={searchOption === 'service' ? 'bg-accent' : ''}
               >
                 Service only
