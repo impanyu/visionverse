@@ -2314,7 +2314,7 @@ Don't overthink, if the user asks for some category of product, just output the 
 For search_location field:
 - For products: Always use empty string ""
 - For each service: 
-  You should reason about where the service should be searched for, to best achieve the user's goal.
+  You should reason about where the service should be located, to best achieve the user's goal.
 
 Pay attention: Output ONLY a json string, without any other text !!
 
@@ -2324,7 +2324,8 @@ For query: "I want to travel to New York" (products and services):
 [ 
   {"description": "Travel backpack for carrying essentials", "necessity_score": 0.9, "type": "product", "search_location": ""},
   {"description": "Water bottle to stay hydrated", "necessity_score": 0.8, "type": "product", "search_location": ""},
-  {"description": "Hotel in New York", "necessity_score": 1.0, "type": "service", "search_location": "New York, NY"}
+  {"description": "Hotel in New York", "necessity_score": 1.0, "type": "service", "search_location": "New York, NY"},
+  {"description": "Restaurant", "necessity_score": 1.0, "type": "service", "search_location": "New York, NY"},
 ]
 
 For query: "I want to find an Italian restaurant near me" (products and services):
