@@ -2292,8 +2292,8 @@ TASK: Based on user's goal: ${query},
 
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1-26 necessary products and/or services serving different and non-overlapping functionalities which work together to best achieve the user's goal.
-You have to make the list of products or services as comprehensive as possible, but do not include duplicate items or items with overlapping functionalities.
-If not specified, you can assume the user is a male adult, if the user specifies gender, you should use the gender.tes
+You have to make the list of products or services as comprehensive as possible, but to achieve the user's goal is enough, do not add in items that are not necessary to achieve the user's goal.
+If not specified, you can assume the user is a male adult, if the user specifies gender, you should use the gender.
 
 SEARCH SCOPE:
 - Include products: ${search_product}
