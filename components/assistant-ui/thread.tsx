@@ -58,28 +58,28 @@ const GlobalSearchLoadingOverlay: FC = () => {
           background: 'white',
           border: '1px solid #e5e7eb',
           borderRadius: '8px',
-          padding: '24px',
+          padding: '40px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '20px',
+          gap: '28px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          minWidth: '300px',
-          maxWidth: '400px'
+          minWidth: '450px',
+          maxWidth: '550px'
         };
 
         const spinnerStyle: React.CSSProperties = {
-          width: '32px',
-          height: '32px',
-          border: '3px solid transparent',
-          borderTop: '3px solid #2563eb',
+          width: '44px',
+          height: '44px',
+          border: '4px solid transparent',
+          borderTop: '4px solid #2563eb',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         };
 
         const mainTextStyle: React.CSSProperties = {
-          fontSize: '18px',
-          fontWeight: 600,
+          fontSize: '22px',
+          fontWeight: 700,
           color: '#374151',
           textAlign: 'center',
           lineHeight: 1.3,
@@ -87,7 +87,8 @@ const GlobalSearchLoadingOverlay: FC = () => {
         };
 
         const searchItemStyle: React.CSSProperties = {
-          fontSize: '14px',
+          fontSize: '16px',
+          fontWeight: 500,
           color: '#6b7280',
           textAlign: 'center',
           margin: 0,
@@ -97,7 +98,7 @@ const GlobalSearchLoadingOverlay: FC = () => {
         const searchItemsStyle: React.CSSProperties = {
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '12px'
         };
 
         return (
@@ -109,7 +110,7 @@ const GlobalSearchLoadingOverlay: FC = () => {
             `}</style>
             <div style={containerStyle}>
               <div style={panelStyle}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                   <div style={spinnerStyle}></div>
                   <p style={mainTextStyle}>Searching for the most suitable products and services</p>
                 </div>
