@@ -35,44 +35,129 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Global search loading overlay component - PRODUCTION FIXED POSITIONING
+// Global search loading overlay component - CSS RESPONSIVE INLINE STYLES
 const GlobalSearchLoadingOverlay: FC = () => {
   return (
     <ThreadPrimitive.If running>
       {(() => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
         return (
-          <div 
-            className="fixed z-[100]" 
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              maxWidth: '90vw',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}
-          >
-            <div className="bg-white border border-gray-200 rounded-lg p-5 flex flex-col items-center space-y-4 shadow-lg">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div>
-                <span className="text-base font-medium text-gray-700 text-center">Searching for the most suitable products and services</span>
-              </div>
-              <div className="text-center space-y-1.5">
-                <p className="text-gray-600 text-sm">🏠 Searching local products and services</p>
-                <p className="text-gray-600 text-sm">🔍 Searching Amazon marketplace</p>
-                <p className="text-gray-600 text-sm">🛒 Searching Google Shopping</p>
-                <p className="text-gray-600 text-sm">🏪 Searching eBay marketplace</p>
-                <p className="text-gray-600 text-sm">🏬 Searching Walmart</p>
-                <p className="text-gray-600 text-sm">🎨 Searching Etsy</p>
-                <p className="text-gray-600 text-sm">👗 Searching Shein</p>
-                <p className="text-gray-600 text-sm">🛍️ Searching Temu</p>
-                <p className="text-gray-600 text-sm">🗺️ Searching Google Maps services</p>
-                <p className="text-gray-600 text-sm">💬 Reading customer comments</p>
-                <p className="text-gray-600 text-sm">🤖 Evaluating product quality</p>
+          <>
+            <style jsx>{`
+              .waiting-panel-container {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 100;
+                max-width: 95vw;
+                max-height: 85vh;
+                overflow: auto;
+              }
+              .waiting-panel {
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+              }
+              .spinner {
+                width: 24px;
+                height: 24px;
+                border: 2px solid transparent;
+                border-top: 2px solid #2563eb;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+              }
+              .main-text {
+                font-size: 14px;
+                font-weight: 500;
+                color: #374151;
+                text-align: center;
+                line-height: 1.3;
+                margin: 0;
+              }
+              .search-item {
+                font-size: 12px;
+                color: #6b7280;
+                text-align: center;
+                margin: 0;
+                line-height: 1.4;
+              }
+              .search-items {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+              
+              /* Tablet styles */
+              @media (min-width: 640px) {
+                .waiting-panel {
+                  padding: 20px;
+                  gap: 16px;
+                }
+                .spinner {
+                  width: 28px;
+                  height: 28px;
+                }
+                .main-text {
+                  font-size: 16px;
+                }
+                .search-item {
+                  font-size: 14px;
+                }
+                .search-items {
+                  gap: 6px;
+                }
+              }
+              
+              /* Desktop styles */
+              @media (min-width: 768px) {
+                .waiting-panel {
+                  padding: 24px;
+                  gap: 20px;
+                }
+                .spinner {
+                  width: 32px;
+                  height: 32px;
+                }
+                .main-text {
+                  font-size: 18px;
+                }
+                .search-items {
+                  gap: 8px;
+                }
+              }
+            `}</style>
+            <div className="waiting-panel-container">
+              <div className="waiting-panel">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                  <div className="spinner"></div>
+                  <p className="main-text">Searching for the most suitable products and services</p>
+                </div>
+                <div className="search-items">
+                  <p className="search-item">🏠 Searching local products and services</p>
+                  <p className="search-item">🔍 Searching Amazon marketplace</p>
+                  <p className="search-item">🛒 Searching Google Shopping</p>
+                  <p className="search-item">🏪 Searching eBay marketplace</p>
+                  <p className="search-item">🏬 Searching Walmart</p>
+                  <p className="search-item">🎨 Searching Etsy</p>
+                  <p className="search-item">👗 Searching Shein</p>
+                  <p className="search-item">🛍️ Searching Temu</p>
+                  <p className="search-item">🗺️ Searching Google Maps services</p>
+                  <p className="search-item">💬 Reading customer comments</p>
+                  <p className="search-item">🤖 Evaluating product quality</p>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         );
       })()}
     </ThreadPrimitive.If>
