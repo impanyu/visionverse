@@ -44,9 +44,9 @@ const GlobalSearchLoadingOverlay: FC = () => {
         return (
           <div className="fixed inset-0 flex items-center justify-center z-[100]">
             <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-lg mx-4 flex flex-col items-center space-y-5">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
+                <span className="text-lg font-medium text-gray-700 text-center">Searching for the most suitable products and services</span>
               </div>
               <div className="text-center space-y-2">
                 <p className="text-gray-600 text-sm">🏠 Searching local products and services</p>
