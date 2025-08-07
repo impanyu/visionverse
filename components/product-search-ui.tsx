@@ -1889,11 +1889,13 @@ export const ProductSearchToolUI = makeAssistantToolUI<
       statusType: status?.type, 
       hasResult: !!result, 
       query: args?.query,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      fullStatus: status
     });
     
-    if (status.type === "running") {
-      console.log('🔄 ProductSearchToolUI: Showing loading state');
+    // Show loading state for both "running" and when no result yet
+    if (status.type === "running" || (!result && args?.query)) {
+      console.log('🔄 ProductSearchToolUI: Showing loading state for status:', status.type);
       return (
         <div className="flex flex-col items-center justify-center p-12 space-y-4">
                         <div className="flex items-center gap-3">
