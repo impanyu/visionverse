@@ -2450,7 +2450,7 @@ TASK: Based on user's goal: ${query},  in which the user's profile is in the par
 
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
-Make the plan as comprehensive and thorough as possible, but do not add in items that are not necessary to achieve the user's goal.
+Make the plan as comprehensive and thorough as possible, 
 When making the plan, you should fully consider the user's profile, such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, physical condition, income, financial status, psychological condition, etc.
 
 SEARCH SCOPE:
