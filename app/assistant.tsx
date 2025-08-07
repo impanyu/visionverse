@@ -3,6 +3,7 @@
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { EnhancedThread } from "@/components/enhanced-thread";
 import { Button } from "@/components/ui/button";
@@ -190,7 +191,9 @@ export default function AssistantPage() {
       <div className="flex flex-col h-screen">
         <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 border-b border-slate-700 shadow-lg px-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</span>
+            <Link href="/" className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer">
+              ChoiceMade.ai
+            </Link>
             <Separator orientation="vertical" className="mr-2 h-4 bg-slate-600" />
             <span className="text-slate-200">{displayTitle}</span>
           </div>
