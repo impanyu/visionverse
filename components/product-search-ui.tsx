@@ -633,12 +633,27 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
         allProductsUpToRefresh: result.allAccumulatedProducts || []
       };
 
+      // Get current search option from global state
+      const currentSearchOption = (window as any).__CHOICEMADE_SEARCH_OPTION || 'both';
+      const userLocation = (window as any).__CHOICEMADE_USER_LOCATION;
+      
+      console.log('🔄 Refresh: Using search option:', currentSearchOption);
+      console.log('🔄 Refresh: Using user location:', userLocation);
+
+      // Prepare headers with search option and user location
+      const headers: any = {
+        'Content-Type': 'application/json',
+        'X-Search-Option': currentSearchOption
+      };
+      
+      if (userLocation) {
+        headers['X-User-Location'] = JSON.stringify(userLocation);
+      }
+
       // Make direct API call
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         credentials: 'include',
         body: JSON.stringify({
           messages: [
@@ -754,12 +769,27 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
     console.log('🔄 Frontend: Starting refresh search with query:', modifiedQuery);
     
     try {
+      // Get current search option from global state
+      const currentSearchOption = (window as any).__CHOICEMADE_SEARCH_OPTION || 'both';
+      const userLocation = (window as any).__CHOICEMADE_USER_LOCATION;
+      
+      console.log('🔄 General Refresh: Using search option:', currentSearchOption);
+      console.log('🔄 General Refresh: Using user location:', userLocation);
+
+      // Prepare headers with search option and user location
+      const headers: any = {
+        'Content-Type': 'application/json',
+        'X-Search-Option': currentSearchOption
+      };
+      
+      if (userLocation) {
+        headers['X-User-Location'] = JSON.stringify(userLocation);
+      }
+
       // Make direct API call for new product search
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         credentials: 'include',
         signal: abortControllerRef.current.signal, // Add abort signal
         body: JSON.stringify({
