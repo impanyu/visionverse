@@ -43,23 +43,17 @@ const GlobalSearchLoadingOverlay: FC = () => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
         return (
           <div className="fixed inset-0 flex items-center justify-center z-[100]">
-            <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-lg mx-4 flex flex-col items-center space-y-5">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="text-lg font-medium text-gray-700 text-center">Searching for the most suitable products and services</span>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 max-w-sm mx-4 flex flex-col items-center space-y-3">
+              <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span className="text-sm font-medium text-gray-700 text-center">Searching for products and services</span>
               </div>
-              <div className="text-center space-y-2">
-                <p className="text-gray-600 text-sm">🏠 Searching local products and services</p>
-                <p className="text-gray-600 text-sm">🔍 Searching Amazon marketplace</p>
-                <p className="text-gray-600 text-sm">🛒 Searching Google Shopping</p>
-                <p className="text-gray-600 text-sm">🏪 Searching eBay marketplace</p>
-                <p className="text-gray-600 text-sm">🏬 Searching Walmart</p>
-                <p className="text-gray-600 text-sm">🎨 Searching Etsy</p>
-                <p className="text-gray-600 text-sm">👗 Searching Shein</p>
-                <p className="text-gray-600 text-sm">🛍️ Searching Temu</p>
-                <p className="text-gray-600 text-sm">🗺️ Searching Google Maps services</p>
-                <p className="text-gray-600 text-sm">💬 Reading customer comments</p>
-                <p className="text-gray-600 text-sm">🤖 Evaluating product quality</p>
+              <div className="text-center space-y-1">
+                <p className="text-gray-600 text-xs">🏠 Local products & services</p>
+                <p className="text-gray-600 text-xs">🔍 Amazon marketplace</p>
+                <p className="text-gray-600 text-xs">🛒 Google Shopping</p>
+                <p className="text-gray-600 text-xs">🗺️ Google Maps services</p>
+                <p className="text-gray-600 text-xs">🤖 Evaluating quality</p>
               </div>
             </div>
           </div>
