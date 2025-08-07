@@ -51,6 +51,19 @@ async function handleProductSearchRefresh(refreshRequest: any, token: any) {
   console.log(`🔄 Handling refresh: iteration ${refreshRequest.refreshFromIteration}, type ${refreshRequest.refreshType}`);
   
   const originalQuery = refreshRequest.originalQuery;
+  
+  // Track refresh query in user profile
+  try {
+    const { addQueryToProfile } = await import('@/lib/user-db');
+    const userId = token.id as string;
+    
+    // Add refresh query to user profile
+    await addQueryToProfile(userId, originalQuery);
+    console.log(`👤 Profile: Added refresh query to user profile: "${originalQuery}"`);
+  } catch (error) {
+    console.error('⚠️ Profile: Error adding refresh query to profile:', error);
+    // Don't block refresh if profile update fails
+  }
   const refreshFromIteration = refreshRequest.refreshFromIteration;
   const refreshType = refreshRequest.refreshType;
   const searchStepsUpToRefresh = refreshRequest.searchStepsUpToRefresh || [];
@@ -140,40 +153,41 @@ Select the product number (or -1 if none are appropriate):`;
           console.log(`🕒 Re-analyzing user intent from original query...`);
           const historicalQueries = await searchSimilarHistoricalQueries(originalQuery, token.id as string, 30);
           
-          if (historicalQueries.documents[0] && historicalQueries.documents[0].length > 0) {
-            // Sort historical queries by timestamp (most recent first)
-            const queriesWithMetadata = historicalQueries.documents[0].map((hQuery, i) => ({
-              query: hQuery,
-              distance: historicalQueries.distances[0][i],
-              timestamp: historicalQueries.metadatas[0][i]?.createdAt || '',
-              metadata: historicalQueries.metadatas[0][i]
-            }));
+                  if (historicalQueries.documents[0] && historicalQueries.documents[0].length > 0) {
+          // Sort historical queries by timestamp (most recent first)
+          const queriesWithMetadata = historicalQueries.documents[0].map((hQuery, i) => ({
+            query: hQuery,
+            distance: historicalQueries.distances[0][i],
+            timestamp: historicalQueries.metadatas[0][i]?.createdAt || '',
+            metadata: historicalQueries.metadatas[0][i]
+          }));
+          
+          queriesWithMetadata.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          
+          // Get user profile for intent prompt
+          let userProfileContext = '';
+          try {
+            const { getUserProfile } = await import('@/lib/user-db');
+            const userProfile = await getUserProfile(token.id as string);
             
-            queriesWithMetadata.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-            
-            // Use LLM to regenerate intent
-            const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-            
-            const intentPrompt = `Rewrite search query using user profile and conversational context.
+            if (userProfile && userProfile.profile.length > 0) {
+              const profileItems = userProfile.profile;
+              userProfileContext = `\n\nThis user has profile as follows: ${profileItems.join(', ')}.`;
+            }
+          } catch (error) {
+            console.error('⚠️ Profile: Error loading user profile for intent:', error);
+          }
+          
+          // Use LLM to regenerate intent
+          const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          
+          const intentPrompt = `Rewrite search query using user profile and conversational context.
 
 Current query: "${originalQuery}"
 
-USER PROFILE (frequent patterns >5 times):
-${(() => {
-  const queryFreq: { [key: string]: number } = {};
-  queriesWithMetadata.forEach(item => {
-    const query = item.query.toLowerCase();
-    queryFreq[query] = (queryFreq[query] || 0) + 1;
-  });
-  
-  const frequentPatterns = Object.entries(queryFreq)
-    .filter(([, count]) => count >= 5)
-    .sort((a, b) => b[1] - a[1]);
-    
-  return frequentPatterns.length > 0 
-    ? frequentPatterns.map(([query, count]) => `• "${query}" (${count}x)`).join('\n')
-    : 'No frequent patterns found.';
-})()}
+USER PROFILE:
+${userProfileContext}
+
 
 CONVERSATIONAL CONTEXT (recent bundles):
 ${lastSearchedProductBundles.length > 0 ? 
@@ -182,7 +196,7 @@ lastSearchedProductBundles.map((search, index) =>
 ).join('\n')
 : 'No recent searches.'}
 
-Use profile for stable preferences, context for conversation flow. Keep core intent unchanged.
+Use user'sprofile and context for conversation flow. Keep core intent unchanged.
 
 Return ONLY the rewritten query, no explanation.`;
 
@@ -335,6 +349,19 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  // Initialize user profile (creates user if doesn't exist)
+  try {
+    const { createOrGetUser } = await import('@/lib/user-db');
+    const userId = token.id as string;
+    const userName = token.name as string || 'Unknown User';
+    const userEmail = token.email as string || 'unknown@example.com';
+    
+    await createOrGetUser(userId, userName, userEmail);
+  } catch (error) {
+    console.error('⚠️ Error initializing user profile:', error);
+    // Don't block the chat flow if user profile creation fails
+  }
+
   const { messages, system, tools } = await req.json();
 
   // Add debugging for received messages
@@ -476,7 +503,9 @@ export async function POST(req: Request) {
 
   // Enhanced system prompt with user context
   const userName = token.name || token.email || "User";
-  let enhancedSystem = `${system || "You are a helpful assistant."}\n\nUser context: You are chatting with ${userName}. Be personable and remember this is a personalized conversation.
+
+  
+  let enhancedSystem = `${system || "You are a helpful assistant."}\n\nUser context: You are chatting with ${userName}. 
 
 🚨🚨🚨 ABSOLUTELY CRITICAL: ZERO TEXT WITH TOOLS! 🚨🚨🚨
 
@@ -1794,6 +1823,19 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
             console.log(`🔍 Backend: refreshRequest:`, refreshRequest);
             console.log(`🔍 Backend: User ID: ${token.id}`);
             
+            // Track user query in profile
+            try {
+              const { addQueryToProfile } = await import('@/lib/user-db');
+              const userId = token.id as string;
+              
+              // Add query to user profile (handles both new queries and refresh queries)
+              await addQueryToProfile(userId, query);
+              console.log(`👤 Profile: Added query to user profile: "${query}"`);
+            } catch (error) {
+              console.error('⚠️ Profile: Error adding query to profile:', error);
+              // Don't block search if profile update fails
+            }
+            
             // Clean up old search records
             cleanupActiveSearches();
             
@@ -1921,31 +1963,33 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
 
                 // Use LLM to reason about user intent and rewrite query
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                                
+                // Get user profile for personalized context
+                let userProfileContext = '';
+                try {
+                  const { getUserProfile } = await import('@/lib/user-db');
+                  const userProfile = await getUserProfile(token.id as string);
+                  
+                  if (userProfile && userProfile.profile.length > 0) {
+                    // Create profile context for the AI using all current profile items
+                    const profileItems = userProfile.profile; // Use all current profile items
+                    userProfileContext = `this user has profile as follows: ${profileItems.join(', ')}.`;
+                    console.log(`👤 Profile: userProfileContext: ${userProfileContext}`);
+                    console.log(`👤 Profile: Added user context with ${profileItems.length} profile items`);
+                  }
+                } catch (error) {
+                  console.error('⚠️ Profile: Error loading user profile for context:', error);
+                  // Continue without profile context if there's an error
+                }
                 
-                const intentPrompt = `Analyze user's profile and conversational context. 
+                const intentPrompt = `You need to understand the user's intent and rewrite the query to best achieve the user's goal.
 
 Current query: "${query}"
 
-USER PROFILE (frequent patterns only):
-${(() => {
-  // Count query frequencies
-  const queryFreq: { [key: string]: number } = {};
-  queriesWithMetadata.forEach(item => {
-    const query = item.query.toLowerCase();
-    queryFreq[query] = (queryFreq[query] || 0) + 1;
-  });
-  
-  // Filter for patterns >5 times
-  const frequentPatterns = Object.entries(queryFreq)
-    .filter(([, count]) => count >= 5)
-    .sort((a, b) => b[1] - a[1]);
-    
-  if (frequentPatterns.length === 0) {
-    return 'No frequent patterns (>5 times) found.';
-  }
-  
-  return frequentPatterns.map(([query, count]) => `• "${query}" (${count}x)`).join('\n');
-})()}
+USER PROFILE:
+${userProfileContext}
+
+
 
 CONVERSATIONAL CONTEXT (recent searches):
 ${lastSearchedProductBundles.length > 0 ? 
@@ -1958,7 +2002,7 @@ ${index + 1}. "${search.originalQuery}" → ${search.finalProducts.length} produ
 COMPARATIVE QUERY RULES:
 ${lastSearchedProductBundles.length > 0 && (() => {
   const latestBundle = lastSearchedProductBundles[0];
-  const bundlePrices = latestBundle.finalProducts.map(p => parseFloat(p.price.replace(/[$,]/g, '')) || 0);
+  const bundlePrices = latestBundle.finalProducts.map(p => parseFloat((p.price || '').replace(/[$,]/g, '')) || 0);
   const avgPrice = bundlePrices.reduce((sum, price) => sum + price, 0) / bundlePrices.length;
   const totalPrice = bundlePrices.reduce((sum, price) => sum + price, 0);
   
@@ -1969,22 +2013,21 @@ ${lastSearchedProductBundles.length > 0 && (() => {
 })() || 'No price reference available.'}
 
 TASK:
-1. Use PROFILE for stable user characteristics (demographics, preferences)
-2. Use CONTEXT for conversational flow and comparison references
-3. Generate 8-15 relevant keywords
+1. Summerize the user profile and only keep important profiles such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, etc., ignore the user's behaviors or activities or plans in the summary!!!
+2. After the original query, append the user profile
+3. Only use CONTEXT when it is helpful for comparison references
+4. Generate 8-15 relevant keywords
 
 Guidelines:
 - Always keep ALL the exact words in the original query!!!!
-- when necessary only append more personalized information to the original query
-- When analyzing personlized info, prioritize recent context over old patterns
-- For comparisons, include precise price/quality references
 
 
-Pay attention!! : When adding personized info, don't guess and distort anything!! You need solid reasoning to support your interpretation of the user's historical preferences and profile.
+Pay attention: don't let the personalized information to be too long and distort or undermine the original query
+
 
 Respond in JSON:
 {
-  "modified_query": ${query} + " personalized info",
+  "rewritten_query": ${query} + "(user profile)",
   "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
@@ -2014,8 +2057,18 @@ Respond in JSON:
                     
                     console.log(`🔍 BACKEND: Cleaned JSON for parsing:`, cleanJson);
                     const intentData = JSON.parse(cleanJson);
-                    if (intentData.rewritten_query && intentData.rewritten_query !== query) {
-                      rewrittenQuery = intentData.rewritten_query;
+                    // Handle both field names for backward compatibility
+                    const rewrittenFromIntent = intentData.rewritten_query || intentData.modified_query;
+                    
+                    console.log(`🔍 Intent analysis result:`, { 
+                      original: query, 
+                      rewritten: rewrittenFromIntent, 
+                      different: rewrittenFromIntent !== query,
+                      fieldFound: intentData.rewritten_query ? 'rewritten_query' : intentData.modified_query ? 'modified_query' : 'none'
+                    });
+                    
+                    if (rewrittenFromIntent && rewrittenFromIntent !== query) {
+                      rewrittenQuery = rewrittenFromIntent;
                       if (isComparativeQuery) {
                         console.log(`🔄 COMPARATIVE REWRITE SUCCESS:`);
                         console.log(`   Original: "${query}"`);
@@ -2263,18 +2316,50 @@ Examples:
                   // Remove markdown formatting
                   let fixed = str.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
                   
-                  // Try to fix unterminated strings by finding the last complete object
-                  if (fixed.includes('"product_description"')) {
-                    // Find the last complete product object
-                    const matches = fixed.match(/\{"product_description"[^}]*\}/g);
-                    if (matches && matches.length > 0) {
-                      fixed = '[' + matches.join(',') + ']';
+                  // Handle truncated JSON by finding complete objects
+                  if (fixed.includes('"description"')) {
+                    // Find all complete objects with the new format
+                    const objectMatches = [];
+                    const regex = /\{[^{}]*"description"[^{}]*\}/g;
+                    let match;
+                    
+                    while ((match = regex.exec(fixed)) !== null) {
+                      try {
+                        // Test if this object is valid JSON
+                        JSON.parse(match[0]);
+                        objectMatches.push(match[0]);
+                      } catch {
+                        // Skip invalid objects
+                      }
+                    }
+                    
+                    if (objectMatches.length > 0) {
+                      fixed = '[' + objectMatches.join(',') + ']';
+                      console.log(`🔧 Fixed JSON: Found ${objectMatches.length} complete objects`);
+                      return fixed;
+                    }
+                  }
+                  
+                  // Try to fix unclosed strings and objects
+                  if (fixed.includes('{"description"')) {
+                    // Find the start of the last incomplete object and remove it
+                    const lastCompleteObject = fixed.lastIndexOf('},');
+                    if (lastCompleteObject > 0) {
+                      fixed = fixed.substring(0, lastCompleteObject + 1) + ']';
+                      console.log(`🔧 Truncated at last complete object`);
                     }
                   }
                   
                   // Ensure it starts and ends with array brackets
                   if (!fixed.startsWith('[')) fixed = '[' + fixed;
-                  if (!fixed.endsWith(']')) fixed = fixed + ']';
+                  if (!fixed.endsWith(']') && !fixed.endsWith('}]')) {
+                    // Remove any trailing incomplete content
+                    const lastCompleteEnd = Math.max(fixed.lastIndexOf('}'), fixed.lastIndexOf(']'));
+                    if (lastCompleteEnd > 0) {
+                      fixed = fixed.substring(0, lastCompleteEnd + 1);
+                    }
+                    if (!fixed.endsWith(']')) fixed = fixed + ']';
+                  }
                   
                   return fixed;
                 } catch {
@@ -2293,7 +2378,7 @@ TASK: Based on user's goal: ${query},
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
 Make the plan as comprehensive and thorough as possible, but do not add in items that are not necessary to achieve the user's goal.
-
+When making the plan, you should fully consider the user's profile, such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, etc.
 
 SEARCH SCOPE:
 - Include products: ${search_product}
@@ -2308,13 +2393,15 @@ Pay attention: output a json list containing descriptions, necessity score betwe
 
 Necessity score measures how important the item is in the plan. 
 For only one item in the plan, the necessity score should be 1. 
-The description should be clear but not overly specific. 
 Don't overthink, if the user asks for some category of product, just output the product description of the category.
 
 For search_location field:
 - For products: Always use empty string ""
 - For each service: 
-  You should reason about where the service should be located, to best achieve the user's goal.
+  The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
+  You should reason about where the service should be located, to best achieve the user's goal. 
+
+Pay attention: ALWAYS specify relevant user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions when helpful.
 
 Pay attention: Output ONLY a json string, without any other text !!
 
@@ -2364,7 +2451,7 @@ JSON Array:`;
                       }],
                       generationConfig: {
                         temperature: 0.3, // Lower temperature for more consistent JSON
-                        maxOutputTokens: 800,
+                        maxOutputTokens: 600, // Reduced to prevent truncation
                         topP: 0.8,
                         topK: 10
                       }
@@ -2382,7 +2469,7 @@ JSON Array:`;
                     console.warn(`⚠️ No content returned from Gemini API on attempt ${attempt}`);
                     if (attempt === MAX_RETRIES) {
                       console.log('🔍 Final attempt - using fallback');
-                      return [{ product_description: query, necessity_score: 1.0 }]; // Keep backward compatibility
+                      return [{ description: query, necessity_score: 1.0, type: 'product', search_location: '' }]; // Fallback response
                     }
                     continue; // Try next attempt
                   }
@@ -2422,7 +2509,8 @@ JSON Array:`;
                           product_description: description, // Old format for backward compatibility
                           description: description, // New format
                           necessity_score: necessity_score,
-                          type: type
+                          type: type,
+                          search_location: item.search_location || '' // Preserve search_location field
                         };
                       })
                       .filter(item => item.description.length > 0)
@@ -2445,9 +2533,11 @@ JSON Array:`;
                     if (attempt === MAX_RETRIES) {
                       console.log('🚨 All attempts failed, using fallback');
                       return [{ 
-                        product_description: `Product for: ${query}`, 
-                        necessity_score: 1.0
-                      }]; // Keep backward compatibility
+                        description: `Product for: ${query}`, 
+                        necessity_score: 1.0,
+                        type: 'product',
+                        search_location: ''
+                      }]; // Fallback response
                     }
                     // Continue to next attempt
                   }
@@ -2458,8 +2548,10 @@ JSON Array:`;
                   if (attempt === MAX_RETRIES) {
                     console.log('🚨 All attempts exhausted, using fallback');
                     return [{
-                      product_description: `Product for: ${query}`,
-                      necessity_score: 1.0
+                      description: `Product for: ${query}`,
+                      necessity_score: 1.0,
+                      type: 'product',
+                      search_location: ''
                     }];
                   }
                   
@@ -2469,7 +2561,7 @@ JSON Array:`;
               }
               
               // This should never be reached, but just in case
-              return [{ product_description: query, necessity_score: 1.0 }];
+              return [{ description: query, necessity_score: 1.0, type: 'product', search_location: '' }];
             };
 
             // Utility function to validate subquery distinctness
@@ -3025,7 +3117,15 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
               // Step 2: Get Gemini product recommendations
               // =============================================================================
               const step2Start = Date.now();
-              const geminiRecommendations = await getGeminiProductRecommendations(query);
+              // Use rewritten query if available, otherwise use original query
+              const queryToUse = rewrittenQuery || query;
+              console.log(`🤖 Final query selection:`, { 
+                original: query, 
+                rewritten: rewrittenQuery, 
+                using: queryToUse,
+                isRewritten: rewrittenQuery !== query
+              });
+              const geminiRecommendations = await getGeminiProductRecommendations(queryToUse);
               const step2Time = Date.now() - step2Start;
               console.log(`🤖 Gemini returned ${geminiRecommendations.length} product recommendations (${step2Time}ms)`);
               
@@ -3055,7 +3155,7 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                 
                 console.log(`🔍 [${index+1}/${geminiRecommendations.length}] Starting parallel search for ${itemType}: "${description}" (necessity: ${necessityScore})`);
                 if (suggestedLocation) {
-                  console.log(`📍 [${index+1}] Gemini suggested location: "${suggestedLocation}"`);
+                  console.log(`📍 [${index+1}] Gemini suggested location: "${suggestedLocation}" for description: "${description}"`);
                 }
                 if (priceRange) {
                   console.log(`💰 [${index+1}] Applying price range: $${priceRange.min || 0} - $${priceRange.max || 'unlimited'}`);
@@ -3552,7 +3652,8 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
             console.log(`   - Using: ${allSelectedProductsForResult.length > 0 ? `${allSelectedProductsForResult.length} products from Gemini search` : 'no products'}`);
 
             const result: ProductSearchResult = {
-              originalQuery: rewrittenQuery,
+              originalQuery: query, // Keep the query as sent from frontend (could be user-modified)
+              rewrittenQuery: rewrittenQuery !== query ? rewrittenQuery : undefined, // Add rewritten query if different from input
               searchSteps: globalSearchSteps,
               recommendedProduct: bestProduct || undefined,
               recommendedProducts: allSelectedProductsForResult,
@@ -3562,7 +3663,12 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
               suggestedKeywords: suggestedKeywords
             };
             
-            console.log(`🎯 FINAL: recommendedProducts array length: ${result.recommendedProducts?.length || 0}`);
+            console.log(`🎯 FINAL RESULT:`, { 
+              originalQuery: result.originalQuery, 
+              rewrittenQuery: result.rewrittenQuery, 
+              hasRewritten: !!result.rewrittenQuery,
+              productsCount: result.recommendedProducts?.length || 0 
+            });
             if (result.recommendedProducts && result.recommendedProducts.length > 0) {
               console.log(`🏆 FINAL: Displaying ${result.recommendedProducts.length} products to user:`);
               result.recommendedProducts.forEach((p: any, idx: number) => {
@@ -3575,7 +3681,7 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
               try {
                 await storeHistoricalSearchResult(
                   {
-                    originalQuery: rewrittenQuery,
+                    originalQuery: query, // Store the original user query
                     finalProducts: result.recommendedProducts || [],
                     searchSteps: globalSearchSteps,
                     searchSummary

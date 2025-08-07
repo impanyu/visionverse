@@ -29,6 +29,7 @@ export interface SearchStep {
 
 export interface ProductSearchResult {
   originalQuery: string;
+  rewrittenQuery?: string; // Added for AI-enhanced queries
   searchSteps: SearchStep[];
   recommendedProduct?: any & {
     evaluation: {
@@ -986,7 +987,14 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
             </div>
           </div>
           <div className="mt-2 flex items-center justify-between">
-            <p className="text-gray-700 font-medium flex-1">{modifiedQuery}</p>
+            <div className="flex-1">
+              <p className="text-gray-700 font-medium">{modifiedQuery}</p>
+              {result.rewrittenQuery && result.rewrittenQuery !== result.originalQuery && (
+                <p className="text-xs text-blue-600 mt-1">
+                  ✨ AI Enhanced: {result.rewrittenQuery}
+                </p>
+              )}
+            </div>
             {modifiedQuery !== result.originalQuery && (
               <button
                 onClick={() => {
