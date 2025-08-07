@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 // Initialize Chroma client
 const chroma = new ChromaClient({
-  path: "http://localhost:8000", // v1.x API uses 'path' parameter
+  path: "http://127.0.0.1:8000", // Use IPv4 to avoid localhost resolution issues
 });
 
 // Collection name for vision descriptions
