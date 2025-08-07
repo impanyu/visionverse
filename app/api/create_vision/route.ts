@@ -43,9 +43,12 @@ export async function POST(req: Request) {
       visionDescription = formData.get("visionDescription") as string;
       const priceString = formData.get("price") as string;
       price = priceString ? parseFloat(priceString) * 100 : undefined; // Convert dollars to cents
-      const file = formData.get("imageFile") as File | null;
+      const file = formData.get("imageFile");
 
-      if (file && file.size > 0) {
+      // Check if file is a file-like object (works in both browser and Node.js)
+      const isFileObject = file && typeof file === 'object' && 'name' in file && 'size' in file;
+
+      if (isFileObject && (file as any).size > 0) {
         // Create user directory
         const userId = token.id as string;
         const userDataDir = path.join(process.cwd(), "data", userId);
@@ -57,14 +60,14 @@ export async function POST(req: Request) {
 
         // Generate unique filename with timestamp
         const timestamp = Date.now();
-        const originalName = file.name;
+        const originalName = (file as any).name;
         const extension = path.extname(originalName);
         const nameWithoutExt = path.basename(originalName, extension);
         const uniqueFileName = `${nameWithoutExt}_${timestamp}${extension}`;
         
         // Save file to disk
         const fileSavePath = path.join(userDataDir, uniqueFileName);
-        const bytes = await file.arrayBuffer();
+        const bytes = await (file as any).arrayBuffer();
         const buffer = Buffer.from(bytes);
         await writeFile(fileSavePath, buffer);
         
