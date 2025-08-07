@@ -2463,7 +2463,7 @@ ${search_product && search_service ? 'You can include both products and services
 
 Pay attention: output a json list containing descriptions, necessity score between 0 - 1, type, and search_location: 
 {"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service", "search_location": "location for search"} 
-Pay attention: ALWAYS append user's known profile details after each description!!!!
+Pay attention: ALWAYS append user's profile after each description!!!!
 
 
 
