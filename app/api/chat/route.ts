@@ -2445,7 +2445,8 @@ Examples:
                   
                   const geminiPrompt = `
 
-TASK: Based on user's goal: ${query}, 
+TASK: Based on user's goal: ${query},  in which the user's profile is in the parentheses.
+
 
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
@@ -2473,8 +2474,7 @@ For search_location field:
   The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
   You should reason about where the service should be located, to best achieve the user's goal. 
 
-Pay attention: ALWAYS specify relevant user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions when helpful.
-Especially when buying clothes, shoes, or any other products that are related to the user's body, gender, you must add these information to the description.
+Pay attention: ALWAYS specify user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions!!
 
 
 Pay attention: Output ONLY a json string, without any other text !!
