@@ -149,13 +149,43 @@ const Composer: FC = () => {
     'service': 'Service only'
   };
 
-  // Function to get user's GPS location - UPDATED v3.1
-  const getCurrentLocation = () => {
+  // Function to get user's GPS location - MOBILE CHROME COMPATIBLE v4
+  const getCurrentLocation = async () => {
+    console.log('📍 Starting location request (Mobile Chrome v4)');
+    
+    // Check if geolocation is supported
     if (!navigator.geolocation) {
-      console.error('Geolocation is not supported by this browser.');
+      console.error('🚨 Geolocation is not supported by this browser');
+      setGpsEnabled(false);
       return;
     }
 
+    // Check if we're on HTTPS (required for mobile Chrome location)
+    if (typeof window !== 'undefined' && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      console.warn('🚨 HTTPS required for geolocation on mobile Chrome');
+      setGpsEnabled(false);
+      alert('Location access requires HTTPS connection on mobile devices');
+      return;
+    }
+
+    // Check permissions first (for mobile Chrome)
+    if ('permissions' in navigator) {
+      try {
+        const permission = await navigator.permissions.query({name: 'geolocation'});
+        console.log('📍 Geolocation permission status:', permission.state);
+        
+        if (permission.state === 'denied') {
+          console.log('🚨 Geolocation permission denied');
+          setGpsEnabled(false);
+          alert('Location access is blocked. Please enable location permissions in your browser settings.');
+          return;
+        }
+      } catch (e) {
+        console.log('📍 Permission API not available, proceeding with location request');
+      }
+    }
+
+    // Mobile Chrome optimized geolocation request
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const location = {
@@ -163,44 +193,59 @@ const Composer: FC = () => {
           lng: position.coords.longitude
         };
         setUserLocation(location);
-        console.log('📍 GPS Location obtained (v2):', location);
+        console.log('📍 GPS Location obtained (Mobile Chrome v4):', location);
+        console.log('📍 Accuracy:', position.coords.accuracy, 'meters');
+        
         // Store location globally for backend access
         (window as any).__CHOICEMADE_USER_LOCATION = location;
+        setGpsEnabled(true);
       },
       (error) => {
-        // FIXED ERROR HANDLING - v3
-        const errorDetails = {
-          code: error?.code || 'UNKNOWN',
-          message: error?.message || 'No message available',
-          errorType: error?.constructor?.name || 'GeolocationError'
-        };
+        console.log('🚨 LOCATION ERROR CAUGHT (Mobile Chrome v4):', {
+          code: error.code,
+          message: error.message,
+          timestamp: new Date().toISOString()
+        });
         
-        console.log('🚨 LOCATION ERROR CAUGHT (v3):', errorDetails);
         setGpsEnabled(false);
         
-        // Show user-friendly error message based on error code
+        // Mobile-specific error handling
         let userMessage = 'Unable to get location';
-        if (error?.code === 1) userMessage = 'Location access denied by user';
-        else if (error?.code === 2) userMessage = 'Location information unavailable';
-        else if (error?.code === 3) userMessage = 'Location request timed out';
-        else userMessage = 'Unknown location error';
+        switch (error.code) {
+          case 1: // PERMISSION_DENIED
+            userMessage = 'Location access denied. Please enable location permissions in your browser settings.';
+            break;
+          case 2: // POSITION_UNAVAILABLE
+            userMessage = 'Location information unavailable. Please check your GPS is enabled.';
+            break;
+          case 3: // TIMEOUT
+            userMessage = 'Location request timed out. Please try again.';
+            break;
+          default:
+            userMessage = 'Unknown location error. Please try again.';
+        }
         
-        console.log('📍 USER-FRIENDLY MESSAGE (v3):', userMessage);
+        console.log('📍 USER-FRIENDLY MESSAGE (Mobile Chrome v4):', userMessage);
+        alert(userMessage); // Show alert for mobile users
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        enableHighAccuracy: false, // Changed for mobile battery saving
+        timeout: 15000, // Increased timeout for mobile
+        maximumAge: 600000 // 10 minutes cache for mobile
       }
     );
   };
 
-  // Handle GPS toggle
-  const handleGpsToggle = () => {
+  // Handle GPS toggle - MOBILE OPTIMIZED
+  const handleGpsToggle = async () => {
+    console.log('📍 GPS Toggle clicked, current state:', gpsEnabled);
+    
     if (!gpsEnabled) {
-      getCurrentLocation();
-      setGpsEnabled(true);
+      console.log('📍 Enabling GPS...');
+      setGpsEnabled(true); // Set immediately for UI feedback
+      await getCurrentLocation();
     } else {
+      console.log('📍 Disabling GPS...');
       setGpsEnabled(false);
       setUserLocation(null);
       (window as any).__CHOICEMADE_USER_LOCATION = null;
