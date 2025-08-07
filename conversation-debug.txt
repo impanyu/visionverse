@@ -1,16 +1,18 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:54:53.852Z
-📊 Total messages: 16
-👤 User messages: 6
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T03:35:28.124Z
+📊 Total messages: 22
+👤 User messages: 8
 
 📝 USER MESSAGE HISTORY:
-  [1/6] [{"type":"text","text":"i need to go to a restaurant"}]
-  [2/6] [{"type":"text","text":"i need to go to a restaurant"}]
-  [3/6] [{"type":"text","text":"i need to find a chinese restaurant"}]
-  [4/6] [{"type":"text","text":"i need to go to chicago"}]
-  [5/6] [{"type":"text","text":"i need to go to mars"}]
-  [6/6] [{"type":"text","text":"i need to go to moon"}]
+  [1/8] [{"type":"text","text":"i need to go to a restaurant"}]
+  [2/8] [{"type":"text","text":"i need to go to a restaurant"}]
+  [3/8] [{"type":"text","text":"i need to find a chinese restaurant"}]
+  [4/8] [{"type":"text","text":"i need to go to chicago"}]
+  [5/8] [{"type":"text","text":"i need to go to mars"}]
+  [6/8] [{"type":"text","text":"i need to go to moon"}]
+  [7/8] [{"type":"text","text":"i want a banana"}]
+  [8/8] [{"type":"text","text":"i need a bear"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i need to go to moon"}]
+  [{"type":"text","text":"i need a bear"}]
 
 ================================================================================
