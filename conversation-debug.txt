@@ -1,12 +1,14 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:20:43.025Z
-📊 Total messages: 4
-👤 User messages: 2
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:30:23.813Z
+📊 Total messages: 10
+👤 User messages: 4
 
 📝 USER MESSAGE HISTORY:
-  [1/2] [{"type":"text","text":"i need a dinosaur toy"}]
-  [2/2] [{"type":"text","text":"i need an apple"}]
+  [1/4] [{"type":"text","text":"i need a dinosaur toy"}]
+  [2/4] [{"type":"text","text":"i need an apple"}]
+  [3/4] [{"type":"text","text":"a pear"}]
+  [4/4] [{"type":"text","text":"an apple"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i need an apple"}]
+  [{"type":"text","text":"an apple"}]
 
 ================================================================================
