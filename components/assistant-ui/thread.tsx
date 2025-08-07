@@ -333,12 +333,12 @@ const Composer: FC = () => {
     >
       {/* Desktop: Single row layout */}
       <div className="hidden sm:block">
-        <div className="relative flex items-center w-full">
+        <div className="flex items-center w-full border border-border rounded-lg bg-background">
           <ComposerPrimitive.Input
             rows={1}
             autoFocus
             placeholder="Write a message..."
-            className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-3 pr-32 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+            className="placeholder:text-muted-foreground max-h-40 flex-1 resize-none border-none bg-transparent pl-4 pr-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
             onChange={(e) => {
               console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
             }}
@@ -349,8 +349,8 @@ const Composer: FC = () => {
             }}
           />
           
-          {/* Right-aligned controls inside input */}
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+          {/* Right-aligned controls */}
+          <div className="flex items-center gap-2 pr-2">
             {/* GPS Location Toggle */}
             <Button
               type="button"
