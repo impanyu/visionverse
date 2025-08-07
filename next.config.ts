@@ -11,6 +11,22 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  webpack: (config: any) => {
+    // Handle ChromaDB external dependencies
+    config.externals = config.externals || [];
+    config.externals.push({
+      'chromadb-default-embed': 'chromadb-default-embed',
+    });
+    
+    // Ignore ChromaDB's external HTTP imports during build
+    config.resolve = config.resolve || {};
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'chromadb-default-embed': false,
+    };
+
+    return config;
+  },
 };
 
 export default nextConfig;
