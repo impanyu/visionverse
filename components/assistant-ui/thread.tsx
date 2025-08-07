@@ -187,7 +187,7 @@ const ThreadWelcome: FC = () => {
       <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           <p className="mt-4 font-bold max-w-2xl text-center text-3xl">Welcome to ChoiceMade.ai!</p>
-                      <p className="mt-2 text-center text-gray-600 max-w-2xl text-lg">Skip the list,<br />no pondering, no comparison, no hassle,<br />we just make the choice for you.</p>
+                      <p className="mt-2 text-center text-gray-600 max-w-2xl text-lg">No pondering, no comparison, no hassle,<br />we make the shopping plan for you.</p>
         </div>
         <ThreadWelcomeSuggestions />
       </div>
