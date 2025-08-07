@@ -261,14 +261,14 @@ function TikTokProductBrowser({ products }: TikTokProductBrowserProps) {
                     <img
                       src={imageUrl}
                       alt={currentProduct.title}
-                      className="w-32 h-32 object-cover rounded-lg shadow-md"
+                      className="w-28 h-28 object-cover rounded-lg shadow-md"
                                               onError={(e) => {
                           // If image fails to load, replace with styled placeholder
                           const target = e.target as HTMLImageElement;
                           const parent = target.parentElement;
                           if (parent) {
                             parent.innerHTML = `
-                              <div class="w-32 h-32 bg-gradient-to-br from-red-100 to-red-200 rounded-lg shadow-md flex items-center justify-center border border-red-300">
+                              <div class="w-28 h-28 bg-gradient-to-br from-red-100 to-red-200 rounded-lg shadow-md flex items-center justify-center border border-red-300">
                                 <div class="text-center">
                                   <div class="text-red-400 text-2xl mb-1">❌</div>
                                   <span class="text-red-500 text-xs font-medium">
@@ -286,7 +286,7 @@ function TikTokProductBrowser({ products }: TikTokProductBrowserProps) {
                 // Show a placeholder when no image is available
                 return (
                   <div className="flex-shrink-0">
-                    <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-md flex items-center justify-center border border-gray-300">
+                    <div className="w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-md flex items-center justify-center border border-gray-300">
                       <div className="text-center">
                         <div className="text-gray-400 text-2xl mb-1">📦</div>
                         <span className="text-gray-500 text-xs font-medium">
@@ -1352,7 +1352,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                         </div>
                         
                         {/* Product Image */}
-                        <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
+                        <div className="w-28 h-28 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md border border-gray-200">
                           {(() => {
                             const imageUrl = product.thumbnail || product.image || 
                                            product.product_photos?.[0] || product.images?.[0] || 
@@ -1587,7 +1587,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                                         <img 
                                           src={finalImageUrl} 
                                           alt={service.title || 'Service'}
-                                          className="w-24 h-24 object-cover rounded-lg border"
+                                          className="w-28 h-28 object-cover rounded-lg border"
                                           onError={(e) => {
                                             console.log(`⚠️ Image load failed for "${service.title}", showing fallback`);
                                             e.currentTarget.style.display = 'none';
@@ -1596,7 +1596,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                                         />
                                       ) : null;
                                     })()}
-                                    <div className={`w-24 h-24 bg-gradient-to-br from-purple-100 to-violet-200 rounded-lg flex items-center justify-center ${(service.image || service.thumbnail) ? 'hidden' : ''}`}>
+                                    <div className={`w-28 h-28 bg-gradient-to-br from-purple-100 to-violet-200 rounded-lg flex items-center justify-center ${(service.image || service.thumbnail) ? 'hidden' : ''}`}>
                                       <span className="text-2xl">🏢</span>
                                     </div>
                                   </div>
