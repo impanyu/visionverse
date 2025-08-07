@@ -2291,8 +2291,9 @@ Examples:
 TASK: Based on user's goal: ${query}, 
 
 Ignoring the price, you will help the user to make a plan for the goal. 
-A plan is a list of 1-30 necessary products and/or services serving different and non-overlapping functionalities which work together to best achieve the user's goal.
-Make the plan as comprehensive as possible, but do not add in items that are not necessary to achieve the user's goal.
+A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
+Make the plan as comprehensive and thorough as possible, but do not add in items that are not necessary to achieve the user's goal.
+
 If not specified, you can assume the user is a male adult, if the user specifies gender, you should use the gender.
 
 SEARCH SCOPE:

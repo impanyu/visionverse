@@ -1,27 +1,31 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T03:58:41.295Z
-📊 Total messages: 49
-👤 User messages: 17
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T04:03:47.725Z
+📊 Total messages: 61
+👤 User messages: 21
 
 📝 USER MESSAGE HISTORY:
-  [1/17] [{"type":"text","text":"i need to go to a restaurant"}]
-  [2/17] [{"type":"text","text":"i need to go to a restaurant"}]
-  [3/17] [{"type":"text","text":"i need to find a chinese restaurant"}]
-  [4/17] [{"type":"text","text":"i need to go to chicago"}]
-  [5/17] [{"type":"text","text":"i need to go to mars"}]
-  [6/17] [{"type":"text","text":"i need to go to moon"}]
-  [7/17] [{"type":"text","text":"i want a banana"}]
-  [8/17] [{"type":"text","text":"i need a bear"}]
-  [9/17] [{"type":"text","text":"i want a pear"}]
-  [10/17] [{"type":"text","text":"i want to buy a paper"}]
-  [11/17] [{"type":"text","text":"i want a apple"}]
-  [12/17] [{"type":"text","text":"a banana"}]
-  [13/17] [{"type":"text","text":"an apple"}]
-  [14/17] [{"type":"text","text":"i want a chocolate"}]
-  [15/17] [{"type":"text","text":"i want a box of pineapple"}]
-  [16/17] [{"type":"text","text":"i want a box of sugar"}]
-  [17/17] [{"type":"text","text":"i want to go to china"}]
+  [1/21] [{"type":"text","text":"i need to go to a restaurant"}]
+  [2/21] [{"type":"text","text":"i need to go to a restaurant"}]
+  [3/21] [{"type":"text","text":"i need to find a chinese restaurant"}]
+  [4/21] [{"type":"text","text":"i need to go to chicago"}]
+  [5/21] [{"type":"text","text":"i need to go to mars"}]
+  [6/21] [{"type":"text","text":"i need to go to moon"}]
+  [7/21] [{"type":"text","text":"i want a banana"}]
+  [8/21] [{"type":"text","text":"i need a bear"}]
+  [9/21] [{"type":"text","text":"i want a pear"}]
+  [10/21] [{"type":"text","text":"i want to buy a paper"}]
+  [11/21] [{"type":"text","text":"i want a apple"}]
+  [12/21] [{"type":"text","text":"a banana"}]
+  [13/21] [{"type":"text","text":"an apple"}]
+  [14/21] [{"type":"text","text":"i want a chocolate"}]
+  [15/21] [{"type":"text","text":"i want a box of pineapple"}]
+  [16/21] [{"type":"text","text":"i want a box of sugar"}]
+  [17/21] [{"type":"text","text":"i want to go to china"}]
+  [18/21] [{"type":"text","text":"i want to go to china"}]
+  [19/21] [{"type":"text","text":"i need to go to india"}]
+  [20/21] [{"type":"text","text":"i need to go to china"}]
+  [21/21] [{"type":"text","text":"i need to go to china"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want to go to china"}]
+  [{"type":"text","text":"i need to go to china"}]
 
 ================================================================================
