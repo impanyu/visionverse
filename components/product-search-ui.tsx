@@ -1893,47 +1893,8 @@ export const ProductSearchToolUI = makeAssistantToolUI<
       fullStatus: status
     });
     
-    // Force loading state with useState and useEffect for better control
-    const [showLoading, setShowLoading] = React.useState(true);
-    const [hasShownResults, setHasShownResults] = React.useState(false);
-    
-    React.useEffect(() => {
-      if (result && result.result) {
-        // Add a minimum loading time of 1 second
-        const timer = setTimeout(() => {
-          setShowLoading(false);
-          setHasShownResults(true);
-        }, 1000);
-        
-        return () => clearTimeout(timer);
-      }
-    }, [result]);
-    
-    // Always show loading first, regardless of status or result
-    if (showLoading && !hasShownResults) {
-      console.log('🔄 ProductSearchToolUI: FORCING loading state display');
-      return (
-        <div className="flex flex-col items-center justify-center p-12 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
-          </div>
-          <div className="text-center space-y-2">
-            <p className="text-gray-600">🏠 Searching local products and services</p>
-            <p className="text-gray-600">🔍 Searching Amazon marketplace</p>
-            <p className="text-gray-600">🛒 Searching Google Shopping</p>
-            <p className="text-gray-600">🏪 Searching eBay marketplace</p>
-            <p className="text-gray-600">🏬 Searching Walmart</p>
-            <p className="text-gray-600">🎨 Searching Etsy</p>
-            <p className="text-gray-600">👗 Searching Shein</p>
-            <p className="text-gray-600">🛍️ Searching Temu</p>
-            <p className="text-gray-600">🗺️ Searching Google Maps services</p>
-            <p className="text-gray-600">💬 Reading customer comments</p>
-            <p className="text-gray-600">🤖 Evaluating product quality</p>
-          </div>
-        </div>
-      );
-    }
+    // No need for forced loading here since we have global loading overlay
+    console.log('🔄 ProductSearchToolUI: Global loading overlay will handle the loading state');
 
     if (!result) {
       console.error('🚨 ProductSearchToolUI: result is null or undefined');

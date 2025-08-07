@@ -35,6 +35,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Global search loading overlay component
+const GlobalSearchLoadingOverlay: FC = () => {
+  return (
+    <ThreadPrimitive.If running>
+      {(() => {
+        console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-lg p-8 max-w-md mx-4 flex flex-col items-center space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-gray-600 text-sm">🏠 Searching local products and services</p>
+                <p className="text-gray-600 text-sm">🔍 Searching Amazon marketplace</p>
+                <p className="text-gray-600 text-sm">🛒 Searching Google Shopping</p>
+                <p className="text-gray-600 text-sm">🏪 Searching eBay marketplace</p>
+                <p className="text-gray-600 text-sm">🏬 Searching Walmart</p>
+                <p className="text-gray-600 text-sm">🎨 Searching Etsy</p>
+                <p className="text-gray-600 text-sm">👗 Searching Shein</p>
+                <p className="text-gray-600 text-sm">🛍️ Searching Temu</p>
+                <p className="text-gray-600 text-sm">🗺️ Searching Google Maps services</p>
+                <p className="text-gray-600 text-sm">💬 Reading customer comments</p>
+                <p className="text-gray-600 text-sm">🤖 Evaluating product quality</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+    </ThreadPrimitive.If>
+  );
+};
+
 export const Thread: FC = () => {
   const { messages = [] } = useThread() || {};
 
@@ -45,6 +79,9 @@ export const Thread: FC = () => {
         ["--thread-max-width" as string]: "90rem",
       }}
     >
+      {/* Global loading overlay */}
+      <GlobalSearchLoadingOverlay />
+      
       <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8 pb-24 only-last-assistant-message">
         <ThreadWelcome />
         <ThreadPrimitive.Messages
