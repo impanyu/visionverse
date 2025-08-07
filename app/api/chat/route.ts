@@ -2474,7 +2474,7 @@ For search_location field:
   The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
   You should reason about where the service should be located, to best achieve the user's goal. 
 
-Pay attention: ALWAYS specify user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions!!
+Pay attention: ALWAYS specify user profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions!! Only include specific profile information in the description.
 
 
 Pay attention: Output ONLY a json string, without any other text !!
