@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https:; object-src 'none'; base-uri 'self';"
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config: any) => {
     // Handle ChromaDB external dependencies more aggressively
     config.externals = config.externals || [];
