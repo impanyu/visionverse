@@ -3,10 +3,7 @@
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { useSession, signOut } from "next-auth/react";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { EnhancedThread } from "@/components/enhanced-thread";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,98 +187,83 @@ export default function AssistantPage() {
       <ShowServiceToolUI />
 
       <ProductSearchToolUI />
-      <SidebarProvider defaultOpen={false}>
-        <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-10 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 border-b border-slate-700 shadow-lg">
-            <div className="flex items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1 text-slate-300 hover:text-white" />
+      <div className="flex flex-col h-screen">
+        <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-slate-800 via-gray-800 to-slate-900 border-b border-slate-700 shadow-lg px-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</span>
             <Separator orientation="vertical" className="mr-2 h-4 bg-slate-600" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/">
-                      <span className="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">ChoiceMade.ai</span>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block text-slate-500" />
-                <BreadcrumbItem>
-                    <BreadcrumbPage className="text-slate-200">{displayTitle}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            </div>
-            <div className="ml-auto flex items-center gap-2 px-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-slate-700">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={session.user?.image || undefined} alt={session.user?.name || "User"} />
-                      <AvatarFallback>
-                        <User className="h-4 w-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{session.user?.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={(e) => {
-                    console.log('🎯 DropdownMenuItem clicked for add product');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddProduct();
-                  }}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    <span>add a product</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    console.log('🎯 DropdownMenuItem clicked for manage products');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleManageProducts();
-                  }}>
-                    <Package className="mr-2 h-4 w-4" />
-                    <span>manage my products</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    console.log('🎯 DropdownMenuItem clicked for add service');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAddService();
-                  }}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    <span>add a service</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    console.log('🎯 DropdownMenuItem clicked for manage services');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleManageServices();
-                  }}>
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    <span>manage my services</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <ThreadWrapper onUserMessageChange={setCurrentUserMessage} />
+            <span className="text-slate-200">{displayTitle}</span>
           </div>
-        </SidebarInset>
-      </SidebarProvider>
+          <div className="ml-auto flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-slate-700">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.user?.image || undefined} alt={session.user?.name || "User"} />
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={(e) => {
+                  console.log('🎯 DropdownMenuItem clicked for add product');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddProduct();
+                }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span>add a product</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  console.log('🎯 DropdownMenuItem clicked for manage products');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleManageProducts();
+                }}>
+                  <Package className="mr-2 h-4 w-4" />
+                  <span>manage my products</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  console.log('🎯 DropdownMenuItem clicked for add service');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddService();
+                }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span>add a service</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  console.log('🎯 DropdownMenuItem clicked for manage services');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleManageServices();
+                }}>
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  <span>manage my services</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <ThreadWrapper onUserMessageChange={setCurrentUserMessage} />
+        </div>
+      </div>
 
       
       {/* Hidden suggestion button for add product */}
