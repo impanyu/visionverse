@@ -943,18 +943,18 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
           transform: scale(1.1);
         }
       `}</style>
-      <div className="max-w-4xl mx-auto p-6 space-y-4">
+      <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
       {/* Only show the main UI if search is not blocked */}
       {!isBlockedSearch && (
         <>
         {/* Original Query Box */}
       <Card className="border border-gray-200 bg-gray-50/50 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-800">Search Query</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Refresh Search Button */}
               <button
                 onClick={handleRefreshSearch}
@@ -1001,11 +1001,11 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
             )}
           </div>
           
-          {/* Suggested Keywords */}
+          {/* Suggested Keywords - MOBILE RESPONSIVE */}
           {(result.suggestedKeywords && result.suggestedKeywords.length > 0) && (
-            <div className="mt-3">
+            <div className="mt-2 sm:mt-3">
               <p className="text-xs text-gray-500 mb-2">Suggested refinements:</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {result.suggestedKeywords.map((keyword, index) => {
                   // Single blue color scheme for all keyword boxes
                   const colors = {
@@ -1045,7 +1045,7 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                         console.log('🏷️ Added keyword:', keyword, 'New query:', newQuery);
                       }
                     }}
-                      className={`px-3 py-1 text-xs border border-dashed rounded-md transition-colors ${colors.hover} ${
+                      className={`px-2 sm:px-3 py-1 text-xs border border-dashed rounded-md transition-colors ${colors.hover} ${
                         modifiedQuery.includes(keyword) 
                           ? colors.selected
                           : colors.default
