@@ -92818,3 +92818,3259 @@ The 'path' argument is deprecated. Please use 'ssl', 'host', and 'port' instead
  GET /api/image-proxy?url=https%3A%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAC9h4nprB0MzhlbtJiNc5MDNBKDc9lxfR96x_AI0neo26jT3aQASXmbcpH-n-6sucNnSJw9863Ydw0rRTNnNG4uaIhiAIkOHP2BXP7xDxFGLjWeOzw9z0onlIVtNa_JCUirFgmXZ-SzE%3Dw122-h92-k-no 200 in 231ms
 ✅ Successfully proxied image: image/jpeg, 5642 bytes
  GET /api/image-proxy?url=https%3A%2F%2Flh3.googleusercontent.com%2Fp%2FAF1QipN_k08iR3aUyuD7ma6503t9UKyrpMzWOxkgHyJT%3Dw166-h92-k-no 200 in 412ms
+👤 Creating or getting user profile for: 103232145871075765795
+✅ Found existing user profile for: 103232145871075765795
+🎯 API: Received messages count: 130
+🎯 API: Last user message: complex content
+🎯 API: This should trigger product search if it's a product query
+🚨 CONVERSATION HISTORY saved to: conversation-debug.txt (44 user messages)
+🎯 API: Search option from headers: both
+📍 API: User location from headers: { lat: 40.8312584553854, lng: -96.66904513001089 }
+🔍 API: Array message content: "i want to make love with my girlfriend"
+🤖 API: General user input - letting AI choose appropriate tool naturally
+🔍 API: Extracted user text content: "i want to make love with my girlfriend"
+✅ Forcing tool: intelligent_product_search (detected product search)
+🔄 API: Trimmed conversation from 130 to 3 messages for product search consistency
+🔍 API: Detected product search: true, Messages: 130, Will trim: true
+🤖 API: About to call streamText with:
+🤖 API: System message length: 3361
+🤖 API: Messages count: 3
+🤖 API: Tool choice: FORCED intelligent_product_search
+🤖 API: Available tools: [
+  'create_vision_direct',
+  'create_product_form',
+  'create_product_direct',
+  'list_my_products',
+  'show_product',
+  'delete_product',
+  'product_created_with_list',
+  'product_deleted_with_list',
+  'create_service_form',
+  'list_my_services',
+  'show_service',
+  'delete_service',
+  'intelligent_product_search'
+]
+🤖 API: Last 3 messages:
+  [0] assistant: complex content
+  [1] tool: complex content
+  [2] user: complex content
+🤖 API: Sending to AI - Last message content: "i want to make love with my girlfriend" (forcedTool=intelligent_product_search)
+🤖 API: System prompt contains "NEVER GENERATE TEXT WITH TOOLS": false
+🤖 API: Calling streamText...
+🤖 API: streamText completed, returning data stream response
+🤖 API: If this was a product search, we should see tool calls in the stream
+🎯 API: Response streaming initiated - tool UIs should render based on AI's tool calls
+🎯 Backend: TOOL CALLED - intelligent_product_search
+🔍 Backend: Starting intelligent search for: "i want to make love with my girlfriend"
+🔍 Backend: Search option: both, search_product: true, search_service: true
+🔍 Backend: refreshRequest: null
+🔍 Backend: User ID: 103232145871075765795
+🔍 Adding query to profile for user: 103232145871075765795
+➕ Adding profile item for user: 103232145871075765795
+✅ Added profile item for: 103232145871075765795
+👤 Profile: Added query to user profile: "i want to make love with my girlfriend"
+✅ Backend: Registered new search search_1754554536794_vrw1juph1 for user 103232145871075765795
+🔍 Backend: No refresh request, performing normal search
+💾 Storing historical query: "i want to make love with my girlfriend" for user: 103232145871075765795
+🔍 Retrieving last 3 searched product bundles for user: 103232145871075765795
+🤖 Generating embedding for: "i want to make love with my girlfriend"
+✅ Found 3 historical product bundles for context
+   1. "i want to hang out with my girl in a hotel" → 10 products (8/7/2025)
+   2. "i want to swim" → 10 products (8/7/2025)
+   3. "i want to swim" → 12 products (8/7/2025)
+🕒 Searching for similar historical queries...
+🔍 Searching for similar historical queries for user: 103232145871075765795, query: "i want to make love with my girlfriend"
+🤖 Generating embedding for: "i want to make love with my girlfriend"
+✅ Generated embedding with 3072 dimensions
+✅ Historical query stored with ID: 103232145871075765795-1754554537146-pfe6sgp5j
+✅ Generated embedding with 3072 dimensions
+🔍 Searching historical queries collection for user: 103232145871075765795...
+🔍 Raw historical queries results: {
+      foundIds: 30,
+      distances: [0.00000157, 0.79441643, 0.91434401...]
+    }
+🔍 Found 29 similar historical queries for user
+📚 BACKEND: Historical queries search result: { hasDocuments: true, queryCount: 29 }
+📚 Found 29 similar historical queries:
+  1. "i want to hang out with my girl in a hotel" (distance: 0.7944, date: 8/7/2025)
+  2. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  3. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  4. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  5. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  6. "i want to swim" (distance: 1.2795, date: 8/7/2025)
+  7. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  8. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  9. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  10. "i want to hang out with my girl in forest" (distance: 0.9143, date: 8/7/2025)
+  11. "i want to swim" (distance: 1.2797, date: 8/7/2025)
+  12. "i want to swim in the sea" (distance: 1.2563, date: 8/7/2025)
+  13. "i want to swim in the sea" (distance: 1.2563, date: 8/7/2025)
+  14. "i want a chocolate" (distance: 1.2287, date: 8/7/2025)
+  15. "i want a box of chocolate" (distance: 1.2421, date: 8/6/2025)
+  16. "i want a chocolate" (distance: 1.2287, date: 8/6/2025)
+  17. "i want to go to a restauraunt" (distance: 1.2227, date: 8/6/2025)
+  18. "i want to go to a restaurant" (distance: 1.2250, date: 8/6/2025)
+  19. "i want to go to restaraunt" (distance: 1.2024, date: 8/6/2025)
+  20. "i want to book a hotel" (distance: 1.2682, date: 8/6/2025)
+  21. "i want to book a hotel" (distance: 1.2684, date: 8/6/2025)
+  22. "i want to go to a restuarnt" (distance: 1.2289, date: 8/6/2025)
+  23. "i want to go to a restaruant" (distance: 1.2276, date: 8/6/2025)
+  24. "i want a chocolate" (distance: 1.2287, date: 8/6/2025)
+  25. "i want to go to india" (distance: 1.2569, date: 8/6/2025)
+  26. "i want a chocolate" (distance: 1.2287, date: 8/6/2025)
+  27. "i want a chocolate" (distance: 1.2287, date: 8/6/2025)
+  28. "i want a chocolate" (distance: 1.2287, date: 8/6/2025)
+  29. "i want to go to india" (distance: 1.2570, date: 8/6/2025)
+🔍 Standard query processing: "i want to make love with my girlfriend"
+👤 Profile: userProfileContext: this user has profile as follows: i want to swim in the sea, i'm male, i want to swim in the pool, i need to go to india, i want to swim, i need to go to inda, i need to go to china, i want to go to china, i want to go to china, China travel, swimming, i want to swim in the see, i want to hang out with my girl in forest, i want to travel to nebraska, i want to go to swim, i want to hang out with my girl in a hotel, i want to make love with my girlfriend.
+👤 Profile: Added user context with 15 profile items
+🔍 BACKEND: Raw intent response (1797ms): {
+  "rewritten_query": "i want to make love with my girlfriend (male)",
+  "suggested_keywords": ["romantic getaway", "hotel for couples", "privacy", "romantic experience", "couple activities", "intimacy", "relationship", "romantic trip", "love", "girlfriend", "romantic ideas", "couple travel", "private hotel room", "romantic date", "romantic setting"]
+}
+🔍 BACKEND: Cleaned JSON for parsing: {
+  "rewritten_query": "i want to make love with my girlfriend (male)",
+  "suggested_keywords": ["romantic getaway", "hotel for couples", "privacy", "romantic experience", "couple activities", "intimacy", "relationship", "romantic trip", "love", "girlfriend", "romantic ideas", "couple travel", "private hotel room", "romantic date", "romantic setting"]
+}
+🔍 Intent analysis result: {
+  original: 'i want to make love with my girlfriend',
+  rewritten: 'i want to make love with my girlfriend (male)',
+  different: true,
+  fieldFound: 'rewritten_query'
+}
+🧠 Intent-based rewritten query: "i want to make love with my girlfriend (male)"
+🏷️ BACKEND: Generated suggested keywords: [
+  'romantic getaway',
+  'hotel for couples',
+  'privacy',
+  'romantic experience',
+  'couple activities',
+  'intimacy',
+  'relationship',
+  'romantic trip',
+  'love',
+  'girlfriend',
+  'romantic ideas',
+  'couple travel',
+  'private hotel room',
+  'romantic date',
+  'romantic setting'
+]
+🌟 Starting Gemini-based product search for: "i want to make love with my girlfriend (male)"
+⏱️ INITIALIZATION TIMING: History: 812ms, Intent: 1797ms
+🌟 Gemini-based Query Interpreter: "i want to make love with my girlfriend (male)"
+💰 Price Analyzer: No explicit price range found in "i want to make love with my girlfriend (male)"
+💰 Price Range: No price specified (443ms)
+🤖 Final query selection: {
+  original: 'i want to make love with my girlfriend (male)',
+  rewritten: 'i want to make love with my girlfriend (male)',
+  using: 'i want to make love with my girlfriend (male)',
+  isRewritten: false
+}
+🤖 Gemini API: Getting product recommendations for "i want to make love with my girlfriend (male)" (attempt 1/2)
+🤖 Gemini Raw Response (attempt 1): ```json
+[
+  {"description": "Condoms for safe sex (assuming male, any age)", "necessity_score": 1.0, "type": "product", "search_location": ""},
+  {"description": "Lubricant to enhance comfort and plea...
+🔧 Attempting to fix JSON on attempt 1
+🔧 Fixed JSON: Found 4 complete objects
+✅ Gemini API: Successfully parsed 4 items on attempt 1
+  1. "Condoms for safe sex (assuming male, any age)" (necessity: 1, type: product)
+  2. "Lubricant to enhance comfort and pleasure (assuming male, any age)" (necessity: 0.8, type: product)
+  3. "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)" (necessity: 0.7, type: product)
+  4. "Massage oil for sensual massage (assuming male, any age)" (necessity: 0.6, type: product)
+🤖 Gemini returned 4 product recommendations (2039ms)
+🚀 Starting parallel search for 4 products simultaneously...
+🔍 [1/4] Starting parallel search for product: "Condoms for safe sex (assuming male, any age)" (necessity: 1)
+📍 [1] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Condoms for safe sex (assuming male, any age)"
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Condoms for safe sex (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Condoms for safe sex (assuming male, any age)"
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Condoms for safe sex (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [2/4] Starting parallel search for product: "Lubricant to enhance comfort and pleasure (assuming male, any age)" (necessity: 0.8)
+📍 [2] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Lubricant to enhance comfort and pleasure (assuming male, any age)"
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Lubricant to enhance comfort and pleasure (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Lubricant to enhance comfort and pleasure (assuming male, any age)"
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Lubricant to enhance comfort and pleasure (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [3/4] Starting parallel search for product: "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)" (necessity: 0.7)
+📍 [3] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)"
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)"
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [4/4] Starting parallel search for product: "Massage oil for sensual massage (assuming male, any age)" (necessity: 0.6)
+📍 [4] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Massage oil for sensual massage (assuming male, any age)"
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Massage oil for sensual massage (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Massage oil for sensual massage (assuming male, any age)"
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Massage oil for sensual massage (assuming male, any age)',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🏠 Searching local products for: "Condoms for safe sex (assuming male, any age)"
+🏠 Searching local products for: "Lubricant to enhance comfort and pleasure (assuming male, any age)"
+🏠 Searching local products for: "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)"
+🏠 Searching local products for: "Massage oil for sensual massage (assuming male, any age)"
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+📭 No organic results found in Amazon search
+🛒 Amazon: Fetched 0 products (limit: 20)
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Majestic Pure Coconut Massage Oil" (skipping offers)
+🔄 Converting Google product: "Majestic Pure Coconut Massage Oil"
+📝 Base product data: {
+  seller: 'Walmart - Majestic Pure',
+  product_link: 'https://www.google.com/shopping/product/10187179354722104365?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10187179354722104365/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Maple Holistics Mango Sensual Massage Oil" (skipping offers)
+🔄 Converting Google product: "Maple Holistics Mango Sensual Massage Oil"
+📝 Base product data: {
+  seller: 'Maple Holistics',
+  product_link: 'https://www.google.com/shopping/product/13050900734960733227?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13050900734960733227/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Sensual Couple Massage Oil" (skipping offers)
+🔄 Converting Google product: "Sensual Couple Massage Oil"
+📝 Base product data: {
+  seller: 'VedaOils US',
+  product_link: 'https://www.google.com/shopping/product/2438723660406609649?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2438723660406609649/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Maple Holistics Aromatherapy Massage Oil" (skipping offers)
+🔄 Converting Google product: "Maple Holistics Aromatherapy Massage Oil"
+📝 Base product data: {
+  seller: 'Walmart - Natural USA Products',
+  product_link: 'https://www.google.com/shopping/product/4585581292977228248?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4585581292977228248/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Earthly Body Edible Massage Oil" (skipping offers)
+🔄 Converting Google product: "Earthly Body Edible Massage Oil"
+📝 Base product data: {
+  seller: 'Kinkly',
+  product_link: 'https://www.google.com/shopping/product/10213731273131218826?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10213731273131218826/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Shadow of Desire Massage Oil" (skipping offers)
+🔄 Converting Google product: "The Shadow of Desire Massage Oil"
+📝 Base product data: {
+  seller: 'Kindred Black',
+  product_link: 'https://www.google.com/shopping/product/851870422239894544?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/851870422239894544/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Honeydew Vanilla Massage Oil" (skipping offers)
+🔄 Converting Google product: "Honeydew Vanilla Massage Oil"
+📝 Base product data: {
+  seller: 'eBay - prolinics',
+  product_link: 'https://www.google.com/shopping/product/10095528825895583711?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10095528825895583711/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Promescent Sensual Massage Oil for Couples" (skipping offers)
+🔄 Converting Google product: "Promescent Sensual Massage Oil for Couples"
+📝 Base product data: {
+  seller: 'Promescent',
+  product_link: 'https://www.google.com/shopping/product/9421622110574211005?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9421622110574211005/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Massage Oil 8 oz" (skipping offers)
+🔄 Converting Google product: "Massage Oil 8 oz"
+📝 Base product data: {
+  seller: 'Rowe Casa Organics',
+  product_link: 'https://www.google.com/shopping/product/3438568527774684115?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3438568527774684115/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Intimate Earth Awake Massage Oil" (skipping offers)
+🔄 Converting Google product: "Intimate Earth Awake Massage Oil"
+📝 Base product data: {
+  seller: 'Kinkly',
+  product_link: 'https://www.google.com/shopping/product/2022476901299371575?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2022476901299371575/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Xotics Full Body Massage Oil" (skipping offers)
+🔄 Converting Google product: "Xotics Full Body Massage Oil"
+📝 Base product data: {
+  seller: 'Xotics By Curtis Smith',
+  product_link: 'https://www.google.com/shopping/product/5180680437256597948?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5180680437256597948/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "M3 Naturals Lavender Massage Oil" (skipping offers)
+🔄 Converting Google product: "M3 Naturals Lavender Massage Oil"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/6505713597813704528?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6505713597813704528/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Majestic Pure Lavender Massage Oil" (skipping offers)
+🔄 Converting Google product: "Majestic Pure Lavender Massage Oil"
+📝 Base product data: {
+  seller: 'Walmart - Majestic Pure',
+  product_link: 'https://www.google.com/shopping/product/5576293122701865398?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5576293122701865398/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kama Sutra Naturals Coconut Pineapple Massage Oil" (skipping offers)
+🔄 Converting Google product: "Kama Sutra Naturals Coconut Pineapple Massage Oil"
+📝 Base product data: {
+  seller: 'WorldCondoms',
+  product_link: 'https://www.google.com/shopping/product/7026794512205026021?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7026794512205026021/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Botanic Hearth Coconut Massage Oil" (skipping offers)
+🔄 Converting Google product: "Botanic Hearth Coconut Massage Oil"
+📝 Base product data: {
+  seller: 'Botanic Hearth',
+  product_link: 'https://www.google.com/shopping/product/12380770658222222649?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12380770658222222649/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Viva Naturals Organic Massage Oil Relaxing Lavender Scent" (skipping offers)
+🔄 Converting Google product: "Viva Naturals Organic Massage Oil Relaxing Lavender Scent"
+📝 Base product data: {
+  seller: 'Viva Naturals',
+  product_link: 'https://www.google.com/shopping/product/9795504505021400702?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9795504505021400702/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Last Touch Exotic Sensual Massage Oil" (skipping offers)
+🔄 Converting Google product: "Last Touch Exotic Sensual Massage Oil"
+📝 Base product data: {
+  seller: 'eBay',
+  product_link: 'https://www.google.com/shopping/product/7028707666230305028?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7028707666230305028/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Promescent Lavender Massage Oil for Massage Therapy Massage Oils for Date Night" (skipping offers)
+🔄 Converting Google product: "Promescent Lavender Massage Oil for Massage Therapy Massage Oils for Date Night"
+📝 Base product data: {
+  seller: 'Promescent',
+  product_link: 'https://www.google.com/shopping/product/3498399080311234897?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3498399080311234897/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Maple Holistics Vanilla Massage Oil" (skipping offers)
+🔄 Converting Google product: "Maple Holistics Vanilla Massage Oil"
+📝 Base product data: {
+  seller: 'Maple Holistics',
+  product_link: 'https://www.google.com/shopping/product/396231212756172732?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/396231212756172732/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Cosmetasa Lavender Relaxation Massage Oil with Massage Roller Ball No Stain 100% Natural Blend of Spa Quality Oils for Calming" (skipping offers)
+🔄 Converting Google product: "Cosmetasa Lavender Relaxation Massage Oil with Massage Roller Ball No Stain 100% Natural Blend of Spa Quality Oils for Calming"
+📝 Base product data: {
+  seller: 'Cosmetasa',
+  product_link: 'https://www.google.com/shopping/product/2189239580161596192?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2189239580161596192/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Medicine Mama Organic Lube" (skipping offers)
+🔄 Converting Google product: "Medicine Mama Organic Lube"
+📝 Base product data: {
+  seller: 'Medicine Mama',
+  product_link: 'https://www.google.com/shopping/product/6717183398858171104?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6717183398858171104/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Elevated Lover's Liquid Gold Lube" (skipping offers)
+🔄 Converting Google product: "Elevated Lover's Liquid Gold Lube"
+📝 Base product data: {
+  seller: "Taylor's Naturals",
+  product_link: 'https://www.google.com/shopping/product/7934885577919531900?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7934885577919531900/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Teaser 2.0" (skipping offers)
+🔄 Converting Google product: "The Teaser 2.0"
+📝 Base product data: {
+  seller: 'Ulta Beauty',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:9535460701530760766',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:9535460701530760766',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lube The Butters" (skipping offers)
+🔄 Converting Google product: "Lube The Butters"
+📝 Base product data: {
+  seller: 'The Butters Hygienics Co.',
+  product_link: 'https://www.google.com/shopping/product/11866654570487815288?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11866654570487815288/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Super Slip & Slide" (skipping offers)
+🔄 Converting Google product: "Super Slip & Slide"
+📝 Base product data: {
+  seller: 'Vella Bioscience',
+  product_link: 'https://www.google.com/shopping/product/3219753628302107212?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3219753628302107212/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "VetOne OB Lube Non-Spermicidal Sterile Lubricating Jelly" (skipping offers)
+🔄 Converting Google product: "VetOne OB Lube Non-Spermicidal Sterile Lubricating Jelly"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/9625207111870738089?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9625207111870738089/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Aladdin Magic Lube" (skipping offers)
+🔄 Converting Google product: "Aladdin Magic Lube"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/3670114659827540829?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3670114659827540829/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lubricating Jelly McKesson" (skipping offers)
+🔄 Converting Google product: "Lubricating Jelly McKesson"
+📝 Base product data: {
+  seller: 'VitalityMedical.com',
+  product_link: 'https://www.google.com/shopping/product/17607038918668356068?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17607038918668356068/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Surgilube Sterile Lubricating Jelly" (skipping offers)
+🔄 Converting Google product: "Surgilube Sterile Lubricating Jelly"
+📝 Base product data: {
+  seller: 'MedicalRite',
+  product_link: 'https://www.google.com/shopping/product/10725261401718866176?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10725261401718866176/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lactomedi Pleasure Gel" (skipping offers)
+🔄 Converting Google product: "Lactomedi Pleasure Gel"
+📝 Base product data: {
+  seller: 'YesStyle.com',
+  product_link: 'https://www.google.com/shopping/product/11781684155593413646?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11781684155593413646/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Surgilube Lubricating Jelly 2 oz Flip Top Tube" (skipping offers)
+🔄 Converting Google product: "Surgilube Lubricating Jelly 2 oz Flip Top Tube"
+📝 Base product data: {
+  seller: 'Grayline Medical',
+  product_link: 'https://www.google.com/shopping/product/15115470905239722838?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/15115470905239722838/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Rock N Roll Gold Chain Lube" (skipping offers)
+🔄 Converting Google product: "Rock N Roll Gold Chain Lube"
+📝 Base product data: {
+  seller: 'Chenango Point',
+  product_link: 'https://www.google.com/shopping/product/16240657308938047385?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16240657308938047385/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Boy Butter H2O Stock Up & Save Tub Trio Bundle" (skipping offers)
+🔄 Converting Google product: "Boy Butter H2O Stock Up & Save Tub Trio Bundle"
+📝 Base product data: {
+  seller: 'Boy Butter',
+  product_link: 'https://www.google.com/shopping/product/9080663870267497667?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9080663870267497667/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "#ToyLife O-town + Hose Down Kit" (skipping offers)
+🔄 Converting Google product: "#ToyLife O-town + Hose Down Kit"
+📝 Base product data: {
+  seller: '#Lubelife',
+  product_link: 'https://www.google.com/shopping/product/5618035614862506917?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5618035614862506917/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Ideal General Lube 8oz" (skipping offers)
+🔄 Converting Google product: "Ideal General Lube 8oz"
+📝 Base product data: {
+  seller: 'Rural King',
+  product_link: 'https://www.google.com/shopping/product/2452836635456864013?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2452836635456864013/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "10 oz. Gel Lube No-Drip Formula Smart Straw Spray (2-Pack)" (skipping offers)
+🔄 Converting Google product: "10 oz. Gel Lube No-Drip Formula Smart Straw Spray (2-Pack)"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/4921680982252137529?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4921680982252137529/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Selfmade Self Disclosure Intimacy Serum" (skipping offers)
+🔄 Converting Google product: "Selfmade Self Disclosure Intimacy Serum"
+📝 Base product data: {
+  seller: 'beselfmade.co',
+  product_link: 'https://www.google.com/shopping/product/6315597040893051659?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6315597040893051659/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "E-Z Lubricating Jelly Flip-Top Tube" (skipping offers)
+🔄 Converting Google product: "E-Z Lubricating Jelly Flip-Top Tube"
+📝 Base product data: {
+  seller: 'Honest Medical',
+  product_link: 'https://www.google.com/shopping/product/7287837230843124452?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7287837230843124452/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Angstrom Gravitas" (skipping offers)
+🔄 Converting Google product: "Angstrom Gravitas"
+📝 Base product data: {
+  seller: 'TheCubicle',
+  product_link: 'https://www.google.com/shopping/product/4134387132631909343?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4134387132631909343/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dynarex DynaLube Lubricating Jelly Sterile" (skipping offers)
+🔄 Converting Google product: "Dynarex DynaLube Lubricating Jelly Sterile"
+📝 Base product data: {
+  seller: 'Common Cents EMS Supply',
+  product_link: 'https://www.google.com/shopping/product/17778522295693164900?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17778522295693164900/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [4] "Massage oil for sensual massage (assuming male, any age)": Found 16 recommended products from 40 total (APIs: 2222ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 16 products for "Massage oil for sensual massage (assuming male, any age)"
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Trojan Magnum Bareskin Condoms" (skipping offers)
+🔄 Converting Google product: "Trojan Magnum Bareskin Condoms"
+📝 Base product data: {
+  seller: 'CondomDepot.com',
+  product_link: 'https://www.google.com/shopping/product/6512442901656085491?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6512442901656085491/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "One Super Sensitive Condoms" (skipping offers)
+🔄 Converting Google product: "One Super Sensitive Condoms"
+📝 Base product data: {
+  seller: 'ONE Condoms',
+  product_link: 'https://www.google.com/shopping/product/17232352068502608702?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17232352068502608702/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Durex Tropical Color & Scents Condoms" (skipping offers)
+🔄 Converting Google product: "Durex Tropical Color & Scents Condoms"
+📝 Base product data: {
+  seller: 'Durex',
+  product_link: 'https://www.google.com/shopping/product/15297737630806800438?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/15297737630806800438/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lola Ultra Thin Lubricated Latex Condoms" (skipping offers)
+🔄 Converting Google product: "Lola Ultra Thin Lubricated Latex Condoms"
+📝 Base product data: {
+  seller: 'LOLA',
+  product_link: 'https://www.google.com/shopping/product/5842584839270051853?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5842584839270051853/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lifestyles Condoms" (skipping offers)
+🔄 Converting Google product: "Lifestyles Condoms"
+📝 Base product data: {
+  seller: 'The Gayraj',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:8135173510236732894',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:8135173510236732894',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lifestyles Ultra Sensitive Latex Condoms" (skipping offers)
+🔄 Converting Google product: "Lifestyles Ultra Sensitive Latex Condoms"
+📝 Base product data: {
+  seller: 'Save Rite Medical',
+  product_link: 'https://www.google.com/shopping/product/3363019544121279807?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3363019544121279807/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Lovability Ultra-Thin Condoms" (skipping offers)
+🔄 Converting Google product: "Lovability Ultra-Thin Condoms"
+📝 Base product data: {
+  seller: 'Lovability',
+  product_link: 'https://www.google.com/shopping/product/10767939320411548745?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10767939320411548745/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "P.S. Condoms The Best Condoms On Earth XL" (skipping offers)
+🔄 Converting Google product: "P.S. Condoms The Best Condoms On Earth XL"
+📝 Base product data: {
+  seller: 'P.S.',
+  product_link: 'https://www.google.com/shopping/product/745423783148310176?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/745423783148310176/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "UltraFeel Condoms" (skipping offers)
+🔄 Converting Google product: "UltraFeel Condoms"
+📝 Base product data: {
+  seller: 'ONE Condoms',
+  product_link: 'https://www.google.com/shopping/product/327723104357583994?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/327723104357583994/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Ultra-Thin Organic Condoms and Organic Personal Lube Kit" (skipping offers)
+🔄 Converting Google product: "Ultra-Thin Organic Condoms and Organic Personal Lube Kit"
+📝 Base product data: {
+  seller: 'Maude',
+  product_link: 'https://www.google.com/shopping/product/16095698449123945354?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16095698449123945354/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kimono MicroThin Condoms" (skipping offers)
+🔄 Converting Google product: "Kimono MicroThin Condoms"
+📝 Base product data: {
+  seller: 'Lovers Stores',
+  product_link: 'https://www.google.com/shopping/product/7061498740072488708?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7061498740072488708/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Night Light Glow in the Dark Condoms" (skipping offers)
+🔄 Converting Google product: "Night Light Glow in the Dark Condoms"
+📝 Base product data: {
+  seller: 'Condomania',
+  product_link: 'https://www.google.com/shopping/product/16789069023709736388?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16789069023709736388/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Trojan RAW Pure Feel Non Latex Condoms" (skipping offers)
+🔄 Converting Google product: "Trojan RAW Pure Feel Non Latex Condoms"
+📝 Base product data: {
+  seller: 'CondomDepot.com',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:7146353201331243114',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:7146353201331243114',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "LifeStyles SKYN Elite Extra Lubricated Non-Latex Condoms" (skipping offers)
+🔄 Converting Google product: "LifeStyles SKYN Elite Extra Lubricated Non-Latex Condoms"
+📝 Base product data: {
+  seller: 'Honest Medical',
+  product_link: 'https://www.google.com/shopping/product/2856086193485576287?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2856086193485576287/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Trojan Magnum Condoms" (skipping offers)
+🔄 Converting Google product: "Trojan Magnum Condoms"
+📝 Base product data: {
+  seller: 'Promescent',
+  product_link: 'https://www.google.com/shopping/product/7571781121472404454?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7571781121472404454/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Durex Extra Sensitive Condoms" (skipping offers)
+🔄 Converting Google product: "Durex Extra Sensitive Condoms"
+📝 Base product data: {
+  seller: 'HerbsDaily.com',
+  product_link: 'https://www.google.com/shopping/product/3700935347443794015?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3700935347443794015/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "One Flex Graphene Condoms" (skipping offers)
+🔄 Converting Google product: "One Flex Graphene Condoms"
+📝 Base product data: {
+  seller: 'ONE Condoms',
+  product_link: 'https://www.google.com/shopping/product/3624636192710842240?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3624636192710842240/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Mates Protect Extra Safe Condoms 9 Pack" (skipping offers)
+🔄 Converting Google product: "Mates Protect Extra Safe Condoms 9 Pack"
+📝 Base product data: {
+  seller: 'Sexy Emporium',
+  product_link: 'https://www.google.com/shopping/product/15361592847810687952?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/15361592847810687952/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Glyde Slimfit Condoms" (skipping offers)
+🔄 Converting Google product: "Glyde Slimfit Condoms"
+📝 Base product data: {
+  seller: 'SheVibe',
+  product_link: 'https://www.google.com/shopping/product/2676271642686380322?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2676271642686380322/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Wink Closer Condoms" (skipping offers)
+🔄 Converting Google product: "Wink Closer Condoms"
+📝 Base product data: {
+  seller: 'CondomDepot.com',
+  product_link: 'https://www.google.com/shopping/product/10114039967693416862?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10114039967693416862/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [1] "Condoms for safe sex (assuming male, any age)": Found 16 recommended products from 40 total (APIs: 3349ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 16 products for "Condoms for safe sex (assuming male, any age)"
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Moodcast Romantic Scented Candle" (skipping offers)
+🔄 Converting Google product: "Moodcast Romantic Scented Candle"
+📝 Base product data: {
+  seller: 'Candle Delirium',
+  product_link: 'https://www.google.com/shopping/product/12100094808175069800?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12100094808175069800/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Musical Love Amber Romance Candle" (skipping offers)
+🔄 Converting Google product: "Musical Love Amber Romance Candle"
+📝 Base product data: {
+  seller: 'Custom Candle Co',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:6091395263614311613',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:6091395263614311613',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Future Method Bedside Candle" (skipping offers)
+🔄 Converting Google product: "Future Method Bedside Candle"
+📝 Base product data: {
+  seller: 'Future Method',
+  product_link: 'https://www.google.com/shopping/product/16593139268384691442?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16593139268384691442/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dengmore Free Romantic Air Aromatherapy Candles" (skipping offers)
+🔄 Converting Google product: "Dengmore Free Romantic Air Aromatherapy Candles"
+📝 Base product data: {
+  seller: 'Walmart - Agiferg Home Supplier',
+  product_link: 'https://www.google.com/shopping/product/14532341477188894944?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14532341477188894944/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Glasshouse Fragrance Music City Magic Candle" (skipping offers)
+🔄 Converting Google product: "Glasshouse Fragrance Music City Magic Candle"
+📝 Base product data: {
+  seller: 'Glasshouse Fragrances USA',
+  product_link: 'https://www.google.com/shopping/product/1825092215313426108?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1825092215313426108/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Come to Me Candle" (skipping offers)
+🔄 Converting Google product: "Come to Me Candle"
+📝 Base product data: {
+  seller: 'Augustines Spiritual Boutique',
+  product_link: 'https://www.google.com/shopping/product/201975452160718891?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/201975452160718891/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Mood-Boosting Candle Sampler" (skipping offers)
+🔄 Converting Google product: "Mood-Boosting Candle Sampler"
+📝 Base product data: {
+  seller: 'Caftari',
+  product_link: 'https://www.google.com/shopping/product/17313922148164368115?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17313922148164368115/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Art Of The Root Love & Attraction Soy Candle" (skipping offers)
+🔄 Converting Google product: "Art Of The Root Love & Attraction Soy Candle"
+📝 Base product data: {
+  seller: 'Art Of The Root',
+  product_link: 'https://www.google.com/shopping/product/11056985025637750359?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11056985025637750359/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Anecdote Candles Vinyl Records Candle" (skipping offers)
+🔄 Converting Google product: "Anecdote Candles Vinyl Records Candle"
+📝 Base product data: {
+  seller: 'Tarvos Boutique',
+  product_link: 'https://www.google.com/shopping/product/1559168412273555839?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1559168412273555839/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "A24 Joya Genre Candles" (skipping offers)
+🔄 Converting Google product: "A24 Joya Genre Candles"
+📝 Base product data: {
+  seller: 'A24 Films',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:15246743610183539103',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:15246743610183539103',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Musical Love Candle" (skipping offers)
+🔄 Converting Google product: "Musical Love Candle"
+📝 Base product data: {
+  seller: 'Custom Candle Co',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:5898318900027008504',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:5898318900027008504',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Glasshouse Music City Magic Candle" (skipping offers)
+🔄 Converting Google product: "Glasshouse Music City Magic Candle"
+📝 Base product data: {
+  seller: 'Glasshouse Fragrances USA',
+  product_link: 'https://www.google.com/shopping/product/1341812300872510607?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1341812300872510607/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "iHome Sound Machine with Bluetooth Speaker, Flameless Candle, and Sleep Sounds" (skipping offers)
+🔄 Converting Google product: "iHome Sound Machine with Bluetooth Speaker, Flameless Candle, and Sleep Sounds"
+📝 Base product data: {
+  seller: 'Walmart - VLC DISTRIBUTION',
+  product_link: 'https://www.google.com/shopping/product/10070312293307606721?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10070312293307606721/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Sensual Candle Scent of Seductive Roses" (skipping offers)
+🔄 Converting Google product: "Sensual Candle Scent of Seductive Roses"
+📝 Base product data: {
+  seller: 'Emmerse',
+  product_link: 'https://www.google.com/shopping/product/13147375946596912626?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13147375946596912626/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Isn't It Romantic Candle" (skipping offers)
+🔄 Converting Google product: "Isn't It Romantic Candle"
+📝 Base product data: {
+  seller: 'Carved Solutions',
+  product_link: 'https://www.google.com/shopping/product/7671934622526172383?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7671934622526172383/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FashionCraft Musical Note Design Candles" (skipping offers)
+🔄 Converting Google product: "FashionCraft Musical Note Design Candles"
+📝 Base product data: {
+  seller: 'Menchey Music Service',
+  product_link: 'https://www.google.com/shopping/product/16396430703437616508?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16396430703437616508/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Home Inn Master Bedroom Candle" (skipping offers)
+🔄 Converting Google product: "Home Inn Master Bedroom Candle"
+📝 Base product data: {
+  seller: 'Home Inn Candle Company',
+  product_link: 'https://www.google.com/shopping/product/16955001377701264308?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16955001377701264308/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Paddywax Mood Collection Tranquil Lush Palms Candle" (skipping offers)
+🔄 Converting Google product: "Paddywax Mood Collection Tranquil Lush Palms Candle"
+📝 Base product data: {
+  seller: 'TealDragonflyCreations',
+  product_link: 'https://www.google.com/shopping/product/14216834810771565832?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14216834810771565832/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Book Boyfriend Candle" (skipping offers)
+🔄 Converting Google product: "Book Boyfriend Candle"
+📝 Base product data: {
+  seller: 'C & E Craft Co',
+  product_link: 'https://www.google.com/shopping/product/2440298207834602227?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2440298207834602227/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Romantic Candles" (skipping offers)
+🔄 Converting Google product: "Romantic Candles"
+📝 Base product data: {
+  seller: 'eBay - prepbooks',
+  product_link: 'https://www.google.com/shopping/product/4029179113476153794?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4029179113476153794/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+📊 Product counts - Amazon: 0, Google: 20, Local: 0
+📦 [3] "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)": Found 7 recommended products from 20 total (APIs: 4627ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 7 products for "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)"
+✅ Product Selection Model: Selected "Majestic Pure Lavender Massage Oil" (Score: 70)
+📝 Concise Title: "Majestic Pure Lavender Massage Oil" - This product has the highest rating of 5 stars with 422 reviews, indicating strong user satisfaction and popularity. It is reasonably priced at $13.49, making it a great value for a high-quality sensual massage oil.
+✅ [4] Selected: "Majestic Pure Lavender Massage Oil" - $$13.49 (2529ms)
+⏱️ [4] Total time: 4751ms
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [2] "Lubricant to enhance comfort and pleasure (assuming male, any age)": Found 13 recommended products from 40 total (APIs: 5534ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 13 products for "Lubricant to enhance comfort and pleasure (assuming male, any age)"
+✅ Product Selection Model: Selected "P.S. Condoms The Best Condoms On Earth XL" (Score: 100)
+📝 Concise Title: "P.S. XL Condoms" - This product has the highest quality score (100/100) and a high user rating (4.7★ from 2700 reviews), indicating excellent reliability and user satisfaction. Despite being the most expensive option, its superior quality and popularity make it the best choice for safe sex.
+✅ [1] Selected: "P.S. XL Condoms" - $$19.00 (2458ms)
+⏱️ [1] Total time: 5807ms
+✅ Product Selection Model: Selected "Art Of The Root Love & Attraction Soy Candle" (Score: 70)
+📝 Concise Title: "Love & Attraction Soy Candle" - This candle has a high rating (4.8★) with numerous reviews (134), indicating strong customer satisfaction. It is reasonably priced at $15.99 and specifically mentions 'Love & Attraction,' aligning well with the romantic setting preparation query.
+✅ [3] Selected: "Love & Attraction Soy Candle" - $$15.99 (2221ms)
+⏱️ [3] Total time: 6848ms
+✅ Product Selection Model: Selected "Aladdin Magic Lube" (Score: 70)
+📝 Concise Title: "Aladdin Magic Lube" - Aladdin Magic Lube is the best choice due to its high rating of 4.7★ and the most reviews among similarly rated products, indicating high user satisfaction and popularity. It is also the most affordable option among the top-rated products, making it a cost-effective choice for enhancing comfort and pleasure.
+✅ [2] Selected: "Aladdin Magic Lube" - $$3.35 (2880ms)
+⏱️ [2] Total time: 8415ms
+🚀 PARALLEL EXECUTION COMPLETE: 4 products searched simultaneously in 8418ms
+⏱️ TIMING SUMMARY: Parallel total: 8418ms, Search: 15732ms, Selection: 10088ms
+🎯 Selected 4 products from 4 searches
+💰 No price limit - including all 4 products - Total: $51.83
+🏆 Final selection: 4 products, Total price: $51.83
+🔍 DEBUG: Gemini search results:
+📊 DFS: Final search steps collected (4 total):
+   🔍 Search 1: "Condoms for safe sex (assuming male, any age)"
+   🔍 Search 2: "Lubricant to enhance comfort and pleasure (assuming male, any age)"
+   🔍 Search 3: "Romantic setting preparation (e.g., candles, music) to create a mood (assuming male, any age)"
+   🔍 Search 4: "Massage oil for sensual massage (assuming male, any age)"
+📦 Created allSelectedProductsForResult with 4 products from Gemini search
+🔍 DEBUG: Final result construction:
+   - allBestProducts.length: 4
+   - allSelectedProductsForResult.length: 4
+   - bestProduct exists: true
+   - Using: 4 products from Gemini search
+🎯 FINAL RESULT: {
+  originalQuery: 'i want to make love with my girlfriend',
+  rewrittenQuery: 'i want to make love with my girlfriend (male)',
+  hasRewritten: true,
+  productsCount: 4
+}
+🏆 FINAL: Displaying 4 products to user:
+  1. Level unknown: "P.S. XL Condoms" (from: unknown)
+  2. Level unknown: "Aladdin Magic Lube" (from: unknown)
+  3. Level unknown: "Love & Attraction Soy Candle" (from: unknown)
+  4. Level unknown: "Majestic Pure Lavender Massage Oil" (from: unknown)
+💾 Storing historical search result for user: 103232145871075765795
+✅ Historical search result stored with ID: 689460b6a0be736ae1ead348
+💾 Historical search result stored for user: 103232145871075765795
+🧹 Backend: Completed search for user 103232145871075765795 in 14s, removed from active searches
+🔧 Tool calls made: intelligent_product_search
+✅ No text generated with tools - good!
+ POST /api/chat 200 in 17137ms
+👤 Creating or getting user profile for: 103232145871075765795
+✅ Found existing user profile for: 103232145871075765795
+🎯 API: Received messages count: 133
+🎯 API: Last user message: complex content
+🎯 API: This should trigger product search if it's a product query
+🚨 CONVERSATION HISTORY saved to: conversation-debug.txt (45 user messages)
+🎯 API: Search option from headers: both
+📍 API: User location from headers: { lat: 40.8312584553854, lng: -96.66904513001089 }
+🔍 API: Array message content: "i want to wash my dog"
+🤖 API: General user input - letting AI choose appropriate tool naturally
+🔍 API: Extracted user text content: "i want to wash my dog"
+✅ Forcing tool: intelligent_product_search (detected product search)
+🔄 API: Trimmed conversation from 133 to 3 messages for product search consistency
+🔍 API: Detected product search: true, Messages: 133, Will trim: true
+🤖 API: About to call streamText with:
+🤖 API: System message length: 3361
+🤖 API: Messages count: 3
+🤖 API: Tool choice: FORCED intelligent_product_search
+🤖 API: Available tools: [
+  'create_vision_direct',
+  'create_product_form',
+  'create_product_direct',
+  'list_my_products',
+  'show_product',
+  'delete_product',
+  'product_created_with_list',
+  'product_deleted_with_list',
+  'create_service_form',
+  'list_my_services',
+  'show_service',
+  'delete_service',
+  'intelligent_product_search'
+]
+🤖 API: Last 3 messages:
+  [0] assistant: complex content
+  [1] tool: complex content
+  [2] user: complex content
+🤖 API: Sending to AI - Last message content: "i want to wash my dog" (forcedTool=intelligent_product_search)
+🤖 API: System prompt contains "NEVER GENERATE TEXT WITH TOOLS": false
+🤖 API: Calling streamText...
+🤖 API: streamText completed, returning data stream response
+🤖 API: If this was a product search, we should see tool calls in the stream
+🎯 API: Response streaming initiated - tool UIs should render based on AI's tool calls
+🎯 Backend: TOOL CALLED - intelligent_product_search
+🔍 Backend: Starting intelligent search for: "i want to wash my dog"
+🔍 Backend: Search option: both, search_product: true, search_service: true
+🔍 Backend: refreshRequest: null
+🔍 Backend: User ID: 103232145871075765795
+🔍 Adding query to profile for user: 103232145871075765795
+➕ Adding profile item for user: 103232145871075765795
+✅ Added profile item for: 103232145871075765795
+👤 Profile: Added query to user profile: "i want to wash my dog"
+✅ Backend: Registered new search search_1754554568719_qk0giokub for user 103232145871075765795
+🔍 Backend: No refresh request, performing normal search
+💾 Storing historical query: "i want to wash my dog" for user: 103232145871075765795
+🔍 Retrieving last 3 searched product bundles for user: 103232145871075765795
+✅ Found 3 historical product bundles for context
+   1. "i want to make love with my girlfriend" → 4 products (8/7/2025)
+   2. "i want to hang out with my girl in a hotel" → 10 products (8/7/2025)
+   3. "i want to swim" → 10 products (8/7/2025)
+🕒 Searching for similar historical queries...
+🔍 Searching for similar historical queries for user: 103232145871075765795, query: "i want to wash my dog"
+🤖 Generating embedding for: "i want to wash my dog"
+🤖 Generating embedding for: "i want to wash my dog"
+✅ Generated embedding with 3072 dimensions
+✅ Historical query stored with ID: 103232145871075765795-1754554569274-deet0ot36
+✅ Generated embedding with 3072 dimensions
+🔍 Searching historical queries collection for user: 103232145871075765795...
+🔍 Raw historical queries results: {
+      foundIds: 30,
+      distances: [0.00000119, 1.13681281, 1.13687468...]
+    }
+🔍 Found 29 similar historical queries for user
+📚 BACKEND: Historical queries search result: { hasDocuments: true, queryCount: 29 }
+📚 Found 29 similar historical queries:
+  1. "i want to make love with my girlfriend" (distance: 1.3024, date: 8/7/2025)
+  2. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  3. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  4. "i want to go to swim" (distance: 1.1760, date: 8/7/2025)
+  5. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  6. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  7. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  8. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  9. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  10. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  11. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  12. "i want to swim" (distance: 1.1368, date: 8/7/2025)
+  13. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  14. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  15. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  16. "i want to swim in the pool" (distance: 1.1594, date: 8/7/2025)
+  17. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  18. "i want to swim in the see" (distance: 1.2274, date: 8/7/2025)
+  19. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  20. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  21. "i want to swim" (distance: 1.1369, date: 8/7/2025)
+  22. "i want to swim in the pool" (distance: 1.1593, date: 8/7/2025)
+  23. "i want to swim in the pool" (distance: 1.1594, date: 8/7/2025)
+  24. "i want to swim in the pool" (distance: 1.1594, date: 8/7/2025)
+  25. "i want to swim in the pool" (distance: 1.1594, date: 8/7/2025)
+  26. "i want to swim in the sea" (distance: 1.1943, date: 8/7/2025)
+  27. "i want to swim in the sea" (distance: 1.1942, date: 8/7/2025)
+  28. "i want to go to a restaurant" (distance: 1.2980, date: 8/6/2025)
+  29. "i want to go to restaraunt" (distance: 1.3069, date: 8/6/2025)
+🔍 Standard query processing: "i want to wash my dog"
+👤 Profile: userProfileContext: this user has profile as follows: i want to swim in the sea, i'm male, i want to swim in the pool, i need to go to india, i want to swim, i need to go to inda, i need to go to china, i want to go to china, i want to go to china, China travel, swimming, i want to swim in the see, i want to hang out with my girl in forest, i want to travel to nebraska, i want to go to swim, i want to hang out with my girl in a hotel, i want to make love with my girlfriend, i want to wash my dog.
+👤 Profile: Added user context with 16 profile items
+🔍 BACKEND: Raw intent response (1955ms): {
+  "rewritten_query": "i want to wash my dog (male user)",
+  "suggested_keywords": ["dog wash", "dog shampoo", "dog grooming", "pet bath", "dog cleaning", "dog care", "how to wash dog", "best dog shampoo", "dog bath supplies", "pet grooming", "dog hygiene", "dog washing tips", "dog bath products", "dog washing instructions", "dog grooming tools"]
+}
+🔍 BACKEND: Cleaned JSON for parsing: {
+  "rewritten_query": "i want to wash my dog (male user)",
+  "suggested_keywords": ["dog wash", "dog shampoo", "dog grooming", "pet bath", "dog cleaning", "dog care", "how to wash dog", "best dog shampoo", "dog bath supplies", "pet grooming", "dog hygiene", "dog washing tips", "dog bath products", "dog washing instructions", "dog grooming tools"]
+}
+🔍 Intent analysis result: {
+  original: 'i want to wash my dog',
+  rewritten: 'i want to wash my dog (male user)',
+  different: true,
+  fieldFound: 'rewritten_query'
+}
+🧠 Intent-based rewritten query: "i want to wash my dog (male user)"
+🏷️ BACKEND: Generated suggested keywords: [
+  'dog wash',
+  'dog shampoo',
+  'dog grooming',
+  'pet bath',
+  'dog cleaning',
+  'dog care',
+  'how to wash dog',
+  'best dog shampoo',
+  'dog bath supplies',
+  'pet grooming',
+  'dog hygiene',
+  'dog washing tips',
+  'dog bath products',
+  'dog washing instructions',
+  'dog grooming tools'
+]
+🌟 Starting Gemini-based product search for: "i want to wash my dog (male user)"
+⏱️ INITIALIZATION TIMING: History: 669ms, Intent: 1955ms
+🌟 Gemini-based Query Interpreter: "i want to wash my dog (male user)"
+💰 Price Analyzer: No explicit price range found in "i want to wash my dog (male user)"
+💰 Price Range: No price specified (666ms)
+🤖 Final query selection: {
+  original: 'i want to wash my dog (male user)',
+  rewritten: 'i want to wash my dog (male user)',
+  using: 'i want to wash my dog (male user)',
+  isRewritten: false
+}
+🤖 Gemini API: Getting product recommendations for "i want to wash my dog (male user)" (attempt 1/2)
+🤖 Gemini Raw Response (attempt 1): ```json
+[
+  {"description": "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type.", "necessity_score": 1.0, "type": "product", "search_location": ""},
+  {"de...
+🔧 Attempting to fix JSON on attempt 1
+🔧 Fixed JSON: Found 10 complete objects
+✅ Gemini API: Successfully parsed 10 items on attempt 1
+  1. "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type." (necessity: 1, type: product)
+  2. "Dog conditioner, to moisturize the dog's coat after shampooing." (necessity: 0.7, type: product)
+  3. "Dog towel, absorbent and quick-drying." (necessity: 0.8, type: product)
+  4. "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath." (necessity: 0.7, type: product)
+  5. "Non-slip mat for the bathing area, to prevent the dog from slipping." (necessity: 0.6, type: product)
+  6. "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament." (necessity: 0.4, type: service)
+  7. "Dog nail clippers, to trim the dog's nails after the bath, if needed." (necessity: 0.5, type: product)
+  8. "Dog ear cleaning solution, to clean the dog's ears after the bath." (necessity: 0.4, type: product)
+  9. "Dog treats, to reward the dog for good behavior during the bath." (necessity: 0.6, type: product)
+  10. "Dog dryer, if the user wants to dry the dog quickly and efficiently." (necessity: 0.5, type: product)
+🤖 Gemini returned 10 product recommendations (4319ms)
+🚀 Starting parallel search for 10 products simultaneously...
+🔍 [1/10] Starting parallel search for product: "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type." (necessity: 1)
+📍 [1] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [2/10] Starting parallel search for product: "Dog conditioner, to moisturize the dog's coat after shampooing." (necessity: 0.7)
+📍 [2] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog conditioner, to moisturize the dog's coat after shampooing."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: "Dog conditioner, to moisturize the dog's coat after shampooing.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog conditioner, to moisturize the dog's coat after shampooing."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: "Dog conditioner, to moisturize the dog's coat after shampooing.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [3/10] Starting parallel search for product: "Dog towel, absorbent and quick-drying." (necessity: 0.8)
+📍 [3] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog towel, absorbent and quick-drying."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Dog towel, absorbent and quick-drying.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog towel, absorbent and quick-drying."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Dog towel, absorbent and quick-drying.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [4/10] Starting parallel search for product: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath." (necessity: 0.7)
+📍 [4] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [5/10] Starting parallel search for product: "Non-slip mat for the bathing area, to prevent the dog from slipping." (necessity: 0.6)
+📍 [5] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Non-slip mat for the bathing area, to prevent the dog from slipping."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Non-slip mat for the bathing area, to prevent the dog from slipping.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Non-slip mat for the bathing area, to prevent the dog from slipping."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Non-slip mat for the bathing area, to prevent the dog from slipping.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [6/10] Starting parallel search for service: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament." (necessity: 0.4)
+📍 [6] Gemini suggested location: "user_location" for description: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+📍 [6] Service search location determined: "@40.8312584553854,-96.66904513001089" (from suggestion: "user_location")
+🗺️ Searching Google Maps services for: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+🏠 Searching local services for: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+🔍 [7/10] Starting parallel search for product: "Dog nail clippers, to trim the dog's nails after the bath, if needed." (necessity: 0.5)
+📍 [7] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog nail clippers, to trim the dog's nails after the bath, if needed."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: "Dog nail clippers, to trim the dog's nails after the bath, if needed.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog nail clippers, to trim the dog's nails after the bath, if needed."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: "Dog nail clippers, to trim the dog's nails after the bath, if needed.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [8/10] Starting parallel search for product: "Dog ear cleaning solution, to clean the dog's ears after the bath." (necessity: 0.4)
+📍 [8] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog ear cleaning solution, to clean the dog's ears after the bath."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: "Dog ear cleaning solution, to clean the dog's ears after the bath.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog ear cleaning solution, to clean the dog's ears after the bath."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: "Dog ear cleaning solution, to clean the dog's ears after the bath.",
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [9/10] Starting parallel search for product: "Dog treats, to reward the dog for good behavior during the bath." (necessity: 0.6)
+📍 [9] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog treats, to reward the dog for good behavior during the bath."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Dog treats, to reward the dog for good behavior during the bath.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog treats, to reward the dog for good behavior during the bath."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Dog treats, to reward the dog for good behavior during the bath.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🔍 [10/10] Starting parallel search for product: "Dog dryer, if the user wants to dry the dog quickly and efficiently." (necessity: 0.5)
+📍 [10] Service search location determined: "Los Angeles, CA" (from suggestion: "")
+🔍 Amazon Search: "Dog dryer, if the user wants to dry the dog quickly and efficiently."
+📊 Search params: {
+  engine: 'amazon_search',
+  q: 'Dog dryer, if the user wants to dry the dog quickly and efficiently.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  sort_by: 'featured'
+}
+🛒 Google Shopping Search: "Dog dryer, if the user wants to dry the dog quickly and efficiently."
+📊 Search params: {
+  engine: 'google_shopping',
+  q: 'Dog dryer, if the user wants to dry the dog quickly and efficiently.',
+  api_key: 'ksRxtEkihcTRPvqq1ne8sPEX',
+  gl: 'us',
+  hl: 'en'
+}
+🏠 Searching local products for: "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type."
+🏠 Searching local products for: "Dog conditioner, to moisturize the dog's coat after shampooing."
+🏠 Searching local products for: "Dog towel, absorbent and quick-drying."
+🏠 Searching local products for: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath."
+🏠 Searching local products for: "Non-slip mat for the bathing area, to prevent the dog from slipping."
+🏠 Searching local services for: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+🏠 Searching local products for: "Dog nail clippers, to trim the dog's nails after the bath, if needed."
+🏠 Searching local products for: "Dog ear cleaning solution, to clean the dog's ears after the bath."
+🏠 Searching local products for: "Dog treats, to reward the dog for good behavior during the bath."
+🏠 Searching local products for: "Dog dryer, if the user wants to dry the dog quickly and efficiently."
+🗺️ Searching Google Maps for: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament." in @40.8312584553854,-96.66904513001089
+🎯 Added 5 mile radius (8047m) to Google Maps search
+🗺️ Google Maps API URL: https://www.searchapi.io/api/v1/search?engine=google_maps&api_key=API_KEY_HIDDEN&q=Dog+grooming+service%2C+if+the+user+prefers+professional+assistance%2C+considering+the+dog%27s+size+and+temperament.&hl=en&ll=%4040.8312584553854%2C-96.66904513001089%2C8047m
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 0 local services
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+🏠 Found 1 local products
+📦 Fetching 1 local products from MongoDB
+🔗 Filtered out local product without valid link: "test"
+✅ Converted 0 local products to unified format
+🏠 Retrieved 0 local products
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Green Groom Complete Coat Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Green Groom Complete Coat Dog Conditioner"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/14485389599685704442?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14485389599685704442/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Furminator deShedding Ultra Premium Conditioner" (skipping offers)
+🔄 Converting Google product: "Furminator deShedding Ultra Premium Conditioner"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/5925322063805181343?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5925322063805181343/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "All Systems Triple Magic Rejuvenating Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "All Systems Triple Magic Rejuvenating Dog Conditioner"
+📝 Base product data: {
+  seller: 'Total K-9 Connection',
+  product_link: 'https://www.google.com/shopping/product/4694159392948132676?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4694159392948132676/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Warren London Dog Hydrating Butter" (skipping offers)
+🔄 Converting Google product: "Warren London Dog Hydrating Butter"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/833502614293502630?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/833502614293502630/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Coat handler All-Purpose Coat Conditioner" (skipping offers)
+🔄 Converting Google product: "Coat handler All-Purpose Coat Conditioner"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/8170796760182644796?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8170796760182644796/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Chris Christensen Smart Rinse All Coat Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Chris Christensen Smart Rinse All Coat Dog Conditioner"
+📝 Base product data: {
+  seller: "Ryan's Pet Supplies",
+  product_link: 'https://www.google.com/shopping/product/17814913032884129489?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17814913032884129489/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Burt's Bees Natural Oatmeal Conditioner" (skipping offers)
+🔄 Converting Google product: "Burt's Bees Natural Oatmeal Conditioner"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/15909115671919517908?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/15909115671919517908/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "SPA Nourish Conditioner" (skipping offers)
+🔄 Converting Google product: "SPA Nourish Conditioner"
+📝 Base product data: {
+  seller: 'Care-A-Lot Pet Supply',
+  product_link: 'https://www.google.com/shopping/product/6521612064159356376?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6521612064159356376/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bark 2 Basics Re-Moisture Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Bark 2 Basics Re-Moisture Dog Conditioner"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/1092166667736864142?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1092166667736864142/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Stuff Conditioner & Detangler 16oz" (skipping offers)
+🔄 Converting Google product: "The Stuff Conditioner & Detangler 16oz"
+📝 Base product data: {
+  seller: 'UPCO Pet Supplies',
+  product_link: 'https://www.google.com/shopping/product/9085986928195608707?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9085986928195608707/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Furminator Deshedding Ultra Premium Conditioner" (skipping offers)
+🔄 Converting Google product: "Furminator Deshedding Ultra Premium Conditioner"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/3342903352847380356?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3342903352847380356/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Top Performance GloCoat Conditioner" (skipping offers)
+🔄 Converting Google product: "Top Performance GloCoat Conditioner"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/12325252186275023083?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12325252186275023083/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bodhi Dog Gentle Moisturizing Dog Conditioner Soothing Plant-Based Formula with Aloe Vera & Jojoba Oil" (skipping offers)
+🔄 Converting Google product: "Bodhi Dog Gentle Moisturizing Dog Conditioner Soothing Plant-Based Formula with Aloe Vera & Jojoba Oil"
+📝 Base product data: {
+  seller: 'Bodhi Dog',
+  product_link: 'https://www.google.com/shopping/product/9468940615941314992?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9468940615941314992/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Coat handler Undercoat Control Deshedding Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "The Coat handler Undercoat Control Deshedding Dog Conditioner"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/13841910354408183179?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13841910354408183179/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Silk Rainforest Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Pet Silk Rainforest Dog Conditioner"
+📝 Base product data: {
+  seller: 'Cherrybrook',
+  product_link: 'https://www.google.com/shopping/product/17979557468761335829?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17979557468761335829/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pride and Groom Dog Days Nourishing Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Pride and Groom Dog Days Nourishing Dog Conditioner"
+📝 Base product data: {
+  seller: 'Walmart - PRIDE+GROOM',
+  product_link: 'https://www.google.com/shopping/product/7385875635283777964?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7385875635283777964/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Petedge The Stuff Concentrated Conditioner and Detangler 4oz" (skipping offers)
+🔄 Converting Google product: "Petedge The Stuff Concentrated Conditioner and Detangler 4oz"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9396976711986107763?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9396976711986107763/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Chris Christensen Ice on Ice Detangling Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Chris Christensen Ice on Ice Detangling Dog Conditioner"
+📝 Base product data: {
+  seller: 'Chris Christensen',
+  product_link: 'https://www.google.com/shopping/product/13201066102224893919?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13201066102224893919/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Crown Coat Almond Grove All Purpose Dog Conditioner" (skipping offers)
+🔄 Converting Google product: "Crown Coat Almond Grove All Purpose Dog Conditioner"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/14687300499330325831?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14687300499330325831/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Top Performance Oatmeal Conditioner" (skipping offers)
+🔄 Converting Google product: "Top Performance Oatmeal Conditioner"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/17364890332329548869?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17364890332329548869/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Golden Rewards Peanut Butter Flavor Superfood Blend Training Dog Treats" (skipping offers)
+🔄 Converting Google product: "Golden Rewards Peanut Butter Flavor Superfood Blend Training Dog Treats"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/2100772048782572870?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2100772048782572870/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bil-Jac Little-Jacs Small Dog Training Treats" (skipping offers)
+🔄 Converting Google product: "Bil-Jac Little-Jacs Small Dog Training Treats"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9480854093711177447?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9480854093711177447/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Blue Buffalo Bits Tasty Chicken Soft-Moist Dog Training Treats" (skipping offers)
+🔄 Converting Google product: "Blue Buffalo Bits Tasty Chicken Soft-Moist Dog Training Treats"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/6324628545471167447?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6324628545471167447/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Zuke's Chicken Mini Naturals Dog Treats" (skipping offers)
+🔄 Converting Google product: "Zuke's Chicken Mini Naturals Dog Treats"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/65111567634333659?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/65111567634333659/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bocce's Bakery PB-Banana Chip Soft & Chewy Dog Treats" (skipping offers)
+🔄 Converting Google product: "Bocce's Bakery PB-Banana Chip Soft & Chewy Dog Treats"
+📝 Base product data: {
+  seller: "Lowe's",
+  product_link: 'https://www.google.com/shopping/product/14601565594358319921?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14601565594358319921/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Wiggles & Wags Training Bites Bacon Dog Treats" (skipping offers)
+🔄 Converting Google product: "Wiggles & Wags Training Bites Bacon Dog Treats"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/14355530979324351498?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14355530979324351498/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Hill's Natural Soft Savories Chicken & Yogurt Dog Treats" (skipping offers)
+🔄 Converting Google product: "Hill's Natural Soft Savories Chicken & Yogurt Dog Treats"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/10705311981868534879?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10705311981868534879/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Golden Rewards Chicken Recipe Training Treat Dog Treats" (skipping offers)
+🔄 Converting Google product: "Golden Rewards Chicken Recipe Training Treat Dog Treats"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/767664075127935429?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/767664075127935429/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Polka Dog Chicken Littles Bits Treats" (skipping offers)
+🔄 Converting Google product: "Polka Dog Chicken Littles Bits Treats"
+📝 Base product data: {
+  seller: 'Polkadog',
+  product_link: 'https://www.google.com/shopping/product/7657866352810311925?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7657866352810311925/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Wellness Soft Wellbites Chicken & Lamb Dog Treats" (skipping offers)
+🔄 Converting Google product: "Wellness Soft Wellbites Chicken & Lamb Dog Treats"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/13882797440840598703?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13882797440840598703/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kindfull Chicken Jerky Recipe Dog Treats" (skipping offers)
+🔄 Converting Google product: "Kindfull Chicken Jerky Recipe Dog Treats"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/7056549484647767724?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7056549484647767724/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Open Farm Be Good Bites Chicken Treats" (skipping offers)
+🔄 Converting Google product: "Open Farm Be Good Bites Chicken Treats"
+📝 Base product data: {
+  seller: 'Pet Supermarket',
+  product_link: 'https://www.google.com/shopping/product/5909565875643510004?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5909565875643510004/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bil-Jac Yapple- Nanas Dog Treats" (skipping offers)
+🔄 Converting Google product: "Bil-Jac Yapple- Nanas Dog Treats"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/1605691443893973699?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1605691443893973699/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Jinx Chicken & Bananas Tiny Treats Dog Training Treats" (skipping offers)
+🔄 Converting Google product: "Jinx Chicken & Bananas Tiny Treats Dog Training Treats"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/1214253331425230340?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1214253331425230340/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Portland Pet Food Beef Broth Brew Biscuits" (skipping offers)
+🔄 Converting Google product: "Portland Pet Food Beef Broth Brew Biscuits"
+📝 Base product data: {
+  seller: 'Portland Pet Food Company',
+  product_link: 'https://www.google.com/shopping/product/3845527305533958996?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3845527305533958996/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Honest Kitchen Surf & Turf Meaty Littles Chicken & Salmon Dog Treats" (skipping offers)
+🔄 Converting Google product: "The Honest Kitchen Surf & Turf Meaty Littles Chicken & Salmon Dog Treats"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/2642999235932618806?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2642999235932618806/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Cloud Star Chewy Tricky Trainers Salmon Dog Treats" (skipping offers)
+🔄 Converting Google product: "Cloud Star Chewy Tricky Trainers Salmon Dog Treats"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9586851168141245003?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9586851168141245003/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Botanics Training Rewards Mini Dog Treats Chicken 4 oz" (skipping offers)
+🔄 Converting Google product: "Pet Botanics Training Rewards Mini Dog Treats Chicken 4 oz"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/1554439949594519358?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1554439949594519358/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Polkadog Chicken Littles Training Bits Dog Treats" (skipping offers)
+🔄 Converting Google product: "Polkadog Chicken Littles Training Bits Dog Treats"
+📝 Base product data: {
+  seller: 'DogTuff.com',
+  product_link: 'https://www.google.com/shopping/product/17527507846517875705?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17527507846517875705/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Blue Buffalo BLUE Bits Natural Soft-Moist Training Dog Treats" (skipping offers)
+🔄 Converting Google product: "Blue Buffalo BLUE Bits Natural Soft-Moist Training Dog Treats"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/11159520660221216591?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11159520660221216591/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+🗺️ Found 20 services from Google Maps
+🔍 Debug service 1: "Ty-D-Paws Express"
+  - thumbnail: https://lh3.googleusercontent.com/gps-cs-s/AC9h4npWjfA-FIP8cg1yE3klJlNcMUR-9rgBJ-QM01PPErE6o-0AqFsSV0IDIavUSNeoaO4-qhngEPjpN_88AUAgdQxAAB9yYlO3rkBmfraBILcGAoG0sNJrqJ_-r2GbMw3swq4Rn2o=w80-h155-k-no
+  - images array: 0 items
+🔍 Debug service 2: "Pampered Paws Mobile Grooming"
+  - thumbnail: https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=KMU4pyP-r3R9HzbGwdi6pg&cb_client=search.gws-prod.gps&w=80&h=92&yaw=276.7162&pitch=0&thumbfov=100
+  - images array: 0 items
+🔍 Debug service 3: "HydroDog/Oswald"
+  - thumbnail: https://lh3.googleusercontent.com/p/AF1QipMZCuI-Smf5Tpfs66k8TziG6oes1guNQ-iUU-pC=w122-h92-k-no
+  - images array: 0 items
+🖼️ Using primary thumbnail for "Ty-D-Paws Express"
+🖼️ Using primary thumbnail for "Pampered Paws Mobile Grooming"
+🖼️ Using primary thumbnail for "HydroDog/Oswald"
+🖼️ Using primary thumbnail for "Embark Pet Company"
+🖼️ Using primary thumbnail for "Suds N' Scissors"
+🖼️ Using primary thumbnail for "The Kitty Groomer at 1515 S 22nd ST"
+🖼️ Using primary thumbnail for "Canine Design"
+🖼️ Using primary thumbnail for "Four Paws"
+🖼️ Using primary thumbnail for "The Groom Room Inc"
+🖼️ Using primary thumbnail for "Urban Tailworks"
+🖼️ Using primary thumbnail for "Salon K9"
+🖼️ Using primary thumbnail for "Zoom Groom"
+🖼️ Using primary thumbnail for "Certified Grooming"
+🖼️ Using primary thumbnail for "Vanity Fur"
+🖼️ Using primary thumbnail for "Fit Canine Inc."
+🖼️ Using primary thumbnail for "Sunshine Dog Spa"
+🖼️ Using primary thumbnail for "Paws 4 Fun"
+🖼️ Using primary thumbnail for "Muddy Mutts Grooming"
+🖼️ Using primary thumbnail for "Critter Clippers Mobile Grooming"
+🖼️ Using primary thumbnail for "PetSmart Grooming"
+🔍 Service search complete: Found 20 total services (Google Maps: enabled)
+📍 Location filtering: Using API radius parameter for Google Maps services (5 miles)
+📦 Returning 20 services (limited from 20 filtered, 20 total for Google Maps)
+🗺️ Found 20 Google Maps services
+📊 Service counts - Google Maps: 20, Local: 0
+📦 [6] "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament.": Found 18 recommended services from 20 total (APIs: 1452ms, Eval: 1ms)
+🏢 Service Selection Model: Analyzing 18 services for "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Miracle Care QuickFinder Nail Trimmer for Dogs" (skipping offers)
+🔄 Converting Google product: "Miracle Care QuickFinder Nail Trimmer for Dogs"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9613846717705846980?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9613846717705846980/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Millers Forge Pet Nail Clipper" (skipping offers)
+🔄 Converting Google product: "Millers Forge Pet Nail Clipper"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/5485179364150826081?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5485179364150826081/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Mighty Paw Dog Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Mighty Paw Dog Nail Clippers"
+📝 Base product data: {
+  seller: 'Mighty Paw',
+  product_link: 'https://www.google.com/shopping/product/6130383405865400308?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6130383405865400308/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FURminator Dog Nail Clippers" (skipping offers)
+🔄 Converting Google product: "FURminator Dog Nail Clippers"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/13181569431339780969?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13181569431339780969/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Wahl Dog Nail Clipper" (skipping offers)
+🔄 Converting Google product: "Wahl Dog Nail Clipper"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/2056827683774541020?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2056827683774541020/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Safari Nail Trimmer Professional" (skipping offers)
+🔄 Converting Google product: "Safari Nail Trimmer Professional"
+📝 Base product data: {
+  seller: 'Coastal Pet Products',
+  product_link: 'https://www.google.com/shopping/product/5568304221475732717?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5568304221475732717/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Heusom Easy Dog Nail Clippers & Grinder" (skipping offers)
+🔄 Converting Google product: "Heusom Easy Dog Nail Clippers & Grinder"
+📝 Base product data: {
+  seller: 'Heusom',
+  product_link: 'https://www.google.com/shopping/product/13005528117517349265?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13005528117517349265/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Resco Original Dog Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Resco Original Dog Nail Clippers"
+📝 Base product data: {
+  seller: 'Cherrybrook',
+  product_link: 'https://www.google.com/shopping/product/5912319317036184918?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5912319317036184918/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "H&H Pets Dog & Cat Nail Clipper" (skipping offers)
+🔄 Converting Google product: "H&H Pets Dog & Cat Nail Clipper"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/12228786280281661925?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12228786280281661925/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Millers Forge Designer Series Dog Nail Clipper" (skipping offers)
+🔄 Converting Google product: "Millers Forge Designer Series Dog Nail Clipper"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/8750924552849193916?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8750924552849193916/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Top Paw Pet Nail Clipper" (skipping offers)
+🔄 Converting Google product: "Top Paw Pet Nail Clipper"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/11146937368970121043?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11146937368970121043/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Cofeemo Dog Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Cofeemo Dog Nail Clippers"
+📝 Base product data: {
+  seller: 'Walmart - shen zhen shi tan long dian zi shang wu you xian gong si',
+  product_link: 'https://www.google.com/shopping/product/11269879864255259713?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11269879864255259713/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Frisco Nail Clippers for Cats & Small Dogs" (skipping offers)
+🔄 Converting Google product: "Frisco Nail Clippers for Cats & Small Dogs"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/14187000751825751940?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14187000751825751940/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Four Paws Magic Coat Professional Series Deluxe Dog Nail Clipper with Size Guide" (skipping offers)
+🔄 Converting Google product: "Four Paws Magic Coat Professional Series Deluxe Dog Nail Clipper with Size Guide"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/9986299602656122497?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9986299602656122497/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Andis Dog Nail Clipper" (skipping offers)
+🔄 Converting Google product: "Andis Dog Nail Clipper"
+📝 Base product data: {
+  seller: 'Lambert Vet Supply',
+  product_link: 'https://www.google.com/shopping/product/16092762753881403954?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16092762753881403954/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Candure Dog Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Candure Dog Nail Clippers"
+📝 Base product data: {
+  seller: 'eBay - dealszd',
+  product_link: 'https://www.google.com/shopping/product/10686633758264349483?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10686633758264349483/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Petspy Dog Nail Clippers and Trimmer" (skipping offers)
+🔄 Converting Google product: "Petspy Dog Nail Clippers and Trimmer"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9309458143914660000?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9309458143914660000/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dremel 7760-PGK Cordless Pet Nail Grooming Kit" (skipping offers)
+🔄 Converting Google product: "Dremel 7760-PGK Cordless Pet Nail Grooming Kit"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/16457606801789764934?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16457606801789764934/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bell+Howell Paw Perfect Pet Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Bell+Howell Paw Perfect Pet Nail Clippers"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/6296199987530317574?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6296199987530317574/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Master Grooming Tools Guillotine Nail Clippers" (skipping offers)
+🔄 Converting Google product: "Master Grooming Tools Guillotine Nail Clippers"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/12501900697390070520?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12501900697390070520/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [7] "Dog nail clippers, to trim the dog's nails after the bath, if needed.": Found 9 recommended products from 40 total (APIs: 1544ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 9 products for "Dog nail clippers, to trim the dog's nails after the bath, if needed."
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Veterinary Formula Clinical Care Ear Therapy" (skipping offers)
+🔄 Converting Google product: "Veterinary Formula Clinical Care Ear Therapy"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/2407322300223198667?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2407322300223198667/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Virbac Epi-Otic Advanced Ear Cleanser" (skipping offers)
+🔄 Converting Google product: "Virbac Epi-Otic Advanced Ear Cleanser"
+📝 Base product data: {
+  seller: 'petvm.com',
+  product_link: 'https://www.google.com/shopping/product/6959482783196964387?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6959482783196964387/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "vedco Clean Ear with Aloe Vera 8oz." (skipping offers)
+🔄 Converting Google product: "vedco Clean Ear with Aloe Vera 8oz."
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/8432461525831830030?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8432461525831830030/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vetoquinol Cerumene Ear Cleansing Liquid for Dogs and Cats" (skipping offers)
+🔄 Converting Google product: "Vetoquinol Cerumene Ear Cleansing Liquid for Dogs and Cats"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/4803144745718545539?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4803144745718545539/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Zymox Ear Solution with Hydrocortisone" (skipping offers)
+🔄 Converting Google product: "Zymox Ear Solution with Hydrocortisone"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/17581022989473729955?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17581022989473729955/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bark2Basics Dog Ear Cleaner, 1 Gallon Natural, Witch Hazel and Aloe Vera" (skipping offers)
+🔄 Converting Google product: "Bark2Basics Dog Ear Cleaner, 1 Gallon Natural, Witch Hazel and Aloe Vera"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/12558861791175656878?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12558861791175656878/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vet's Best Ear Relief Wash & Dry for Dogs" (skipping offers)
+🔄 Converting Google product: "Vet's Best Ear Relief Wash & Dry for Dogs"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/4377746900028040123?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4377746900028040123/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kin+Kind Clean Ears Dog Ear Cleaner" (skipping offers)
+🔄 Converting Google product: "Kin+Kind Clean Ears Dog Ear Cleaner"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/9418775428136606600?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9418775428136606600/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "vedco Clean Ear with Aloe Vera" (skipping offers)
+🔄 Converting Google product: "vedco Clean Ear with Aloe Vera"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/16548887494172546932?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16548887494172546932/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "PetArmor Ear Rinse for Dogs and Cats" (skipping offers)
+🔄 Converting Google product: "PetArmor Ear Rinse for Dogs and Cats"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/13452013590956641939?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13452013590956641939/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "EpiKlean Ear Cleanser for Cats and Dogs" (skipping offers)
+🔄 Converting Google product: "EpiKlean Ear Cleanser for Cats and Dogs"
+📝 Base product data: {
+  seller: 'Allivet Pet Pharmacy',
+  product_link: 'https://www.google.com/shopping/product/1841585819322938804?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1841585819322938804/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "PetLab Co. Clear Ears Therapy Ear Cleaner for Dogs" (skipping offers)
+🔄 Converting Google product: "PetLab Co. Clear Ears Therapy Ear Cleaner for Dogs"
+📝 Base product data: {
+  seller: 'PetLab Co.',
+  product_link: 'https://www.google.com/shopping/product/17087461277198614880?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17087461277198614880/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vetericyn Triple Action Ear Treatment" (skipping offers)
+🔄 Converting Google product: "Vetericyn Triple Action Ear Treatment"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/890640139317075228?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/890640139317075228/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Douxo Skin & Coat Spa Ultra-Safe Ear Cleaner" (skipping offers)
+🔄 Converting Google product: "Douxo Skin & Coat Spa Ultra-Safe Ear Cleaner"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/10574546337766091771?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10574546337766091771/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Veterinary Formula Ear Therapy Cleanser for Dogs and Cats" (skipping offers)
+🔄 Converting Google product: "Veterinary Formula Ear Therapy Cleanser for Dogs and Cats"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:784284619955029030',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:784284619955029030',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vetoquinol Ear Cleansing Solution" (skipping offers)
+🔄 Converting Google product: "Vetoquinol Ear Cleansing Solution"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/11695706590548990417?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11695706590548990417/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "ARC Laboratories OtiClean-A Pet Ear Cleaning Lotion" (skipping offers)
+🔄 Converting Google product: "ARC Laboratories OtiClean-A Pet Ear Cleaning Lotion"
+📝 Base product data: {
+  seller: 'Cherrybrook',
+  product_link: 'https://www.google.com/shopping/product/16235366136859853840?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16235366136859853840/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vet Basics General Ear Cleanser for Dogs & Cat" (skipping offers)
+🔄 Converting Google product: "Vet Basics General Ear Cleanser for Dogs & Cat"
+📝 Base product data: {
+  seller: 'Revival Animal Health',
+  product_link: 'https://www.google.com/shopping/product/18325523735029200494?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/18325523735029200494/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Well & Good Dog Ear Cleaner" (skipping offers)
+🔄 Converting Google product: "Well & Good Dog Ear Cleaner"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/7472944937546929924?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7472944937546929924/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Divine Canine Ear Cleanser" (skipping offers)
+🔄 Converting Google product: "Divine Canine Ear Cleanser"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/16119595973194115663?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16119595973194115663/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [2] "Dog conditioner, to moisturize the dog's coat after shampooing.": Found 13 recommended products from 40 total (APIs: 1641ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 13 products for "Dog conditioner, to moisturize the dog's coat after shampooing."
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Furminator Long Hair deShedding Tool" (skipping offers)
+🔄 Converting Google product: "Furminator Long Hair deShedding Tool"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/9227418778435465651?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9227418778435465651/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Teezer De-Shedding Dog Grooming Brush" (skipping offers)
+🔄 Converting Google product: "Pet Teezer De-Shedding Dog Grooming Brush"
+📝 Base product data: {
+  seller: 'Tangle Teezer US',
+  product_link: 'https://www.google.com/shopping/product/10363722151636824087?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10363722151636824087/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FURminator Comfort Edge Dog Deshedding Tool" (skipping offers)
+🔄 Converting Google product: "FURminator Comfort Edge Dog Deshedding Tool"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/14874564003022654955?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14874564003022654955/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Only Natural Pet Slicker Dog Brush" (skipping offers)
+🔄 Converting Google product: "Only Natural Pet Slicker Dog Brush"
+📝 Base product data: {
+  seller: 'Only Natural Pet',
+  product_link: 'https://www.google.com/shopping/product/1063062284094154444?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1063062284094154444/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Top Paw Curry Dog Brush" (skipping offers)
+🔄 Converting Google product: "Top Paw Curry Dog Brush"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/11340462423904312335?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11340462423904312335/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Hartz Groomer's Best Fur Fetcher De-Shedder Grooming Brush" (skipping offers)
+🔄 Converting Google product: "Hartz Groomer's Best Fur Fetcher De-Shedder Grooming Brush"
+📝 Base product data: {
+  seller: 'eBay - kathleen_spirited',
+  product_link: 'https://www.google.com/shopping/product/10344318384814515041?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10344318384814515041/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "CHI Porcupine Dog Brush" (skipping offers)
+🔄 Converting Google product: "CHI Porcupine Dog Brush"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/7348321369504279932?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7348321369504279932/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Central Ergonomic Double-Sided Brush for Dogs" (skipping offers)
+🔄 Converting Google product: "Pet Central Ergonomic Double-Sided Brush for Dogs"
+📝 Base product data: {
+  seller: 'CVS Pharmacy',
+  product_link: 'https://www.google.com/shopping/product/2215992768624336138?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2215992768624336138/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "up & up Dog Comb Brush Grooming Tool" (skipping offers)
+🔄 Converting Google product: "up & up Dog Comb Brush Grooming Tool"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/697779772790106904?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/697779772790106904/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vibrant Life Plastic Dog Slicker Grooming Brush" (skipping offers)
+🔄 Converting Google product: "Vibrant Life Plastic Dog Slicker Grooming Brush"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/13447871487080090929?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13447871487080090929/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "PetSmart Top Paw Self-Cleaning Slicker Brush" (skipping offers)
+🔄 Converting Google product: "PetSmart Top Paw Self-Cleaning Slicker Brush"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/314188177163986232?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/314188177163986232/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Only Natural Pet Bristle Dog Brush" (skipping offers)
+🔄 Converting Google product: "Only Natural Pet Bristle Dog Brush"
+📝 Base product data: {
+  seller: 'Only Natural Pet',
+  product_link: 'https://www.google.com/shopping/product/18173907956649309164?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/18173907956649309164/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Conair Pet Groom-Me Bristle Brush" (skipping offers)
+🔄 Converting Google product: "Conair Pet Groom-Me Bristle Brush"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/2600328958178744021?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2600328958178744021/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vibrant Life Self Cleaning Slicker Brush" (skipping offers)
+🔄 Converting Google product: "Vibrant Life Self Cleaning Slicker Brush"
+📝 Base product data: {
+  seller: 'eBay - yitaiai',
+  product_link: 'https://www.google.com/shopping/product/13859578064823126484?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13859578064823126484/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FURminator Hair Collection Brush" (skipping offers)
+🔄 Converting Google product: "FURminator Hair Collection Brush"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/11168602109576853484?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11168602109576853484/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vibrant Life Slicker Dog Brush" (skipping offers)
+🔄 Converting Google product: "Vibrant Life Slicker Dog Brush"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/9750996862916740009?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9750996862916740009/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Up & Up Self Clean Slicker Grooming Tool" (skipping offers)
+🔄 Converting Google product: "Up & Up Self Clean Slicker Grooming Tool"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/11712680194814668620?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11712680194814668620/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Retriever Large Pet Slicker Brush" (skipping offers)
+🔄 Converting Google product: "Retriever Large Pet Slicker Brush"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/6339006704042534557?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6339006704042534557/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Teezer Puppy Grooming Brush" (skipping offers)
+🔄 Converting Google product: "Pet Teezer Puppy Grooming Brush"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/4791350885484529237?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4791350885484529237/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Top Paw Small Self-Cleaning Metal Slicker Brush" (skipping offers)
+🔄 Converting Google product: "Top Paw Small Self-Cleaning Metal Slicker Brush"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/12212628266677527134?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12212628266677527134/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Dock & Bay Pups with Pride Quick Dry Dog Towels" (skipping offers)
+🔄 Converting Google product: "Dock & Bay Pups with Pride Quick Dry Dog Towels"
+📝 Base product data: {
+  seller: 'Dock & Bay',
+  product_link: 'https://www.google.com/shopping/product/2573047354462212874?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2573047354462212874/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Absorber Dog Towel" (skipping offers)
+🔄 Converting Google product: "The Absorber Dog Towel"
+📝 Base product data: {
+  seller: "Dog Lover's Towel",
+  product_link: 'https://www.google.com/shopping/product/17312527893794026297?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17312527893794026297/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Muddy Mat Doggy Dryer" (skipping offers)
+🔄 Converting Google product: "Muddy Mat Doggy Dryer"
+📝 Base product data: {
+  seller: 'Walmart - XCE Holdings LLC',
+  product_link: 'https://www.google.com/shopping/product/7906979711511773111?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7906979711511773111/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bone Dry Embroidered Bone Pet Towel" (skipping offers)
+🔄 Converting Google product: "Bone Dry Embroidered Bone Pet Towel"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/12821887920917892721?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12821887920917892721/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bluewater Dog Quick Drying Absorbent Towel Bed Cover" (skipping offers)
+🔄 Converting Google product: "Bluewater Dog Quick Drying Absorbent Towel Bed Cover"
+📝 Base product data: {
+  seller: 'Bluewater Dog',
+  product_link: 'https://www.google.com/shopping/product/6876743898644557946?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6876743898644557946/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Ruffwear Dirtbag Dog Towel" (skipping offers)
+🔄 Converting Google product: "Ruffwear Dirtbag Dog Towel"
+📝 Base product data: {
+  seller: 'Backcountry.com',
+  product_link: 'https://www.google.com/shopping/product/12625512479015479865?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12625512479015479865/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bone Dry Embroidered Paw Pet Towel" (skipping offers)
+🔄 Converting Google product: "Bone Dry Embroidered Paw Pet Towel"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/5509653288178599032?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5509653288178599032/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Life Dry-Aid Hand Inserted Bathing and Grooming Microfiber Pet Towel" (skipping offers)
+🔄 Converting Google product: "Pet Life Dry-Aid Hand Inserted Bathing and Grooming Microfiber Pet Towel"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/8830153652697482363?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8830153652697482363/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Clean Paws Assorted Dog Drying Towel" (skipping offers)
+🔄 Converting Google product: "Clean Paws Assorted Dog Drying Towel"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/10807307529453549278?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10807307529453549278/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FUNNYFUZZY Striped Absorbent Dog & Cat Bath Towel" (skipping offers)
+🔄 Converting Google product: "FUNNYFUZZY Striped Absorbent Dog & Cat Bath Towel"
+📝 Base product data: {
+  seller: 'FunnyFuzzy',
+  product_link: 'https://www.google.com/shopping/product/6915817935647023722?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6915817935647023722/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Artero Samba Ultra-Absorbent Dog Towel" (skipping offers)
+🔄 Converting Google product: "Artero Samba Ultra-Absorbent Dog Towel"
+📝 Base product data: {
+  seller: 'Artero',
+  product_link: 'https://www.google.com/shopping/product/1989601644089613382?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1989601644089613382/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Taupe Custom Dog Drying Towel" (skipping offers)
+🔄 Converting Google product: "Taupe Custom Dog Drying Towel"
+📝 Base product data: {
+  seller: 'Lillian Vernon',
+  product_link: 'https://www.google.com/shopping/product/17192433350405496371?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17192433350405496371/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Frisco Embroidered Bones Microfiber Dog Bath Towel" (skipping offers)
+🔄 Converting Google product: "Frisco Embroidered Bones Microfiber Dog Bath Towel"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/2100362435716294654?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2100362435716294654/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FurHaven Muddy Paws Towel & Shammy Rug" (skipping offers)
+🔄 Converting Google product: "FurHaven Muddy Paws Towel & Shammy Rug"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/16859623482325240346?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16859623482325240346/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dock & Bay Pawfect Purple Dog Towels" (skipping offers)
+🔄 Converting Google product: "Dock & Bay Pawfect Purple Dog Towels"
+📝 Base product data: {
+  seller: "Sadie's Stitchery",
+  product_link: 'https://www.google.com/shopping/product/7266683130806808129?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7266683130806808129/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dirty Dog Shammy Towel" (skipping offers)
+🔄 Converting Google product: "Dirty Dog Shammy Towel"
+📝 Base product data: {
+  seller: "Mary's Tack and Feed",
+  product_link: 'https://www.google.com/shopping/product/4606777954200726417?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4606777954200726417/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Oavqhlg3b Dog Towels" (skipping offers)
+🔄 Converting Google product: "Oavqhlg3b Dog Towels"
+📝 Base product data: {
+  seller: 'Walmart - OAVQHLG3B',
+  product_link: 'https://www.google.com/shopping/product/5144040577908755870?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5144040577908755870/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pets Favorite Towel" (skipping offers)
+🔄 Converting Google product: "Pets Favorite Towel"
+📝 Base product data: {
+  seller: "Macy's",
+  product_link: 'https://www.google.com/shopping/product/4306549615856631231?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4306549615856631231/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "The Absorber Max Pet Towel" (skipping offers)
+🔄 Converting Google product: "The Absorber Max Pet Towel"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/11541673467854662693?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11541673467854662693/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Rubyloo Dog Drying Shammy Towel" (skipping offers)
+🔄 Converting Google product: "Rubyloo Dog Drying Shammy Towel"
+📝 Base product data: {
+  seller: 'Rubyloo',
+  product_link: 'https://www.google.com/shopping/product/6535914774080450365?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6535914774080450365/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+✅ Found 20 Amazon products
+⚠️ No price found for "Outward Hound by Nina Ottosson Puzzle Bitez USA Made Dog Treats, Pumpkin Flavor, Bite-Sized Training Reward and Interactive Puzzle Toy Treats, 7.5oz" - will be treated as price unavailable
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [9] "Dog treats, to reward the dog for good behavior during the bath.": Found 17 recommended products from 40 total (APIs: 1802ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 17 products for "Dog treats, to reward the dog for good behavior during the bath."
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [8] "Dog ear cleaning solution, to clean the dog's ears after the bath.": Found 16 recommended products from 40 total (APIs: 1980ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 16 products for "Dog ear cleaning solution, to clean the dog's ears after the bath."
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [4] "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath.": Found 7 recommended products from 40 total (APIs: 2048ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 7 products for "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath."
+✅ Found 20 Amazon products
+🛒 Amazon: Fetched 20 products (limit: 20)
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [3] "Dog towel, absorbent and quick-drying.": Found 9 recommended products from 40 total (APIs: 2110ms, Eval: 1ms)
+🎯 Product Selection Model: Analyzing 9 products for "Dog towel, absorbent and quick-drying."
+✅ Found 20 Amazon products
+⚠️ No price found for "Medicated Dog Shampoo for Itchy Skin Relief - Yeast Infection Treatment for Dogs & Dog Allergy Relief Hot Spot Treatment - Hydrocortisone Antifungal Shampoo (16 oz)" - will be treated as price unavailable
+🛒 Amazon: Fetched 20 products (limit: 20)
+✅ Product Selection Model: Selected "Burt's Bees Natural Oatmeal Conditioner" (Score: 70)
+📝 Concise Title: "Burt's Bees Oatmeal Dog Conditioner" - This conditioner is well-rated, affordable, and suitable for moisturizing, making it a great choice for post-shampoo coat care.
+✅ [2] Selected: "Burt's Bees Oatmeal Dog Conditioner" - $$7.98 (1553ms)
+⏱️ [2] Total time: 3194ms
+✅ Product Selection Model: Selected "Dirty Dog Shammy Towel" (Score: 70)
+📝 Concise Title: "Dirty Dog Shammy Towel" - The Dirty Dog Shammy Towel has a high rating of 4.8★ with 187 reviews, indicating strong customer satisfaction. It is specifically designed for dogs, suggesting it is both absorbent and quick-drying, which aligns with the user's query. Although it is more expensive than some options, its high rating and number of reviews make it a reliable choice.
+✅ [3] Selected: "Dirty Dog Shammy Towel" - $$24.99 (1711ms)
+⏱️ [3] Total time: 3822ms
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Nature's Miracle Hypoallergenic Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Nature's Miracle Hypoallergenic Dog Shampoo"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/14389571295486683673?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14389571295486683673/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "FURminator Itch Relief Ultra Premium Shampoo for Dogs" (skipping offers)
+🔄 Converting Google product: "FURminator Itch Relief Ultra Premium Shampoo for Dogs"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/13361960114007595877?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13361960114007595877/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Natural Dog Company Sensitive Skin Oatmeal Shampoo" (skipping offers)
+🔄 Converting Google product: "Natural Dog Company Sensitive Skin Oatmeal Shampoo"
+📝 Base product data: {
+  seller: 'Natural Dog Company',
+  product_link: 'https://www.google.com/shopping/product/16184311524036713788?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16184311524036713788/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vet's Best Allergy Itch Relief Shampoo" (skipping offers)
+🔄 Converting Google product: "Vet's Best Allergy Itch Relief Shampoo"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/12138515777836773206?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12138515777836773206/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Veterinary Formula Clinical Care Antiparasitic & Antiseborrheic Medicated Shampoo" (skipping offers)
+🔄 Converting Google product: "Veterinary Formula Clinical Care Antiparasitic & Antiseborrheic Medicated Shampoo"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/6184143592196500134?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6184143592196500134/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kindfull Hypoallergenic Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Kindfull Hypoallergenic Dog Shampoo"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/8592318139209129169?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8592318139209129169/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Burt's Bees Hypoallergenic Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Burt's Bees Hypoallergenic Dog Shampoo"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/2053888092002257275?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2053888092002257275/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Natural Dog Company Itchy Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Natural Dog Company Itchy Dog Shampoo"
+📝 Base product data: {
+  seller: 'Grove Collaborative',
+  product_link: 'https://www.google.com/shopping/product/11898394170703050377?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11898394170703050377/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "TropiClean Medicated Oatmeal & Tea Tree Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "TropiClean Medicated Oatmeal & Tea Tree Dog Shampoo"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/3688447460148434539?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3688447460148434539/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Coat handler Hypoallergenic Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Coat handler Hypoallergenic Dog Shampoo"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/13247815356039952739?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/13247815356039952739/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Paul Mitchell Pet Soothing Oatmeal Shampoo" (skipping offers)
+🔄 Converting Google product: "Paul Mitchell Pet Soothing Oatmeal Shampoo"
+📝 Base product data: {
+  seller: 'PetSmart',
+  product_link: 'https://www.google.com/shopping/product/16653947623407296660?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16653947623407296660/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Wahl Oatmeal Shampoo" (skipping offers)
+🔄 Converting Google product: "Wahl Oatmeal Shampoo"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/12791999633503648567?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12791999633503648567/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Four Paws Magic Coat Hypo-Allergenic Shampoo" (skipping offers)
+🔄 Converting Google product: "Four Paws Magic Coat Hypo-Allergenic Shampoo"
+📝 Base product data: {
+  seller: 'Petco.com',
+  product_link: 'https://www.google.com/shopping/product/3404300112786963048?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3404300112786963048/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Vermont Soap Organics Pet Shampoo" (skipping offers)
+🔄 Converting Google product: "Vermont Soap Organics Pet Shampoo"
+📝 Base product data: {
+  seller: 'Vermont Soap',
+  product_link: 'https://www.google.com/shopping/product/9981952827843659617?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/9981952827843659617/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Bark2Basics Sensi-Skin Shampoo" (skipping offers)
+🔄 Converting Google product: "Bark2Basics Sensi-Skin Shampoo"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/561235361801110439?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/561235361801110439/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Douxo S3 Calm Shampoo For Dogs & Cats" (skipping offers)
+🔄 Converting Google product: "Douxo S3 Calm Shampoo For Dogs & Cats"
+📝 Base product data: {
+  seller: 'VetRxDirect a Pet Pharmacy',
+  product_link: 'https://www.google.com/shopping/product/3752833053235796794?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3752833053235796794/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Life Unlimited Anti-Itch Spray-On Dog Shampoo" (skipping offers)
+🔄 Converting Google product: "Pet Life Unlimited Anti-Itch Spray-On Dog Shampoo"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/246950458574288687?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/246950458574288687/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "4-Legger Hypoallergenic Dog Shampoo with Aloe" (skipping offers)
+🔄 Converting Google product: "4-Legger Hypoallergenic Dog Shampoo with Aloe"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/14008113297389874650?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14008113297389874650/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Best Dog Shampoo for Itchy Skin, Allergy & Dandruff Relief" (skipping offers)
+🔄 Converting Google product: "Best Dog Shampoo for Itchy Skin, Allergy & Dandruff Relief"
+📝 Base product data: {
+  seller: 'Critter Concepts',
+  product_link: 'https://www.google.com/shopping/product/332035334915612471?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/332035334915612471/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Coat Defense Clean Shampoo" (skipping offers)
+🔄 Converting Google product: "Coat Defense Clean Shampoo"
+📝 Base product data: {
+  seller: 'Adams Horse Supply',
+  product_link: 'https://www.google.com/shopping/product/7343767795997543381?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7343767795997543381/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [1] "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type.": Found 17 recommended products from 40 total (APIs: 4036ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 17 products for "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type."
+✅ Product Selection Model: Selected "Blue Buffalo Bits Tasty Chicken Soft-Moist Dog Training Treats" (Score: 100)
+📝 Concise Title: "Blue Buffalo Chicken Training Treats" - This product has a high rating (4.7★) with a large number of reviews (3700), indicating reliability and popularity. It also has a perfect quality score (100/100) and is reasonably priced at $4.98, making it an excellent choice for rewarding dogs during bath time.
+✅ [9] Selected: "Blue Buffalo Chicken Training Treats" - $$4.98 (2258ms)
+⏱️ [9] Total time: 4060ms
+✅ Service Selection Model: Selected "Embark Pet Company" (Score: 80)
+📝 Concise Title: "Embark Pet Grooming Lincoln" - Embark Pet Company is the best choice because it is currently open, has a solid rating of 4★ with a high number of reviews (184), and a good quality score of 80/100. It offers professional pet grooming services, which aligns well with the user's preference for professional assistance. Additionally, it provides contact information, making it easy for the user to reach out for inquiries or appointments.
+✅ [6] Selected service: "Embark Pet Grooming Lincoln" - Price unavailable (2608ms)
+⏱️ [6] Total time: 4061ms
+✅ Product Selection Model: Selected "Virbac Epi-Otic Advanced Ear Cleanser" (Score: 100)
+📝 Concise Title: "Virbac Epi-Otic Ear Cleanser" - Virbac Epi-Otic Advanced Ear Cleanser offers the highest quality score (100/100) and a strong rating (4.7★) with a large number of reviews (1400), making it a reliable and effective choice for cleaning a dog's ears after a bath. Its reasonable price further supports its selection as the best option.
+✅ [8] Selected: "Virbac Epi-Otic Ear Cleanser" - $$10.81 (2864ms)
+⏱️ [8] Total time: 4844ms
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Duck Brand Safety Grip Bathtub Mat" (skipping offers)
+🔄 Converting Google product: "Duck Brand Safety Grip Bathtub Mat"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/8463019207659794192?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8463019207659794192/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Style Selections Gray Non-Slip Shower and Bathtub Mat LW67245PDQ" (skipping offers)
+🔄 Converting Google product: "Style Selections Gray Non-Slip Shower and Bathtub Mat LW67245PDQ"
+📝 Base product data: {
+  seller: "Lowe's",
+  product_link: 'https://www.google.com/shopping/product/8565152028722681993?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8565152028722681993/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pethroom Premium Non-Slip Dog Bath Mat" (skipping offers)
+🔄 Converting Google product: "Pethroom Premium Non-Slip Dog Bath Mat"
+📝 Base product data: {
+  seller: 'eBay - el_el36',
+  product_link: 'https://www.google.com/shopping/product/1511892100506567080?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1511892100506567080/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Kenney Clear Vinyl Bath Mat" (skipping offers)
+🔄 Converting Google product: "Kenney Clear Vinyl Bath Mat"
+📝 Base product data: {
+  seller: 'pOpshelf',
+  product_link: 'https://www.google.com/shopping/product/14805027440709763505?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14805027440709763505/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Duck Brand Safety Grip Tub Mat" (skipping offers)
+🔄 Converting Google product: "Duck Brand Safety Grip Tub Mat"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/5668511718023464601?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/5668511718023464601/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Style Selections White Non-slip Shower and Bathtub Mat LW67267PDQ" (skipping offers)
+🔄 Converting Google product: "Style Selections White Non-slip Shower and Bathtub Mat LW67267PDQ"
+📝 Base product data: {
+  seller: "Lowe's",
+  product_link: 'https://www.google.com/shopping/product/16918580036876139463?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16918580036876139463/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Tucker Murphy Dog Bath Mat" (skipping offers)
+🔄 Converting Google product: "Tucker Murphy Dog Bath Mat"
+📝 Base product data: {
+  seller: 'Wayfair',
+  product_link: 'https://www.google.com/shopping/product/2849934424235314652?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2849934424235314652/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Mainstays Tile Bath Mat" (skipping offers)
+🔄 Converting Google product: "Mainstays Tile Bath Mat"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/12694390124031205743?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/12694390124031205743/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "SlipX Solutions Large Safety Bath Mat" (skipping offers)
+🔄 Converting Google product: "SlipX Solutions Large Safety Bath Mat"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/11651501684165194670?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11651501684165194670/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Muddy Mat Absorbent Microfiber Dog Door Mat Mat" (skipping offers)
+🔄 Converting Google product: "Muddy Mat Absorbent Microfiber Dog Door Mat Mat"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/1937557761141362550?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1937557761141362550/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Clorox Cushioned Shower Mat" (skipping offers)
+🔄 Converting Google product: "Clorox Cushioned Shower Mat"
+📝 Base product data: {
+  seller: 'Walmart',
+  product_link: 'https://www.google.com/shopping/product/2388861219876348254?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2388861219876348254/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "SlipX Solutions Adhesive Safety Treads" (skipping offers)
+🔄 Converting Google product: "SlipX Solutions Adhesive Safety Treads"
+📝 Base product data: {
+  seller: "Lowe's",
+  product_link: 'https://www.google.com/shopping/product/7954830182499685185?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7954830182499685185/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Gorilla Grip Patented Bath Tub Shower Mat" (skipping offers)
+🔄 Converting Google product: "Gorilla Grip Patented Bath Tub Shower Mat"
+📝 Base product data: {
+  seller: 'gorillagrip.com',
+  product_link: 'https://www.google.com/shopping/product/3132767955384194857?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3132767955384194857/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Tall Tails Wet Paws Bath Mat" (skipping offers)
+🔄 Converting Google product: "Tall Tails Wet Paws Bath Mat"
+📝 Base product data: {
+  seller: "Chuck & Don's",
+  product_link: 'https://www.google.com/shopping/product/8272849526541037943?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8272849526541037943/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Medline Tub and Shower Anti-Slip Tread" (skipping offers)
+🔄 Converting Google product: "Medline Tub and Shower Anti-Slip Tread"
+📝 Base product data: {
+  seller: 'ATC Medical',
+  product_link: 'https://www.google.com/shopping/product/11900941720320814594?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11900941720320814594/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "PET202 Dog Bath Mat" (skipping offers)
+🔄 Converting Google product: "PET202 Dog Bath Mat"
+📝 Base product data: {
+  seller: 'eBay - naordavid123',
+  product_link: 'https://www.google.com/shopping/product/774689798996669334?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/774689798996669334/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Non,Slip Rubber Mat for Pet Grooming Bathing Tables" (skipping offers)
+🔄 Converting Google product: "Non,Slip Rubber Mat for Pet Grooming Bathing Tables"
+📝 Base product data: {
+  seller: 'Walmart - lianshangmao',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:12601316715067953083',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:12601316715067953083',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "PawMat Tub Mat" (skipping offers)
+🔄 Converting Google product: "PawMat Tub Mat"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:13211287471003700489',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:13211287471003700489',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Threshold Performance Plus Plush Non Skid Bath Rug" (skipping offers)
+🔄 Converting Google product: "Threshold Performance Plus Plush Non Skid Bath Rug"
+📝 Base product data: {
+  seller: 'Target',
+  product_link: 'https://www.google.com/shopping/product/4448827712030658347?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4448827712030658347/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Latitude Run Non Slip Bathtub Mat" (skipping offers)
+🔄 Converting Google product: "Latitude Run Non Slip Bathtub Mat"
+📝 Base product data: {
+  seller: 'Wayfair',
+  product_link: 'https://www.google.com/shopping/product/7588968469699416347?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/7588968469699416347/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [5] "Non-slip mat for the bathing area, to prevent the dog from slipping.": Found 7 recommended products from 40 total (APIs: 5214ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 7 products for "Non-slip mat for the bathing area, to prevent the dog from slipping."
+ GET /api/auth/session 200 in 41ms
+✅ Found 20 Google Shopping products
+🚀 Fast processing Google product: "Flying Pig Flying One Purple Dog Pet Grooming Dryer" (skipping offers)
+🔄 Converting Google product: "Flying Pig Flying One Purple Dog Pet Grooming Dryer"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/15003835655482027318?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/15003835655482027318/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "K-9 II Blower Dog Dryer" (skipping offers)
+🔄 Converting Google product: "K-9 II Blower Dog Dryer"
+📝 Base product data: {
+  seller: 'K-9 Dryers',
+  product_link: 'https://www.google.com/shopping/product/3394526969355359081?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3394526969355359081/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "B-Air Fido Max 1 Dog Dryer" (skipping offers)
+🔄 Converting Google product: "B-Air Fido Max 1 Dog Dryer"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/4802199319285801990?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4802199319285801990/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Zeny Pet Dog Hair Dryer" (skipping offers)
+🔄 Converting Google product: "Zeny Pet Dog Hair Dryer"
+📝 Base product data: {
+  seller: 'Walmart - ZENY PRODUCTS',
+  product_link: 'https://www.google.com/shopping/product/10370479188087454104?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/10370479188087454104/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "K-9 I Blower" (skipping offers)
+🔄 Converting Google product: "K-9 I Blower"
+📝 Base product data: {
+  seller: "Groomer's Choice Pet Products",
+  product_link: 'https://www.google.com/shopping/product/1642747679085127475?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1642747679085127475/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "17'' H x 7.6'' W x 11.6'' D Metal Dryer IVY&LANE Finish" (skipping offers)
+🔄 Converting Google product: "17'' H x 7.6'' W x 11.6'' D Metal Dryer IVY&LANE Finish"
+📝 Base product data: {
+  seller: 'Wayfair',
+  product_link: 'https://www.google.com/shopping/product/16055232444838597115?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/16055232444838597115/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "K-9 Mini Blower Dog Dryer" (skipping offers)
+🔄 Converting Google product: "K-9 Mini Blower Dog Dryer"
+📝 Base product data: {
+  seller: 'Williamsport Bowman Barber Supply',
+  product_link: 'https://www.google.com/shopping/product/6366114710994936625?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/6366114710994936625/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "XPOWER Airrow Pro Multipurpose Pet Dryer B-53" (skipping offers)
+🔄 Converting Google product: "XPOWER Airrow Pro Multipurpose Pet Dryer B-53"
+📝 Base product data: {
+  seller: 'Tractor Supply Company',
+  product_link: 'https://www.google.com/shopping/product/8501933590082148560?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8501933590082148560/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Shelandy Dog Grooming Dryer" (skipping offers)
+🔄 Converting Google product: "Shelandy Dog Grooming Dryer"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/8495575162334445878?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8495575162334445878/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "K-9 Fluffer Variable Speed Dog Dryer" (skipping offers)
+🔄 Converting Google product: "K-9 Fluffer Variable Speed Dog Dryer"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/11123434137269048827?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/11123434137269048827/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Neakasa F1 Pet Hair Dryer" (skipping offers)
+🔄 Converting Google product: "Neakasa F1 Pet Hair Dryer"
+📝 Base product data: {
+  seller: 'Neakasa',
+  product_link: 'https://www.google.com/shopping/product/17268629748053318167?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17268629748053318167/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Tool Klean GustyAir Mini High Velocity Dog Dryer" (skipping offers)
+🔄 Converting Google product: "Tool Klean GustyAir Mini High Velocity Dog Dryer"
+📝 Base product data: {
+  seller: 'ToolKlean',
+  product_link: 'https://www.google.com/shopping/product/236342665503940672?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/236342665503940672/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Go Pet Club Dog Cat Pet Grooming Hair Dryer" (skipping offers)
+🔄 Converting Google product: "Go Pet Club Dog Cat Pet Grooming Hair Dryer"
+📝 Base product data: {
+  seller: 'eBay - poppie_moon',
+  product_link: 'https://www.google.com/shopping/product/2030477963197168092?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/2030477963197168092/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "MetroVac Air Force Quick Draw Mini Portable Pet Dryer" (skipping offers)
+🔄 Converting Google product: "MetroVac Air Force Quick Draw Mini Portable Pet Dryer"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/14953591206626101106?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/14953591206626101106/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "iPettie Breeze Dog Hair Dryer B540S" (skipping offers)
+🔄 Converting Google product: "iPettie Breeze Dog Hair Dryer B540S"
+📝 Base product data: {
+  seller: 'iPettie',
+  product_link: 'https://www.google.com/shopping/product/3424097953726889140?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/3424097953726889140/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Dog Dryer for Pet Grooming" (skipping offers)
+🔄 Converting Google product: "Dog Dryer for Pet Grooming"
+📝 Base product data: {
+  seller: 'Walmart - Koda Luna Co.',
+  product_link: 'https://www.google.com/shopping/product/1?gl=us&hl=en&prds=pid:15247371321262294735',
+  offers_link: 'https://www.google.com/shopping/product/1/offers?gl=us&hl=en&prds=pid:15247371321262294735',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "K-9 III Blower Dog Dryer" (skipping offers)
+🔄 Converting Google product: "K-9 III Blower Dog Dryer"
+📝 Base product data: {
+  seller: 'PetEdge',
+  product_link: 'https://www.google.com/shopping/product/1269543583752883226?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/1269543583752883226/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "XPOWER B-24 Thermal Ace Professional Force Pet Dryer" (skipping offers)
+🔄 Converting Google product: "XPOWER B-24 Thermal Ace Professional Force Pet Dryer"
+📝 Base product data: {
+  seller: 'Home Depot',
+  product_link: 'https://www.google.com/shopping/product/8349064975441623918?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/8349064975441623918/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Pet Control HQ Dog Hair Dryer Blower" (skipping offers)
+🔄 Converting Google product: "Pet Control HQ Dog Hair Dryer Blower"
+📝 Base product data: {
+  seller: 'eBay - bahofsh0',
+  product_link: 'https://www.google.com/shopping/product/4435732142754616887?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/4435732142754616887/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🚀 Fast processing Google product: "Homerunpet Air Force Dog, Cat & Small Pet Dryer" (skipping offers)
+🔄 Converting Google product: "Homerunpet Air Force Dog, Cat & Small Pet Dryer"
+📝 Base product data: {
+  seller: 'Chewy.com',
+  product_link: 'https://www.google.com/shopping/product/17770262797277979303?gl=us&hl=en',
+  offers_link: 'https://www.google.com/shopping/product/17770262797277979303/offers?gl=us&hl=en',
+  extracted_offers: undefined
+}
+✅ Created 1 unified product (base data only)
+🛒 Google Shopping (Fast): Fetched 20 base products, created 20 unified products
+📊 Product counts - Amazon: 20, Google: 20, Local: 0
+📦 [10] "Dog dryer, if the user wants to dry the dog quickly and efficiently.": Found 13 recommended products from 40 total (APIs: 5349ms, Eval: 0ms)
+🎯 Product Selection Model: Analyzing 13 products for "Dog dryer, if the user wants to dry the dog quickly and efficiently."
+✅ Product Selection Model: Selected "Heusom Easy Dog Nail Clippers & Grinder" (Score: 100)
+📝 Concise Title: "Heusom Dog Nail Clippers & Grinder" - The Heusom Easy Dog Nail Clippers & Grinder has the highest rating (4.8★) with a significant number of reviews (2200), indicating strong user satisfaction and reliability. Its dual functionality as both a clipper and grinder offers versatility for nail trimming after a bath, making it a comprehensive grooming tool. Despite being the most expensive option, its high quality and positive feedback justify the price.
+✅ [7] Selected: "Heusom Dog Nail Clippers & Grinder" - $$39.95 (3919ms)
+⏱️ [7] Total time: 5463ms
+✅ Product Selection Model: Selected "Furminator Long Hair deShedding Tool" (Score: 100)
+📝 Concise Title: "Furminator Long Hair Deshedding Tool" - The Furminator Long Hair deShedding Tool is the best choice due to its high quality score, excellent user rating, and popularity, making it ideal for effectively removing loose fur from dogs with long hair before and after baths.
+✅ [4] Selected: "Furminator Long Hair Deshedding Tool" - $$35.29 (3709ms)
+⏱️ [4] Total time: 5757ms
+✅ Product Selection Model: Selected "Burt's Bees Hypoallergenic Dog Shampoo" (Score: 100)
+📝 Concise Title: "Burt's Bees Hypoallergenic Dog Shampoo" - This product is hypoallergenic, making it suitable for dogs with potential skin sensitivities. It has a high rating of 4.6★ from 1600 reviews, indicating strong user satisfaction. The price is reasonable, and it has a perfect quality score of 100/100, ensuring high quality and effectiveness for sensitive skin.
+✅ [1] Selected: "Burt's Bees Hypoallergenic Dog Shampoo" - $$8.57 (2452ms)
+⏱️ [1] Total time: 6488ms
+✅ Product Selection Model: Selected "Gorilla Grip Patented Bath Tub Shower Mat" (Score: 70)
+📝 Concise Title: "Gorilla Grip Non-Slip Bath Mat" - The Gorilla Grip Bath Mat offers a high rating of 4.5★ and is specifically designed for non-slip use in bathing areas, making it ideal for preventing dogs from slipping. Despite its lower quality score, its strong user feedback and purpose-built design make it the best choice for the query.
+✅ [5] Selected: "Gorilla Grip Non-Slip Bath Mat" - $$30.99 (2088ms)
+⏱️ [5] Total time: 7302ms
+✅ Product Selection Model: Selected "K-9 II Blower Dog Dryer" (Score: 70)
+📝 Concise Title: "K-9 II Blower Dog Dryer" - The K-9 II Blower Dog Dryer is the best choice due to its high rating of 4.8★ from 100 reviews, indicating strong user satisfaction and reliability. It is designed specifically for quickly and efficiently drying dogs, aligning perfectly with the user's query. Despite its higher price, the quality score and popularity make it a worthwhile investment for effective dog drying.
+✅ [10] Selected: "K-9 II Blower Dog Dryer" - $$515.00 (2359ms)
+⏱️ [10] Total time: 7708ms
+🚀 PARALLEL EXECUTION COMPLETE: 10 products searched simultaneously in 7714ms
+⏱️ TIMING SUMMARY: Parallel total: 7714ms, Search: 27178ms, Selection: 25521ms
+🎯 Selected 10 products from 10 searches
+💰 No price limit - including all 10 products - Total: $678.56
+🏆 Final selection: 10 products, Total price: $678.56
+🔍 DEBUG: Gemini search results:
+📊 DFS: Final search steps collected (10 total):
+   🔍 Search 1: "Dog shampoo, formulated for a male dog, considering potential skin sensitivities and coat type."
+   🔍 Search 2: "Dog conditioner, to moisturize the dog's coat after shampooing."
+   🔍 Search 3: "Dog towel, absorbent and quick-drying."
+   🔍 Search 4: "Dog brush, appropriate for the dog's breed and coat type, to remove loose fur before and after the bath."
+   🔍 Search 5: "Non-slip mat for the bathing area, to prevent the dog from slipping."
+   🔍 Search 6: "Dog grooming service, if the user prefers professional assistance, considering the dog's size and temperament."
+   🔍 Search 7: "Dog nail clippers, to trim the dog's nails after the bath, if needed."
+   🔍 Search 8: "Dog ear cleaning solution, to clean the dog's ears after the bath."
+   🔍 Search 9: "Dog treats, to reward the dog for good behavior during the bath."
+   🔍 Search 10: "Dog dryer, if the user wants to dry the dog quickly and efficiently."
+📦 Created allSelectedProductsForResult with 10 products from Gemini search
+🔍 DEBUG: Final result construction:
+   - allBestProducts.length: 10
+   - allSelectedProductsForResult.length: 10
+   - bestProduct exists: true
+   - Using: 10 products from Gemini search
+🎯 FINAL RESULT: {
+  originalQuery: 'i want to wash my dog',
+  rewrittenQuery: 'i want to wash my dog (male user)',
+  hasRewritten: true,
+  productsCount: 10
+}
+🏆 FINAL: Displaying 10 products to user:
+  1. Level unknown: "Burt's Bees Hypoallergenic Dog Shampoo" (from: unknown)
+  2. Level unknown: "Dirty Dog Shammy Towel" (from: unknown)
+  3. Level unknown: "Burt's Bees Oatmeal Dog Conditioner" (from: unknown)
+  4. Level unknown: "Furminator Long Hair Deshedding Tool" (from: unknown)
+  5. Level unknown: "Gorilla Grip Non-Slip Bath Mat" (from: unknown)
+  6. Level unknown: "Blue Buffalo Chicken Training Treats" (from: unknown)
+  7. Level unknown: "Heusom Dog Nail Clippers & Grinder" (from: unknown)
+  8. Level unknown: "K-9 II Blower Dog Dryer" (from: unknown)
+  9. Level unknown: "Embark Pet Grooming Lincoln" (from: unknown)
+  10. Level unknown: "Virbac Epi-Otic Ear Cleanser" (from: unknown)
+💾 Storing historical search result for user: 103232145871075765795
+✅ Historical search result stored with ID: 689460d8a0be736ae1ead349
+💾 Historical search result stored for user: 103232145871075765795
+🧹 Backend: Completed search for user 103232145871075765795 in 15s, removed from active searches
+🔧 Tool calls made: intelligent_product_search
+✅ No text generated with tools - good!
+ POST /api/chat 200 in 15957ms
+🖼️ Proxying image: https://lh3.googleusercontent.com/p/AF1QipP5KfHNPpzIm8QgxkgO4u9Dy50oqwdvlhWpI0yw=w80-h106-k-no
+✅ Successfully proxied image: image/jpeg, 6048 bytes
+ GET /api/image-proxy?url=https%3A%2F%2Flh3.googleusercontent.com%2Fp%2FAF1QipP5KfHNPpzIm8QgxkgO4u9Dy50oqwdvlhWpI0yw%3Dw80-h106-k-no 200 in 286ms
+ GET /api/auth/session 200 in 51ms

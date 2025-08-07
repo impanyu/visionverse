@@ -2403,6 +2403,8 @@ For search_location field:
 
 Pay attention: ALWAYS specify relevant user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions when helpful.
 
+The description should be clear and concise, and should not be too long.
+
 Pay attention: Output ONLY a json string, without any other text !!
 
 EXAMPLES:
