@@ -42,7 +42,7 @@ const GlobalSearchLoadingOverlay: FC = () => {
       {(() => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
         return (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100]">
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]">
             <div className="bg-white border border-gray-200 shadow-lg rounded-lg p-6 max-w-md mx-4 flex flex-col items-center space-y-4">
               <div className="flex items-center gap-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
