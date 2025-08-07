@@ -1,12 +1,16 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:48:18.989Z
-📊 Total messages: 4
-👤 User messages: 2
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:54:53.852Z
+📊 Total messages: 16
+👤 User messages: 6
 
 📝 USER MESSAGE HISTORY:
-  [1/2] [{"type":"text","text":"i want to go to a restauraunt"}]
-  [2/2] [{"type":"text","text":"i need to go to a restaurant"}]
+  [1/6] [{"type":"text","text":"i need to go to a restaurant"}]
+  [2/6] [{"type":"text","text":"i need to go to a restaurant"}]
+  [3/6] [{"type":"text","text":"i need to find a chinese restaurant"}]
+  [4/6] [{"type":"text","text":"i need to go to chicago"}]
+  [5/6] [{"type":"text","text":"i need to go to mars"}]
+  [6/6] [{"type":"text","text":"i need to go to moon"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i need to go to a restaurant"}]
+  [{"type":"text","text":"i need to go to moon"}]
 
 ================================================================================

@@ -292,35 +292,49 @@ export async function fetchLocalProductsFromMongo(productIds: string[]): Promise
       _id: { $in: objectIds }
     }).toArray();
     
-    // Convert to unified product format
-    const unifiedProducts = products.map(product => ({
-      id: product._id.toString(),
-      title: product.productDescription,
-      description: product.productDescription,
-      price: product.price ? (product.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
-      currency: 'USD',
-      image: product.filePath !== '/no-file' ? `/api/files${product.filePath.replace('/data/', '/')}` : null,
-      rating: 5.0, // Default rating for local products
-      reviews: 1, // Default review count
-      source: 'local',
-      product_link: product.url || '#',
-      availability: 'In Stock',
-      seller: product.userName || 'Local Seller',
-      is_sponsored: false,
-      is_prime: false,
-      
-      // Include original MongoDB data for reference
-      _originalData: {
-        userId: product.userId,
-        userName: product.userName,
-        userEmail: product.userEmail,
-        filePath: product.filePath,
-        url: product.url,
-        price: product.price,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt
-      }
-    }));
+    // Convert to unified product format and filter out products without valid links
+    const unifiedProducts = products
+      .filter(product => {
+        const hasValidLink = product.url && 
+                           product.url.trim() !== '' && 
+                           product.url !== '#' && 
+                           !product.url.includes('undefined') &&
+                           !product.url.includes('null');
+        
+        if (!hasValidLink) {
+          console.log(`🔗 Filtered out local product without valid link: "${product.productDescription}"`);
+        }
+        
+        return hasValidLink;
+      })
+      .map(product => ({
+        id: product._id.toString(),
+        title: product.productDescription,
+        description: product.productDescription,
+        price: product.price ? (product.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
+        currency: 'USD',
+        image: product.filePath !== '/no-file' ? `/api/files${product.filePath.replace('/data/', '/')}` : null,
+        rating: 5.0, // Default rating for local products
+        reviews: 1, // Default review count
+        source: 'local',
+        product_link: product.url,
+        availability: 'In Stock',
+        seller: product.userName || 'Local Seller',
+        is_sponsored: false,
+        is_prime: false,
+        
+        // Include original MongoDB data for reference
+        _originalData: {
+          userId: product.userId,
+          userName: product.userName,
+          userEmail: product.userEmail,
+          filePath: product.filePath,
+          url: product.url,
+          price: product.price,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
+        }
+      }));
     
     console.log(`✅ Converted ${unifiedProducts.length} local products to unified format`);
     return unifiedProducts;
@@ -890,20 +904,34 @@ export async function fetchLocalServicesFromMongo(serviceIds: string[]): Promise
       _id: { $in: objectIds }
     }).toArray();
     
-    // Convert to unified service format
-    const unifiedServices = services.map(service => ({
-      id: service._id.toString(),
-      title: service.serviceDescription,
-      description: service.serviceDescription,
-      price: service.price ? (service.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
-      currency: 'USD',
-      image: service.filePath !== '/no-file' ? `/api/files${service.filePath.replace('/data/', '/')}` : null,
-      rating: 5.0, // Default rating for local services
-      reviews: 1, // Default review count
-      source: 'local',
-      product_link: service.url || '#',
-      availability: 'Available',
-      seller: service.userName || 'Local Provider',
+    // Convert to unified service format and filter out services without valid links
+    const unifiedServices = services
+      .filter(service => {
+        const hasValidLink = service.url && 
+                           service.url.trim() !== '' && 
+                           service.url !== '#' && 
+                           !service.url.includes('undefined') &&
+                           !service.url.includes('null');
+        
+        if (!hasValidLink) {
+          console.log(`🔗 Filtered out local service without valid link: "${service.serviceDescription}"`);
+        }
+        
+        return hasValidLink;
+      })
+      .map(service => ({
+        id: service._id.toString(),
+        title: service.serviceDescription,
+        description: service.serviceDescription,
+        price: service.price ? (service.price / 100).toFixed(2) : '0.00', // Convert cents to dollars
+        currency: 'USD',
+        image: service.filePath !== '/no-file' ? `/api/files${service.filePath.replace('/data/', '/')}` : null,
+        rating: 5.0, // Default rating for local services
+        reviews: 1, // Default review count
+        source: 'local',
+        product_link: service.url,
+        availability: 'Available',
+        seller: service.userName || 'Local Provider',
       is_sponsored: false,
       is_prime: false,
       

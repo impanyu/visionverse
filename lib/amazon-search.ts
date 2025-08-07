@@ -658,14 +658,33 @@ class ProductSearchService {
       }
     }
 
+    // Filter out products without valid links
+    const productsWithLinks = allProducts.filter(product => {
+      const hasValidLink = product.link && 
+                          product.link.trim() !== '' && 
+                          product.link !== '#' && 
+                          !product.link.includes('undefined') &&
+                          !product.link.includes('null');
+      
+      if (!hasValidLink) {
+        console.log(`🔗 Filtered out product without valid link: "${product.title}"`);
+      }
+      
+      return hasValidLink;
+    });
+
     // Sort by position and apply final limit
-    const sortedProducts = allProducts.sort((a, b) => a.position - b.position);
+    const sortedProducts = productsWithLinks.sort((a, b) => a.position - b.position);
     const limitedProducts = sortedProducts.slice(0, maxResults);
 
     // Log final results
     const amazonCount = limitedProducts.filter(p => p.source === 'amazon').length;
     const googleShoppingCount = limitedProducts.filter(p => p.source === 'google_shopping').length;
+    const filteredCount = allProducts.length - productsWithLinks.length;
     console.log(`🎯 Final results: ${limitedProducts.length}/${maxResults} products (${amazonCount} Amazon + ${googleShoppingCount} Google Shopping)`);
+    if (filteredCount > 0) {
+      console.log(`🔗 Filtered out ${filteredCount} products without valid links`);
+    }
 
     return limitedProducts;
   }

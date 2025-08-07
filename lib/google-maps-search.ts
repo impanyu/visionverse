@@ -392,6 +392,29 @@ class ServiceSearchService {
     // Apply filters
     let filteredServices = allServices;
 
+    // Filter out services without valid contact methods (website or phone)
+    filteredServices = filteredServices.filter(service => {
+      const hasWebsite = service.website && 
+                        service.website.trim() !== '' && 
+                        service.website !== '#' && 
+                        !service.website.includes('undefined') &&
+                        !service.website.includes('null');
+      
+      const hasPhone = service.phone && 
+                      service.phone.trim() !== '' && 
+                      service.phone !== 'N/A' &&
+                      !service.phone.includes('undefined') &&
+                      !service.phone.includes('null');
+      
+      const hasValidContact = hasWebsite || hasPhone;
+      
+      if (!hasValidContact) {
+        console.log(`🔗 Filtered out service without contact info: "${service.title}"`);
+      }
+      
+      return hasValidContact;
+    });
+
     // Note: Distance filtering for Google Maps is now handled by the API with radius parameter
     // Only need manual filtering for services that don't support API-level radius filtering
     if (userLocation && radiusMiles) {
