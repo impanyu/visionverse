@@ -35,133 +35,97 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Global search loading overlay component - CSS RESPONSIVE INLINE STYLES
+// Global search loading overlay component - PURE INLINE STYLES (NO CSS-IN-JS)
 const GlobalSearchLoadingOverlay: FC = () => {
   return (
     <ThreadPrimitive.If running>
       {(() => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
+        
+        // Define styles as objects to ensure consistency across environments
+        const containerStyle: React.CSSProperties = {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 100,
+          maxWidth: '95vw',
+          maxHeight: '85vh',
+          overflow: 'auto'
+        };
+
+        const panelStyle: React.CSSProperties = {
+          background: 'white',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          padding: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '20px' : '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: window.innerWidth >= 768 ? '32px' : window.innerWidth >= 640 ? '16px' : '12px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          minWidth: window.innerWidth >= 768 ? '500px' : 'auto'
+        };
+
+        const spinnerStyle: React.CSSProperties = {
+          width: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '28px' : '24px',
+          height: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '28px' : '24px',
+          border: `${window.innerWidth >= 768 ? '5px' : '2px'} solid transparent`,
+          borderTop: `${window.innerWidth >= 768 ? '5px' : '2px'} solid #2563eb`,
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        };
+
+        const mainTextStyle: React.CSSProperties = {
+          fontSize: window.innerWidth >= 768 ? '28px' : window.innerWidth >= 640 ? '16px' : '14px',
+          fontWeight: window.innerWidth >= 768 ? 700 : 500,
+          color: '#374151',
+          textAlign: 'center',
+          lineHeight: 1.3,
+          margin: 0,
+          maxWidth: window.innerWidth >= 768 ? '450px' : 'none'
+        };
+
+        const searchItemStyle: React.CSSProperties = {
+          fontSize: window.innerWidth >= 768 ? '17px' : window.innerWidth >= 640 ? '14px' : '12px',
+          fontWeight: window.innerWidth >= 768 ? 500 : 'normal',
+          color: '#6b7280',
+          textAlign: 'center',
+          margin: 0,
+          lineHeight: 1.4
+        };
+
+        const searchItemsStyle: React.CSSProperties = {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: window.innerWidth >= 768 ? '14px' : window.innerWidth >= 640 ? '6px' : '4px'
+        };
+
         return (
           <>
-            <style jsx>{`
-              .waiting-panel-container {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 100;
-                max-width: 95vw;
-                max-height: 85vh;
-                overflow: auto;
-              }
-              .waiting-panel {
-                background: white;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                padding: 16px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 12px;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-              }
-              .spinner {
-                width: 24px;
-                height: 24px;
-                border: 2px solid transparent;
-                border-top: 2px solid #2563eb;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-              }
-              .main-text {
-                font-size: 14px;
-                font-weight: 500;
-                color: #374151;
-                text-align: center;
-                line-height: 1.3;
-                margin: 0;
-              }
-              .search-item {
-                font-size: 12px;
-                color: #6b7280;
-                text-align: center;
-                margin: 0;
-                line-height: 1.4;
-              }
-              .search-items {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-              }
+            <style>{`
               @keyframes spin {
                 to { transform: rotate(360deg); }
               }
-              
-              /* Tablet styles */
-              @media (min-width: 640px) {
-                .waiting-panel {
-                  padding: 20px;
-                  gap: 16px;
-                }
-                .spinner {
-                  width: 28px;
-                  height: 28px;
-                }
-                .main-text {
-                  font-size: 16px;
-                }
-                .search-item {
-                  font-size: 14px;
-                }
-                .search-items {
-                  gap: 6px;
-                }
-              }
-              
-              /* Desktop styles */
-              @media (min-width: 768px) {
-                .waiting-panel {
-                  padding: 48px;
-                  gap: 32px;
-                  min-width: 500px;
-                }
-                .spinner {
-                  width: 48px;
-                  height: 48px;
-                  border-width: 5px;
-                }
-                .main-text {
-                  font-size: 28px;
-                  font-weight: 700;
-                  max-width: 450px;
-                }
-                .search-item {
-                  font-size: 17px;
-                  font-weight: 500;
-                }
-                .search-items {
-                  gap: 14px;
-                }
-              }
             `}</style>
-            <div className="waiting-panel-container">
-              <div className="waiting-panel">
+            <div style={containerStyle}>
+              <div style={panelStyle}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                  <div className="spinner"></div>
-                  <p className="main-text">Searching for the most suitable products and services</p>
+                  <div style={spinnerStyle}></div>
+                  <p style={mainTextStyle}>Searching for the most suitable products and services</p>
                 </div>
-                <div className="search-items">
-                  <p className="search-item">🏠 Searching local products and services</p>
-                  <p className="search-item">🔍 Searching Amazon marketplace</p>
-                  <p className="search-item">🛒 Searching Google Shopping</p>
-                  <p className="search-item">🏪 Searching eBay marketplace</p>
-                  <p className="search-item">🏬 Searching Walmart</p>
-                  <p className="search-item">🎨 Searching Etsy</p>
-                  <p className="search-item">👗 Searching Shein</p>
-                  <p className="search-item">🛍️ Searching Temu</p>
-                  <p className="search-item">🗺️ Searching Google Maps services</p>
-                  <p className="search-item">💬 Reading customer comments</p>
-                  <p className="search-item">🤖 Evaluating product quality</p>
+                <div style={searchItemsStyle}>
+                  <p style={searchItemStyle}>🏠 Searching local products and services</p>
+                  <p style={searchItemStyle}>🔍 Searching Amazon marketplace</p>
+                  <p style={searchItemStyle}>🛒 Searching Google Shopping</p>
+                  <p style={searchItemStyle}>🏪 Searching eBay marketplace</p>
+                  <p style={searchItemStyle}>🏬 Searching Walmart</p>
+                  <p style={searchItemStyle}>🎨 Searching Etsy</p>
+                  <p style={searchItemStyle}>👗 Searching Shein</p>
+                  <p style={searchItemStyle}>🛍️ Searching Temu</p>
+                  <p style={searchItemStyle}>🗺️ Searching Google Maps services</p>
+                  <p style={searchItemStyle}>💬 Reading customer comments</p>
+                  <p style={searchItemStyle}>🤖 Evaluating product quality</p>
                 </div>
               </div>
             </div>
