@@ -2047,6 +2047,8 @@ Respond in JSON:
 
 `;
 
+                console.log(`🔧 DEBUG: About to call OpenAI for intent rewriting...`);
+                console.log(`🔧 DEBUG: Profile context length: ${userProfileContext.length} chars`);
                 const intentStart = Date.now();
                 const intentResponse = await openaiClient.chat.completions.create({
                   model: "gpt-4.1",
@@ -2055,6 +2057,7 @@ Respond in JSON:
                   max_tokens: 600
                 });
                 intentTime = Date.now() - intentStart;
+                console.log(`🔧 DEBUG: OpenAI intent response received in ${intentTime}ms`);
 
                 const responseContent = intentResponse.choices[0]?.message?.content?.trim();
                 
@@ -2150,27 +2153,53 @@ Respond in JSON:
                   console.log(`🧠 No significant intent rewriting needed`);
                 }
               } else {
-                console.log(`📚 No similar historical queries found for this user - generating fallback keywords`);
+                console.log(`📚 No similar historical queries found for this user - using profile-based intent rewriting`);
                 
-                // Fallback: generate suggested keywords without historical context
+                // Get user profile for personalized context (even without historical queries)
+                let userProfileContext = '';
+                console.log(`🔧 DEBUG: Loading user profile for fallback intent rewriting...`);
+                try {
+                  const { getUserProfile } = await import('@/lib/user-db');
+                  const userProfile = await getUserProfile(token.id as string);
+                  
+                  if (userProfile && userProfile.profile.length > 0) {
+                    // Create profile context for the AI using all current profile items
+                    const profileItems = userProfile.profile; // Use all current profile items
+                    userProfileContext = `this user has profile as follows: ${profileItems.join(', ')}.`;
+                    console.log(`👤 Profile: userProfileContext (fallback): ${userProfileContext}`);
+                    console.log(`👤 Profile: Added user context with ${profileItems.length} profile items (fallback)`);
+                  } else {
+                    console.log(`👤 Profile: No profile items found for user (fallback)`);
+                  }
+                } catch (error) {
+                  console.error('⚠️ Profile: Error loading user profile for fallback context:', error);
+                  console.log(`🔧 DEBUG: Profile loading failed in fallback, continuing with empty profile context`);
+                }
+                
+                // Fallback: generate intent rewriting and keywords with user profile context
                 try {
                   const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                   
-                  const fallbackPrompt = `
+                  const fallbackPrompt = `You need to understand the user's intent and rewrite the query to best achieve the user's goal.
 
 Current query: "${query}"
 
+USER PROFILE:
+${userProfileContext}
 
 TASK:
-1. Keep original query unchanged (no rewriting without user history)
-2. Reason about the user's intent and generate 8-15 refining keywords for the original query
+1. Summerize the user profile and only keep important profiles such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, etc., ignore the user's behaviors or activities or plans in the summary!!!
+2. After the original query, append the user profile
+3. Generate 8-15 relevant keywords
 
+Guidelines:
+- Always keep ALL the exact words in the original query!!!!
 
-
+Pay attention: don't let the personalized information to be too long and distort or undermine the original query
 
 Respond in JSON:
 {
-  "original_query": "${query}",
+  "rewritten_query": "${query}" + "(user profile)",
   "suggested_keywords": ["keyword1", "keyword2", ...]
 }
 
@@ -2186,14 +2215,43 @@ MINIMUM 8 keywords required, MAXIMUM 15 keywords allowed.`;
                   const fallbackContent = fallbackResponse.choices[0]?.message?.content?.trim();
                   
                   if (fallbackContent) {
+                    console.log(`🔍 FALLBACK: Raw intent response:`, fallbackContent);
                     try {
-                      const fallbackData = JSON.parse(fallbackContent);
+                      // Strip markdown code blocks if present
+                      let cleanJson = fallbackContent.trim();
+                      if (cleanJson.startsWith('```json')) {
+                        cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                      } else if (cleanJson.startsWith('```')) {
+                        cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                      }
+                      
+                      const fallbackData = JSON.parse(cleanJson);
+                      
+                      // Handle rewritten query from fallback
+                      const rewrittenFromFallback = fallbackData.rewritten_query;
+                      if (rewrittenFromFallback && rewrittenFromFallback !== query) {
+                        rewrittenQuery = rewrittenFromFallback;
+                        console.log(`🧠 Fallback intent-based rewritten query: "${rewrittenQuery}"`);
+                      }
+                      
                       if (fallbackData.suggested_keywords && Array.isArray(fallbackData.suggested_keywords)) {
                         suggestedKeywords = fallbackData.suggested_keywords;
                         console.log(`🏷️ BACKEND: Generated fallback suggested keywords:`, suggestedKeywords);
                       }
+                      
+                      // Add the fallback intent step to search steps if we have a rewritten query
+                      if (rewrittenQuery !== query) {
+                        searchSteps.push({
+                          keywords: rewrittenQuery,
+                          amazonResults: 0,
+                          googleShoppingResults: 0,
+                          refinementReason: `Profile-based intent rewrite (no historical queries)`,
+                          stepType: 'intent'
+                        });
+                      }
                     } catch (fallbackJsonError) {
                       console.error('🚨 Error parsing fallback JSON response:', fallbackJsonError);
+                      console.error('🚨 Raw fallback content:', fallbackContent);
                     }
                   }
                 } catch (fallbackError) {
