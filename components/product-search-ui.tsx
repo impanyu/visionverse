@@ -1562,17 +1562,30 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                                   
                                   {/* Service Image */}
                                   <div className="flex-shrink-0">
-                                    {(service.image || service.thumbnail) ? (
-                                      <img 
-                                        src={service.image || service.thumbnail} 
-                                        alt={service.title || 'Service'}
-                                        className="w-24 h-24 object-cover rounded-lg border"
-                                      />
-                                    ) : (
-                                      <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-violet-200 rounded-lg flex items-center justify-center">
-                                        <span className="text-2xl">🏢</span>
-                                      </div>
-                                    )}
+                                    {(() => {
+                                      const imageUrl = service.image || service.thumbnail;
+                                      console.log(`🖼️ Service "${service.title}" image check:`, {
+                                        image: service.image,
+                                        thumbnail: service.thumbnail,
+                                        finalUrl: imageUrl,
+                                        source: service.source
+                                      });
+                                      return imageUrl ? (
+                                        <img 
+                                          src={imageUrl} 
+                                          alt={service.title || 'Service'}
+                                          className="w-24 h-24 object-cover rounded-lg border"
+                                          onError={(e) => {
+                                            console.error(`❌ Failed to load image for "${service.title}":`, imageUrl);
+                                            e.currentTarget.style.display = 'none';
+                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                          }}
+                                        />
+                                      ) : null;
+                                    })()}
+                                    <div className={`w-24 h-24 bg-gradient-to-br from-purple-100 to-violet-200 rounded-lg flex items-center justify-center ${(service.image || service.thumbnail) ? 'hidden' : ''}`}>
+                                      <span className="text-2xl">🏢</span>
+                                    </div>
                                   </div>
                                 </div>
                                 
