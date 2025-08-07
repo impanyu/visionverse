@@ -8,8 +8,8 @@ const openai = new OpenAI({
 
 // Initialize Chroma client
 const chroma = new ChromaClient({
-  host: "localhost",
-  port: 8000,
+  host: process.env.CHROMA_HOST || "localhost",
+  port: parseInt(process.env.CHROMA_PORT || "8000"),
 });
 
 // Collection name for vision descriptions
