@@ -17,7 +17,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ChoiceMade.ai - Shopping Planner",
   description: "AI-powered chat assistant with Google authentication",
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

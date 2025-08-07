@@ -35,15 +35,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Global search loading overlay component - FIXED POSITIONING
+// Global search loading overlay component
 const GlobalSearchLoadingOverlay: FC = () => {
   return (
     <ThreadPrimitive.If running>
       {(() => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
         return (
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto flex flex-col items-center space-y-4 pointer-events-auto">
+          <div className="fixed inset-0 flex items-center justify-center z-[100]">
+            <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-lg mx-4 flex flex-col items-center space-y-5">
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 <span className="text-lg font-medium text-gray-700 text-center">Searching for the most suitable products and services</span>
@@ -82,7 +82,7 @@ export const Thread: FC = () => {
       {/* Global loading overlay */}
       <GlobalSearchLoadingOverlay />
       
-      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-2 sm:px-4 pt-4 sm:pt-8 pb-20 sm:pb-24 only-last-assistant-message">
+      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8 pb-24 only-last-assistant-message">
         <ThreadWelcome />
         <ThreadPrimitive.Messages
           components={{
@@ -91,7 +91,7 @@ export const Thread: FC = () => {
             AssistantMessage: AssistantMessage,
           }}
         />
-        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 mt-3 flex flex-col items-center justify-end bg-inherit pb-2 sm:pb-4 px-2 sm:px-4 z-50 w-full max-w-4xl">
+        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 mt-3 flex flex-col items-center justify-end bg-inherit pb-4 px-4 z-50 w-full max-w-4xl">
           <PersistentSuggestions />
           <Composer />
         </div>
@@ -254,7 +254,7 @@ const Composer: FC = () => {
   
   return (
     <ComposerPrimitive.Root 
-      className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2 sm:px-2.5 shadow-sm transition-colors ease-in"
+      className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in"
       onSubmit={async (e) => {
         console.log('🚀 Composer: Form submitted!', e);
         console.log('🚀 Composer: Search option:', searchOption);
@@ -269,7 +269,7 @@ const Composer: FC = () => {
           rows={1}
           autoFocus
           placeholder="Write a message..."
-          className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-2 sm:pl-3 pr-16 sm:pr-20 py-3 sm:py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+          className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-3 pr-20 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
           onChange={(e) => {
             console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
           }}
@@ -280,15 +280,15 @@ const Composer: FC = () => {
           }}
         />
         
-        {/* Right-aligned controls inside input - MOBILE RESPONSIVE */}
-        <div className="absolute right-1 flex items-center gap-0.5 sm:gap-1">
+        {/* Right-aligned controls inside input */}
+        <div className="absolute right-1 flex items-center gap-1">
           {/* GPS Location Toggle */}
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleGpsToggle}
-            className={`px-1 sm:px-1.5 py-1 h-6 sm:h-7 text-xs transition-colors ${
+            className={`px-1.5 py-1 h-7 text-xs transition-colors ${
               gpsEnabled 
                 ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100' 
                 : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
@@ -298,15 +298,15 @@ const Composer: FC = () => {
             <MapPin className="w-3 h-3" />
           </Button>
           
-          {/* Search Option Selector - MOBILE RESPONSIVE */}
+          {/* Search Option Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="px-1 sm:px-1.5 py-1 h-6 sm:h-7 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                <Settings className="w-3 h-3 sm:mr-1" />
-                <span className="hidden sm:inline">{searchOptionLabels[searchOption]}</span>
+              <Button variant="ghost" size="sm" className="px-1.5 py-1 h-7 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                <Settings className="w-3 h-3 mr-1" />
+                {searchOptionLabels[searchOption]}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 sm:w-40">
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem 
                 onClick={() => setSearchOption('both')}
                 className={searchOption === 'both' ? 'bg-accent' : ''}

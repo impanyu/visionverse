@@ -1,11 +1,12 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:39:08.700Z
-📊 Total messages: 1
-👤 User messages: 1
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:43:06.280Z
+📊 Total messages: 4
+👤 User messages: 2
 
 📝 USER MESSAGE HISTORY:
-  [1/1] [{"type":"text","text":"i want to go to a restuarnt"}]
+  [1/2] [{"type":"text","text":"i want to book a hotel"}]
+  [2/2] [{"type":"text","text":"i want to book a hotel"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want to go to a restuarnt"}]
+  [{"type":"text","text":"i want to book a hotel"}]
 
 ================================================================================
