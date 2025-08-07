@@ -47,8 +47,9 @@ const cleanupActiveSearches = () => {
 };
 
 // Helper function to handle product search refresh requests
-async function handleProductSearchRefresh(refreshRequest: any, token: any) {
+async function handleProductSearchRefresh(refreshRequest: any, token: any, searchOption: string = 'both') {
   console.log(`🔄 Handling refresh: iteration ${refreshRequest.refreshFromIteration}, type ${refreshRequest.refreshType}`);
+  console.log(`🎯 Refresh: Using search option: ${searchOption}`);
   
   const originalQuery = refreshRequest.originalQuery;
   
@@ -230,19 +231,40 @@ Return ONLY the rewritten query, no explanation.`;
       // This is a simplified version - in a full implementation, you'd continue the iterative search
       // For now, just perform one search iteration from the current query
       
-      // Perform search with current query
-      const searchProducts = await amazonSearchService.searchAllProducts({
-        query: currentQuery,
-        maxResults: 20,
-        sortBy: 'featured',
-        includeAmazon: true,
-        includeGoogleShopping: true
-      });
+      // Set search flags based on search option
+      const search_product = searchOption === 'product' || searchOption === 'both';
+      const search_service = searchOption === 'service' || searchOption === 'both';
+      
+      console.log(`🎯 Refresh: search_product=${search_product}, search_service=${search_service}`);
 
-      allProducts.push(...searchProducts.map(p => ({
-        ...p,
-        evaluation: amazonSearchService.evaluateProductQuality(p)
-      })));
+      let searchProducts: any[] = [];
+      let localServices: any[] = [];
+      let googleMapsServices: any[] = [];
+
+      // Search products if enabled
+      if (search_product) {
+        console.log(`🛍️ Refresh: Searching products...`);
+        const products = await amazonSearchService.searchAllProducts({
+          query: currentQuery,
+          maxResults: 20,
+          sortBy: 'featured',
+          includeAmazon: true,
+          includeGoogleShopping: true
+        });
+        searchProducts = products;
+        
+        allProducts.push(...searchProducts.map(p => ({
+          ...p,
+          evaluation: amazonSearchService.evaluateProductQuality(p)
+        })));
+      }
+
+      // Search services if enabled (simplified for refresh)
+      if (search_service) {
+        console.log(`🏪 Refresh: Services search not implemented in refresh - skipping`);
+        // Note: Service search in refresh would require more complex implementation
+        // For now, we'll only support product refresh to maintain consistency
+      }
 
       // Add this iteration to search steps
       const amazonCount = searchProducts.filter(p => p.source === 'amazon').length;
@@ -252,6 +274,8 @@ Return ONLY the rewritten query, no explanation.`;
         keywords: currentQuery,
         amazonResults: amazonCount,
         googleShoppingResults: googleShoppingCount,
+        localResults: localServices.length,
+        googleMapsResults: googleMapsServices.length,
         stepType: refreshFromIteration === 0 ? 'search' : 'refinement'
       });
 
@@ -263,8 +287,12 @@ Return ONLY the rewritten query, no explanation.`;
     }
 
     let searchSummary: string;
-    if (bestProduct && bestProduct.title) {
+    if (searchOption === 'service') {
+      searchSummary = `Refreshed search with "service only" option - service refresh not yet implemented in refresh functionality.`;
+    } else if (bestProduct && bestProduct.title) {
       searchSummary = `Refreshed search found "${bestProduct.title}" with a recommend score of ${bestProduct.evaluation.score}/100.`;
+    } else if (searchOption === 'product') {
+      searchSummary = `Refreshed product search completed but no suitable product was found.`;
     } else {
       searchSummary = `Refreshed search completed but no suitable product was found.`;
     }
@@ -273,6 +301,7 @@ Return ONLY the rewritten query, no explanation.`;
       originalQuery,
       searchSteps,
       recommendedProduct: bestProduct || undefined,
+      recommendedProducts: bestProduct ? [bestProduct] : [],
       searchSummary,
       sessionId,
       allAccumulatedProducts: allProducts
@@ -1906,7 +1935,8 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                 // Continue with normal search flow but with price constraints
               } else {
                 console.log(`🔄 Backend: Processing refresh request:`, refreshRequest);
-                return await handleProductSearchRefresh(refreshRequest, token);
+                console.log(`🎯 Backend: Passing search option to refresh: ${search_option}`);
+                return await handleProductSearchRefresh(refreshRequest, token, search_option || 'both');
               }
             } else {
               console.log(`🔍 Backend: No refresh request, performing normal search`);
@@ -2463,7 +2493,7 @@ ${search_product && search_service ? 'You can include both products and services
 
 Pay attention: output a json list containing descriptions, necessity score between 0 - 1, type, and search_location: 
 {"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service", "search_location": "location for search"} 
-Pay attention: ALWAYS append user's profile after each description!!!!
+Pay attention: ALWAYS include user's profile in the descriptionach
 
 
 
