@@ -35,22 +35,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Global search loading overlay component - PURE INLINE STYLES (NO CSS-IN-JS)
+// Global search loading overlay component - FIXED SIZE (NO RESPONSIVE LOGIC)
 const GlobalSearchLoadingOverlay: FC = () => {
   return (
     <ThreadPrimitive.If running>
       {(() => {
         console.log('🔄 GlobalSearchLoadingOverlay: Assistant is RUNNING - showing global loading');
         
-        // Define styles as objects to ensure consistency across environments
+        // Fixed styles - identical everywhere
         const containerStyle: React.CSSProperties = {
           position: 'fixed',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 100,
-          maxWidth: '95vw',
-          maxHeight: '85vh',
+          maxWidth: '90vw',
+          maxHeight: '80vh',
           overflow: 'auto'
         };
 
@@ -58,37 +58,36 @@ const GlobalSearchLoadingOverlay: FC = () => {
           background: 'white',
           border: '1px solid #e5e7eb',
           borderRadius: '8px',
-          padding: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '20px' : '16px',
+          padding: '24px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: window.innerWidth >= 768 ? '32px' : window.innerWidth >= 640 ? '16px' : '12px',
+          gap: '20px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          minWidth: window.innerWidth >= 768 ? '500px' : 'auto'
+          minWidth: '300px',
+          maxWidth: '400px'
         };
 
         const spinnerStyle: React.CSSProperties = {
-          width: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '28px' : '24px',
-          height: window.innerWidth >= 768 ? '48px' : window.innerWidth >= 640 ? '28px' : '24px',
-          border: `${window.innerWidth >= 768 ? '5px' : '2px'} solid transparent`,
-          borderTop: `${window.innerWidth >= 768 ? '5px' : '2px'} solid #2563eb`,
+          width: '32px',
+          height: '32px',
+          border: '3px solid transparent',
+          borderTop: '3px solid #2563eb',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         };
 
         const mainTextStyle: React.CSSProperties = {
-          fontSize: window.innerWidth >= 768 ? '28px' : window.innerWidth >= 640 ? '16px' : '14px',
-          fontWeight: window.innerWidth >= 768 ? 700 : 500,
+          fontSize: '18px',
+          fontWeight: 600,
           color: '#374151',
           textAlign: 'center',
           lineHeight: 1.3,
-          margin: 0,
-          maxWidth: window.innerWidth >= 768 ? '450px' : 'none'
+          margin: 0
         };
 
         const searchItemStyle: React.CSSProperties = {
-          fontSize: window.innerWidth >= 768 ? '17px' : window.innerWidth >= 640 ? '14px' : '12px',
-          fontWeight: window.innerWidth >= 768 ? 500 : 'normal',
+          fontSize: '14px',
           color: '#6b7280',
           textAlign: 'center',
           margin: 0,
@@ -98,7 +97,7 @@ const GlobalSearchLoadingOverlay: FC = () => {
         const searchItemsStyle: React.CSSProperties = {
           display: 'flex',
           flexDirection: 'column',
-          gap: window.innerWidth >= 768 ? '14px' : window.innerWidth >= 640 ? '6px' : '4px'
+          gap: '8px'
         };
 
         return (
@@ -110,7 +109,7 @@ const GlobalSearchLoadingOverlay: FC = () => {
             `}</style>
             <div style={containerStyle}>
               <div style={panelStyle}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                   <div style={spinnerStyle}></div>
                   <p style={mainTextStyle}>Searching for the most suitable products and services</p>
                 </div>
