@@ -1007,112 +1007,12 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
               <p className="text-xs text-gray-500 mb-2">Suggested refinements:</p>
               <div className="flex flex-wrap gap-2">
                 {result.suggestedKeywords.map((keyword, index) => {
-                  // Define diverse color schemes for keyword boxes (20 unique colors)
-                  const colorSchemes = [
-                    { // Ocean Blue
-                      default: 'bg-transparent text-blue-700 border-blue-400',
-                      hover: 'hover:bg-blue-50 hover:border-blue-600',
-                      selected: 'bg-blue-200 border-blue-500 text-blue-900'
-                    },
-                    { // Forest Green
-                      default: 'bg-transparent text-emerald-700 border-emerald-400',
-                      hover: 'hover:bg-emerald-50 hover:border-emerald-600',
-                      selected: 'bg-emerald-200 border-emerald-500 text-emerald-900'
-                    },
-                    { // Royal Purple
-                      default: 'bg-transparent text-purple-700 border-purple-400',
-                      hover: 'hover:bg-purple-50 hover:border-purple-600',
-                      selected: 'bg-purple-200 border-purple-500 text-purple-900'
-                    },
-                    { // Sunset Orange
-                      default: 'bg-transparent text-orange-700 border-orange-400',
-                      hover: 'hover:bg-orange-50 hover:border-orange-600',
-                      selected: 'bg-orange-200 border-orange-500 text-orange-900'
-                    },
-                    { // Cherry Red
-                      default: 'bg-transparent text-red-700 border-red-400',
-                      hover: 'hover:bg-red-50 hover:border-red-600',
-                      selected: 'bg-red-200 border-red-500 text-red-900'
-                    },
-                    { // Tropical Teal
-                      default: 'bg-transparent text-teal-700 border-teal-400',
-                      hover: 'hover:bg-teal-50 hover:border-teal-600',
-                      selected: 'bg-teal-200 border-teal-500 text-teal-900'
-                    },
-                    { // Sunset Pink
-                      default: 'bg-transparent text-pink-700 border-pink-400',
-                      hover: 'hover:bg-pink-50 hover:border-pink-600',
-                      selected: 'bg-pink-200 border-pink-500 text-pink-900'
-                    },
-                    { // Deep Indigo
-                      default: 'bg-transparent text-indigo-700 border-indigo-400',
-                      hover: 'hover:bg-indigo-50 hover:border-indigo-600',
-                      selected: 'bg-indigo-200 border-indigo-500 text-indigo-900'
-                    },
-                    { // Golden Yellow
-                      default: 'bg-transparent text-yellow-700 border-yellow-400',
-                      hover: 'hover:bg-yellow-50 hover:border-yellow-600',
-                      selected: 'bg-yellow-200 border-yellow-500 text-yellow-900'
-                    },
-                    { // Fresh Lime
-                      default: 'bg-transparent text-lime-700 border-lime-400',
-                      hover: 'hover:bg-lime-50 hover:border-lime-600',
-                      selected: 'bg-lime-200 border-lime-500 text-lime-900'
-                    },
-                    { // Coral Rose
-                      default: 'bg-transparent text-rose-700 border-rose-400',
-                      hover: 'hover:bg-rose-50 hover:border-rose-600',
-                      selected: 'bg-rose-200 border-rose-500 text-rose-900'
-                    },
-                    { // Electric Cyan
-                      default: 'bg-transparent text-cyan-700 border-cyan-400',
-                      hover: 'hover:bg-cyan-50 hover:border-cyan-600',
-                      selected: 'bg-cyan-200 border-cyan-500 text-cyan-900'
-                    },
-                    { // Lavender Violet
-                      default: 'bg-transparent text-violet-700 border-violet-400',
-                      hover: 'hover:bg-violet-50 hover:border-violet-600',
-                      selected: 'bg-violet-200 border-violet-500 text-violet-900'
-                    },
-                    { // Warm Amber
-                      default: 'bg-transparent text-amber-700 border-amber-400',
-                      hover: 'hover:bg-amber-50 hover:border-amber-600',
-                      selected: 'bg-amber-200 border-amber-500 text-amber-900'
-                    },
-                    { // Cool Slate
-                      default: 'bg-transparent text-slate-700 border-slate-400',
-                      hover: 'hover:bg-slate-50 hover:border-slate-600',
-                      selected: 'bg-slate-300 border-slate-500 text-slate-900'
-                    },
-                    { // Spring Green
-                      default: 'bg-transparent text-green-700 border-green-400',
-                      hover: 'hover:bg-green-50 hover:border-green-600',
-                      selected: 'bg-green-200 border-green-500 text-green-900'
-                    },
-                    { // Warm Fuchsia
-                      default: 'bg-transparent text-fuchsia-700 border-fuchsia-400',
-                      hover: 'hover:bg-fuchsia-50 hover:border-fuchsia-600',
-                      selected: 'bg-fuchsia-200 border-fuchsia-500 text-fuchsia-900'
-                    },
-                    { // Sky Blue
-                      default: 'bg-transparent text-sky-700 border-sky-400',
-                      hover: 'hover:bg-sky-50 hover:border-sky-600',
-                      selected: 'bg-sky-200 border-sky-500 text-sky-900'
-                    },
-                    { // Neutral Stone
-                      default: 'bg-transparent text-stone-700 border-stone-400',
-                      hover: 'hover:bg-stone-50 hover:border-stone-600',
-                      selected: 'bg-stone-300 border-stone-500 text-stone-900'
-                    },
-                    { // Deep Zinc
-                      default: 'bg-transparent text-zinc-700 border-zinc-400',
-                      hover: 'hover:bg-zinc-50 hover:border-zinc-600',
-                      selected: 'bg-zinc-300 border-zinc-500 text-zinc-900'
-                    }
-                  ];
-                  
-                  // Cycle through colors if more than 20 keywords
-                  const colors = colorSchemes[index % colorSchemes.length];
+                  // Single blue color scheme for all keyword boxes
+                  const colors = {
+                    default: 'bg-transparent text-blue-700 border-blue-400',
+                    hover: 'hover:bg-blue-50 hover:border-blue-600',
+                    selected: 'bg-blue-500 border-blue-500 text-white'
+                  };
                   
                   return (
                     <button
