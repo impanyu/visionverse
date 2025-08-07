@@ -2555,12 +2555,7 @@ JSON Array:`;
                         }]
                       }],
                       tools: [{
-                        googleSearchRetrieval: {
-                          dynamicRetrievalConfig: {
-                            mode: "MODE_DYNAMIC",
-                            dynamicThreshold: 0.7
-                          }
-                        }
+                        google_search: {}
                       }],
                       generationConfig: {
                         temperature: 0.3, // Lower temperature for more consistent JSON
