@@ -1973,10 +1973,12 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                 }
 
                 // Use LLM to reason about user intent and rewrite query
+                console.log(`🔧 DEBUG: Starting intent rewriting for query: "${query}"`);
                 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
                                 
                 // Get user profile for personalized context
                 let userProfileContext = '';
+                console.log(`🔧 DEBUG: Loading user profile for intent rewriting...`);
                 try {
                   const { getUserProfile } = await import('@/lib/user-db');
                   const userProfile = await getUserProfile(token.id as string);
@@ -1990,6 +1992,7 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
                   }
                 } catch (error) {
                   console.error('⚠️ Profile: Error loading user profile for context:', error);
+                  console.log(`🔧 DEBUG: Profile loading failed, continuing with empty profile context`);
                   // Continue without profile context if there's an error
                 }
                 
@@ -2414,7 +2417,6 @@ For search_location field:
 
 Pay attention: ALWAYS specify relevant user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions when helpful.
 
-The description should be clear and concise, and should not be too long.
 
 Pay attention: Output ONLY a json string, without any other text !!
 
