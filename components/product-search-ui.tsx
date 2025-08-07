@@ -1563,20 +1563,33 @@ export function ProductSearchDisplay({ result: initialResult }: ProductSearchDis
                                   {/* Service Image */}
                                   <div className="flex-shrink-0">
                                     {(() => {
-                                      const imageUrl = service.image || service.thumbnail;
-                                      console.log(`🖼️ Service "${service.title}" image check:`, {
-                                        image: service.image,
-                                        thumbnail: service.thumbnail,
-                                        finalUrl: imageUrl,
+                                      const originalImageUrl = service.image || service.thumbnail;
+                                      
+                                      // Check if it's a Google image that needs proxying
+                                      const isGoogleImage = originalImageUrl && (
+                                        originalImageUrl.includes('googleusercontent.com') ||
+                                        originalImageUrl.includes('google.com/maps')
+                                      );
+                                      
+                                      // Use image proxy for Google images, original URL for others
+                                      const finalImageUrl = isGoogleImage && originalImageUrl 
+                                        ? `/api/image-proxy?url=${encodeURIComponent(originalImageUrl)}`
+                                        : originalImageUrl;
+                                      
+                                      console.log(`🖼️ Service "${service.title}" image:`, {
+                                        original: originalImageUrl,
+                                        isGoogle: isGoogleImage,
+                                        final: finalImageUrl,
                                         source: service.source
                                       });
-                                      return imageUrl ? (
+                                      
+                                      return finalImageUrl ? (
                                         <img 
-                                          src={imageUrl} 
+                                          src={finalImageUrl} 
                                           alt={service.title || 'Service'}
                                           className="w-24 h-24 object-cover rounded-lg border"
                                           onError={(e) => {
-                                            console.error(`❌ Failed to load image for "${service.title}":`, imageUrl);
+                                            console.log(`⚠️ Image load failed for "${service.title}", showing fallback`);
                                             e.currentTarget.style.display = 'none';
                                             e.currentTarget.nextElementSibling?.classList.remove('hidden');
                                           }}
