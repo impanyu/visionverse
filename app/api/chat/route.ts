@@ -2254,7 +2254,7 @@ Examples:
             };
 
             // Gemini API Integration: Get product recommendations with retry and improved error handling
-            const getGeminiProductRecommendations = async (query: string): Promise<Array<{product_description: string, necessity_score: number}>> => {
+            const getGeminiProductRecommendations = async (query: string): Promise<Array<{description: string, necessity_score: number, type: string, search_location: string}>> => {
               const MAX_RETRIES = 2;
               
               // Helper function to fix common JSON issues
@@ -2304,12 +2304,20 @@ ${search_product && search_service ? 'You can include both products and services
   search_product ? 'CRITICAL: Only include products in your plan. All items must have "type": "product". Even if the query mentions services (like hotels, restaurants), interpret it as related products (like travel items, dining accessories, etc.).' : 
   'CRITICAL: Only include services in your plan. All items must have "type": "service". Focus on how to fulfill the user\'s goal.'}
 
-Pay attention: output a json list containing descriptions and necessity score between 0 - 1: {"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service"}. 
+Pay attention: output a json list containing descriptions, necessity score between 0 - 1, type, and search_location: 
+{"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service", "search_location": "location for search"} 
+
 Necessity score measures how important the item is in the plan. 
 For only one item in the plan, the necessity score should be 1. 
 The description should be clear but not overly specific. 
 Don't overthink, if the user asks for some category of product, just output the product description of the category.
 
+For search_location field:
+- For products: Always use empty string ""
+- For services: 
+  * If user mentions a specific location (city, address, etc.), use that location
+  * If user mentions "near me", "nearby", "local", etc., use "user_location"
+  * If no location context is provided, use empty string ""
 
 Pay attention: Output ONLY a json string, without any other text !!
 
@@ -2317,25 +2325,30 @@ EXAMPLES:
 
 For query: "I want to travel to New York" (products and services):
 [ 
-  {"description": "Travel backpack for carrying essentials", "necessity_score": 0.9, "type": "product"},
-  {"description": "Water bottle to stay hydrated", "necessity_score": 0.8, "type": "product"},
-  {"description": "Hotel in New York", "necessity_score": 1.0, "type": "service"}
+  {"description": "Travel backpack for carrying essentials", "necessity_score": 0.9, "type": "product", "search_location": ""},
+  {"description": "Water bottle to stay hydrated", "necessity_score": 0.8, "type": "product", "search_location": ""},
+  {"description": "Hotel in New York", "necessity_score": 1.0, "type": "service", "search_location": "New York, NY"}
 ]
 
-For query: "I want to find an Italian restaurant" (products and services):
+For query: "I want to find an Italian restaurant near me" (products and services):
 [ 
-  {"description": "Italian restaurant", "necessity_score": 1, "type": "service"}
+  {"description": "Italian restaurant", "necessity_score": 1, "type": "service", "search_location": "user_location"}
 ]
 
 For query: "I need chocolate" (products only):
 [ 
-  {"description": "High-quality dark chocolate", "necessity_score": 1, "type": "product"}
+  {"description": "High-quality dark chocolate", "necessity_score": 1, "type": "product", "search_location": ""}
+]
+
+For query: "I want to find a dentist in Los Angeles" (products and services):
+[ 
+  {"description": "Dental services", "necessity_score": 1, "type": "service", "search_location": "Los Angeles, CA"}
 ]
 
 For query: "I want to find a hotel" (products only):
 [ 
-  {"description": "Travel guidebook for finding accommodations", "necessity_score": 0.8, "type": "product"},
-  {"description": "Travel luggage for hotel stays", "necessity_score": 0.9, "type": "product"}
+  {"description": "Travel guidebook for finding accommodations", "necessity_score": 0.8, "type": "product", "search_location": ""},
+  {"description": "Travel luggage for hotel stays", "necessity_score": 0.9, "type": "product", "search_location": ""}
 ]
 
 JSON Array:`;
@@ -3039,15 +3052,38 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                 const description = recommendation.description || recommendation.product_description; // Support both new and old format
                 const necessityScore = recommendation.necessity_score;
                 const itemType = recommendation.type || 'product'; // default to product for backward compatibility
+                const suggestedLocation = recommendation.search_location || ''; // Gemini's location suggestion
                 const itemStartTime = Date.now();
                 
                 console.log(`🔍 [${index+1}/${geminiRecommendations.length}] Starting parallel search for ${itemType}: "${description}" (necessity: ${necessityScore})`);
+                if (suggestedLocation) {
+                  console.log(`📍 [${index+1}] Gemini suggested location: "${suggestedLocation}"`);
+                }
                 if (priceRange) {
                   console.log(`💰 [${index+1}] Applying price range: $${priceRange.min || 0} - $${priceRange.max || 'unlimited'}`);
                 }
                 
                 try {
                   const cleanQuery = description.replace(/^["']|["']$/g, '');
+                  
+                  // Determine search location based on Gemini's suggestion and user location
+                  const determineSearchLocation = (suggestedLocation: string, userLocation: {lat: number, lng: number} | null): string => {
+                    if (!suggestedLocation) {
+                      // No suggestion: use LA as default
+                      return 'Los Angeles, CA';
+                    }
+                    
+                    if (suggestedLocation === 'user_location') {
+                      // Suggested user location: use user's actual location if available, otherwise LA
+                      return userLocation ? `@${userLocation.lat},${userLocation.lng}` : 'Los Angeles, CA';
+                    }
+                    
+                    // Specific location suggested: use that
+                    return suggestedLocation;
+                  };
+                  
+                  const serviceSearchLocation = determineSearchLocation(suggestedLocation, userLocation);
+                  console.log(`📍 [${index+1}] Service search location determined: "${serviceSearchLocation}" (from suggestion: "${suggestedLocation}")`);
                   
                   // Define search functions for parallel execution within this product
                   const amazonSearchFn = async () => {
@@ -3104,10 +3140,8 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                       // Import service search service
                       const { serviceSearchService } = await import('@/lib/google-maps-search');
                       
-                      // Search Google Maps services
-                      const location = userLocation 
-                        ? `@${userLocation.lat},${userLocation.lng}` 
-                        : 'Los Angeles, CA'; // Default location
+                      // Use the determined search location instead of hardcoded logic
+                      const location = serviceSearchLocation;
                       
                       const googleMapsServices = await serviceSearchService.searchAllServices({
                         query: cleanQuery,
