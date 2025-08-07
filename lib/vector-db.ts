@@ -8,7 +8,9 @@ const openai = new OpenAI({
 
 // Initialize Chroma client
 const chroma = new ChromaClient({
-  path: "http://localhost:8000", // Chroma server URL
+  path: process.env.NODE_ENV === 'production' 
+    ? "https://choicemade.ai/chroma" 
+    : "http://localhost:8000", // Use Nginx proxy in production
 });
 
 // Collection name for vision descriptions
