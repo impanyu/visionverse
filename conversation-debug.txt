@@ -1,20 +1,12 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T00:51:42.142Z
-📊 Total messages: 28
-👤 User messages: 10
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T01:20:43.025Z
+📊 Total messages: 4
+👤 User messages: 2
 
 📝 USER MESSAGE HISTORY:
-  [1/10] [{"type":"text","text":"i want an apple"}]
-  [2/10] [{"type":"text","text":"i want a chocolate"}]
-  [3/10] [{"type":"text","text":"i want a chocolate"}]
-  [4/10] [{"type":"text","text":"i want to go to india"}]
-  [5/10] [{"type":"text","text":"a chocolate"}]
-  [6/10] [{"type":"text","text":"i want a chocolate"}]
-  [7/10] [{"type":"text","text":"an apple"}]
-  [8/10] [{"type":"text","text":"an pear"}]
-  [9/10] [{"type":"text","text":"a bear toy"}]
-  [10/10] [{"type":"text","text":"an apple"}]
+  [1/2] [{"type":"text","text":"i need a dinosaur toy"}]
+  [2/2] [{"type":"text","text":"i need an apple"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"an apple"}]
+  [{"type":"text","text":"i need an apple"}]
 
 ================================================================================
