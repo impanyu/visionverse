@@ -2294,7 +2294,6 @@ Ignoring the price, you will help the user to make a plan for the goal.
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
 Make the plan as comprehensive and thorough as possible, but do not add in items that are not necessary to achieve the user's goal.
 
-If not specified, you can assume the user is a male adult, if the user specifies gender, you should use the gender.
 
 SEARCH SCOPE:
 - Include products: ${search_product}
@@ -2314,10 +2313,8 @@ Don't overthink, if the user asks for some category of product, just output the 
 
 For search_location field:
 - For products: Always use empty string ""
-- For services: 
-  * If user mentions a specific location (city, address, etc.), use that location
-  * If user mentions "near me", "nearby", "local", etc., use "user_location"
-  * If no location context is provided, use empty string ""
+- For each service: 
+  You should reason about where the service should be searched for, to best achieve the user's goal.
 
 Pay attention: Output ONLY a json string, without any other text !!
 
@@ -3176,7 +3173,7 @@ Choose the service index (1-${recommendedServices.length}) of the best service.`
                         cleanQuery,
                         priceMinCents,
                         priceMaxCents,
-                        10 // Max 10 local services
+                        20 // Max 10 local services
                       );
                       
                       let localServices: any[] = [];
