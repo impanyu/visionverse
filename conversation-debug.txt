@@ -1,21 +1,26 @@
-🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T03:51:32.279Z
-📊 Total messages: 31
-👤 User messages: 11
+🚨 CONVERSATION HISTORY DEBUG - 2025-08-07T03:56:31.521Z
+📊 Total messages: 46
+👤 User messages: 16
 
 📝 USER MESSAGE HISTORY:
-  [1/11] [{"type":"text","text":"i need to go to a restaurant"}]
-  [2/11] [{"type":"text","text":"i need to go to a restaurant"}]
-  [3/11] [{"type":"text","text":"i need to find a chinese restaurant"}]
-  [4/11] [{"type":"text","text":"i need to go to chicago"}]
-  [5/11] [{"type":"text","text":"i need to go to mars"}]
-  [6/11] [{"type":"text","text":"i need to go to moon"}]
-  [7/11] [{"type":"text","text":"i want a banana"}]
-  [8/11] [{"type":"text","text":"i need a bear"}]
-  [9/11] [{"type":"text","text":"i want a pear"}]
-  [10/11] [{"type":"text","text":"i want to buy a paper"}]
-  [11/11] [{"type":"text","text":"i want a apple"}]
+  [1/16] [{"type":"text","text":"i need to go to a restaurant"}]
+  [2/16] [{"type":"text","text":"i need to go to a restaurant"}]
+  [3/16] [{"type":"text","text":"i need to find a chinese restaurant"}]
+  [4/16] [{"type":"text","text":"i need to go to chicago"}]
+  [5/16] [{"type":"text","text":"i need to go to mars"}]
+  [6/16] [{"type":"text","text":"i need to go to moon"}]
+  [7/16] [{"type":"text","text":"i want a banana"}]
+  [8/16] [{"type":"text","text":"i need a bear"}]
+  [9/16] [{"type":"text","text":"i want a pear"}]
+  [10/16] [{"type":"text","text":"i want to buy a paper"}]
+  [11/16] [{"type":"text","text":"i want a apple"}]
+  [12/16] [{"type":"text","text":"a banana"}]
+  [13/16] [{"type":"text","text":"an apple"}]
+  [14/16] [{"type":"text","text":"i want a chocolate"}]
+  [15/16] [{"type":"text","text":"i want a box of pineapple"}]
+  [16/16] [{"type":"text","text":"i want a box of sugar"}]
 
 🔍 LATEST MESSAGE:
-  [{"type":"text","text":"i want a apple"}]
+  [{"type":"text","text":"i want a box of sugar"}]
 
 ================================================================================

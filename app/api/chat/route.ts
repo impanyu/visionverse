@@ -2292,7 +2292,7 @@ TASK: Based on user's goal: ${query},
 
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1-30 necessary products and/or services serving different and non-overlapping functionalities which work together to best achieve the user's goal.
-The comprehensive plan to achieve the usertest's goal is enough, do not add in items that are not necessary to achieve the user's goal.
+The comprehensive plan to achieve the user's goal is enough, do not add in items that are not necessary to achieve the user's goal.
 If not specified, you can assume the user is a male adult, if the user specifies gender, you should use the gender.
 
 SEARCH SCOPE:
