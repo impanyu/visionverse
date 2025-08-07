@@ -1893,15 +1893,31 @@ export const ProductSearchToolUI = makeAssistantToolUI<
       fullStatus: status
     });
     
-    // Show loading state for both "running" and when no result yet
-    if (status.type === "running" || (!result && args?.query)) {
-      console.log('🔄 ProductSearchToolUI: Showing loading state for status:', status.type);
+    // Force loading state with useState and useEffect for better control
+    const [showLoading, setShowLoading] = React.useState(true);
+    const [hasShownResults, setHasShownResults] = React.useState(false);
+    
+    React.useEffect(() => {
+      if (result && result.result) {
+        // Add a minimum loading time of 1 second
+        const timer = setTimeout(() => {
+          setShowLoading(false);
+          setHasShownResults(true);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [result]);
+    
+    // Always show loading first, regardless of status or result
+    if (showLoading && !hasShownResults) {
+      console.log('🔄 ProductSearchToolUI: FORCING loading state display');
       return (
         <div className="flex flex-col items-center justify-center p-12 space-y-4">
-                        <div className="flex items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="text-lg font-medium text-gray-700">Searching for the most suitable products and services</span>
+          </div>
           <div className="text-center space-y-2">
             <p className="text-gray-600">🏠 Searching local products and services</p>
             <p className="text-gray-600">🔍 Searching Amazon marketplace</p>
