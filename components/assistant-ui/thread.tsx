@@ -338,7 +338,7 @@ const Composer: FC = () => {
             rows={1}
             autoFocus
             placeholder="Write a message..."
-            className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-3 pr-20 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+            className="placeholder:text-muted-foreground max-h-40 w-full resize-none border-none bg-transparent pl-3 pr-32 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
             onChange={(e) => {
               console.log('⌨️ Composer: Input changed:', e.target.value.substring(0, 50));
             }}
@@ -350,29 +350,33 @@ const Composer: FC = () => {
           />
           
           {/* Right-aligned controls inside input */}
-          <div className="absolute right-1 flex items-center gap-1">
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
             {/* GPS Location Toggle */}
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleGpsToggle}
-              className={`px-1.5 py-1 h-7 text-xs transition-colors ${
+              className={`px-2 py-1.5 h-8 text-xs transition-colors ${
                 gpsEnabled 
                   ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100' 
                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
               }`}
               title={gpsEnabled ? 'GPS enabled - Click to disable' : 'Click to enable GPS location'}
             >
-              <MapPin className="w-3 h-3" />
+              <MapPin className="w-4 h-4" />
             </Button>
             
             {/* Search Option Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="px-1.5 py-1 h-7 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                  <Settings className="w-3 h-3 mr-1" />
-                  {searchOptionLabels[searchOption]}
+                <Button variant="ghost" size="sm" className="px-2 py-1.5 h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                  <Settings className="w-4 h-4 mr-1" />
+                  <span className="hidden lg:inline">{searchOptionLabels[searchOption]}</span>
+                  <span className="lg:hidden">
+                    {searchOption === 'both' ? 'Both' : 
+                     searchOption === 'product' ? 'Product' : 'Service'}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
