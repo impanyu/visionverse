@@ -9,7 +9,7 @@ const openai = new OpenAI({
 // Initialize Chroma client
 const chroma = new ChromaClient({
   path: process.env.NODE_ENV === 'production' 
-    ? "https://choicemade.ai/chroma"     // Production: Use Nginx proxy
+    ? "https://choicemade.hopto.org/chroma"     // Production: Use Nginx proxy
     : "http://localhost:8000",          // Development: Local ChromaDB
 });
 
