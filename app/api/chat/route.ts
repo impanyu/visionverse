@@ -356,9 +356,13 @@ export async function POST(req: Request) {
     const userName = token.name as string || 'Unknown User';
     const userEmail = token.email as string || 'unknown@example.com';
     
-    await createOrGetUser(userId, userName, userEmail);
+    console.log(`🔧 DEBUG: Attempting to create/get user profile for ${userId}`);
+    const user = await createOrGetUser(userId, userName, userEmail);
+    console.log(`✅ DEBUG: User profile initialized successfully for ${userId}, profile length: ${user.profile?.length || 0}`);
   } catch (error) {
-    console.error('⚠️ Error initializing user profile:', error);
+    console.error('❌ CRITICAL: Error initializing user profile:', error);
+    console.error('❌ CRITICAL: This means user profile features will not work!');
+    console.error('❌ CRITICAL: Check MongoDB connection and users collection');
     // Don't block the chat flow if user profile creation fails
   }
 
@@ -1828,11 +1832,18 @@ Remember: Your response to any tool usage = ONLY the tool call, no additional te
               const { addQueryToProfile } = await import('@/lib/user-db');
               const userId = token.id as string;
               
+              console.log(`🔧 DEBUG: Attempting to add query to profile for user ${userId}: "${query}"`);
               // Add query to user profile (handles both new queries and refresh queries)
-              await addQueryToProfile(userId, query);
-              console.log(`👤 Profile: Added query to user profile: "${query}"`);
+              const updatedUser = await addQueryToProfile(userId, query);
+              if (updatedUser) {
+                console.log(`✅ Profile: Added query to user profile: "${query}", new profile length: ${updatedUser.profile?.length || 0}`);
+              } else {
+                console.error(`❌ Profile: addQueryToProfile returned null for user ${userId}`);
+              }
             } catch (error) {
-              console.error('⚠️ Profile: Error adding query to profile:', error);
+              console.error('❌ CRITICAL: Error adding query to profile:', error);
+              console.error('❌ CRITICAL: User profile tracking is not working!');
+              console.error('❌ CRITICAL: Check if users collection exists and MongoDB is connected');
               // Don't block search if profile update fails
             }
             
