@@ -1896,9 +1896,23 @@ export const ProductSearchToolUI = makeAssistantToolUI<
     // No need for forced loading here since we have global loading overlay
     console.log('🔄 ProductSearchToolUI: Global loading overlay will handle the loading state');
 
+    // Handle null/undefined results
     if (!result) {
-      console.error('🚨 ProductSearchToolUI: result is null or undefined');
+      console.log('📝 ProductSearchToolUI: No result yet, returning null to let global overlay handle loading');
       return null;
+    }
+
+    // Handle case where result exists but result.result is null
+    if (!result.result) {
+      console.error('🚨 ProductSearchToolUI: result.result is null or undefined');
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-red-800 font-medium mb-2">Search Error</h3>
+          <p className="text-red-600 text-sm">
+            Unable to display search results. The result data is missing or invalid.
+          </p>
+        </div>
+      );
     }
 
     console.log('✅ ProductSearchToolUI: result received:', result);
