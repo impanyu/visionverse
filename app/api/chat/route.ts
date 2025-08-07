@@ -2450,7 +2450,7 @@ TASK: Based on user's goal: ${query},  in which the user's profile is in the par
 
 Ignoring the price, you will help the user to make a plan for the goal. 
 A plan is a list of 1 - 30 products and/or services serving different and non-overlapping functionalities and purposes which work together to best achieve the user's goal.
-Make the plan as comprehensive and thorough as possible, but do not introduce duplicate items in the plan.
+Make the plan as comprehensive and thorough as possible, but do not include unnecessary items to achieve the user's goal.
 When making the plan, you should fully consider the user's profile, such as the user's name, age, gender, occupation, family status, marital status, health condition, height, weight, physical condition, income, financial status, psychological condition, etc.
 
 SEARCH SCOPE:
@@ -2474,8 +2474,7 @@ For search_location field:
   The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
   You should reason about where the service should be located, to best achieve the user's goal. 
 
-Pay attention: ALWAYS append user's known profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, physical condition, income, financial status, psychological condition, etc.) after each description!!!!
-
+Pay attention: ALWAYS ALWAYS append user's known profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, physical condition, income, financial status, psychological condition, etc.) after each description!!!!
 
 Pay attention: Output ONLY a json string, without any other text !!
 
