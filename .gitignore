@@ -50,7 +50,12 @@ chroma/
 
 # Local database files
 /data/
-server.log
+
+# Log files and debug files
+*.log
+*debug*.txt
 conversation-debug.txt
+server.log
 chroma.log
+dev-server.log
 
