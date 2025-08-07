@@ -2463,6 +2463,9 @@ ${search_product && search_service ? 'You can include both products and services
 
 Pay attention: output a json list containing descriptions, necessity score between 0 - 1, type, and search_location: 
 {"description":"actual description...", "necessity_score": 0.5, "type": "product" or "service", "search_location": "location for search"} 
+Pay attention: after each description, ALWAYS ALWAYS append user's known profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, physical condition, income, financial status, psychological condition, etc.) !!!!
+
+
 
 Necessity score measures how important the item is in the plan. 
 For only one item in the plan, the necessity score should be 1. 
@@ -2474,7 +2477,6 @@ For search_location field:
   The service location for each service should not necessarily be the same as the user's location or the location mentioned in the user's query.
   You should reason about where the service should be located, to best achieve the user's goal. 
 
-Pay attention: after each description of the product or service, ALWAYS ALWAYS append user's known profile details (such as age, gender, occupation,weight, height, marital status, family status, health condition, physical condition, income, financial status, psychological condition, etc.) !!!!
 
 Pay attention: Output ONLY a json string, without any other text !!
 
