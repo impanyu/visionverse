@@ -2474,6 +2474,7 @@ For search_location field:
   You should reason about where the service should be located, to best achieve the user's goal. 
 
 Pay attention: ALWAYS specify relevant user profile details (age, gender, occupation,weight, height, marital status, family status, health condition, etc.) in descriptions when helpful.
+Especially when buying clothes, shoes, or any other products that are related to the user's body, gender, you must add these information to the description.
 
 
 Pay attention: Output ONLY a json string, without any other text !!
