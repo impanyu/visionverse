@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { storeVisionEmbedding, searchSimilarVisions, getEmbeddingStats, debugAllEmbeddings } from "@/lib/vector-db";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication using JWT token
+    const token = await getToken({ 
+      req: request as any, 
+      secret: process.env.NEXTAUTH_SECRET 
+    });
+    
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { action } = body;
 
     switch (action) {
       case 'store':
         const { visionId, description, userId } = body;
+        // Ensure user can only store embeddings for their own data
+        if (userId !== token.id) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
         const result = await storeVisionEmbedding(visionId, description, userId);
         return NextResponse.json({ 
           success: true, 
@@ -18,6 +33,10 @@ export async function POST(request: NextRequest) {
 
       case 'search':
         const { query, userId: searchUserId, limit = 5 } = body;
+        // Ensure user can only search their own data
+        if (searchUserId !== token.id) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
         const searchResults = await searchSimilarVisions(query, searchUserId, limit);
         return NextResponse.json({ 
           success: true, 

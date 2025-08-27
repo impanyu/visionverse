@@ -1,7 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Simple in-memory rate limiting (consider using Redis for production)
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 100; // requests per window
+const WINDOW_MS = 60000; // 1 minute window
+
 export async function GET(request: NextRequest) {
   try {
+    // Basic rate limiting by IP
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                    request.headers.get('x-real-ip') || 
+                    'unknown';
+    
+    const now = Date.now();
+    const userRequests = requestCounts.get(clientIP);
+    
+    if (userRequests && now < userRequests.resetTime) {
+      if (userRequests.count >= RATE_LIMIT) {
+        return new NextResponse('Rate limit exceeded', { status: 429 });
+      }
+      userRequests.count++;
+    } else {
+      requestCounts.set(clientIP, { count: 1, resetTime: now + WINDOW_MS });
+    }
+
     const { searchParams } = new URL(request.url);
     const imageUrl = searchParams.get('url');
 
